@@ -6,9 +6,8 @@ const app = express();
 
 database();
 
-app.use("/api", () => {
-  console.log("hello world");
-});
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.listen(env.PORT, () => {
   console.log(`Server listening on port ${env.PORT}.`);
