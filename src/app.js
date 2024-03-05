@@ -12,6 +12,10 @@ app.use(express.urlencoded({ extended: true }));
 
 configRoutes(app);
 
-app.listen(env.PORT, () => {
-  console.log(`Server listening on port ${env.PORT}.`);
-});
+if (env.NODE_ENV == "dev") {
+  app.listen(env.PORT, () => {
+    console.log(`Server listening on port ${env.PORT}.`);
+  });
+}
+
+export default app;

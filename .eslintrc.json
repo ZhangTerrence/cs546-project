@@ -8,5 +8,6 @@
   "env": {
     "es2023": true,
     "node": true
-  }
+  },
+  "ignorePatterns": ["*.test.js"]
 }
