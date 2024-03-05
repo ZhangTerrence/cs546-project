@@ -1,10 +1,11 @@
-# Dependency directory
+# Dependencies directory
 node_modules
 
-# Logs
-logs
-*.log
+# VSCode directory
+.vscode
 
+# MacOS directory
 .DS_Store
 
+# Environment file
 .env
