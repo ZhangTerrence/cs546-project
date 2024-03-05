@@ -14,6 +14,7 @@ Online chat application made using ExpressJS and HandlebarsJS.
 
 2. Create a .env file at the app's root. The file must have the following values:
 
+   - NODE_ENV, the current environment of the node application ("prod" | "dev" | "test").
    - PORT, the port number at which the web server will be listening to.
    - MONGO_CONNECTION_STRING, the connection string for MongoDB.
 
