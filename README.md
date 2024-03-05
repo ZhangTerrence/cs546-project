@@ -46,10 +46,10 @@ Fixes any errors that can be auto-fixed.
 npm run format:check
 ```
 
-Check if code satisfies Prettier formatting configuration rules.
+Checks if code satisfies Prettier formatting configuration rules.
 
 ```console
 npm run format:fix
 ```
 
-Format the code.
+Formats the code.
