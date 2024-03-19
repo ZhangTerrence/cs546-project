@@ -62,7 +62,7 @@ export const createUser = async (req, res) => {
       .status(400)
       .render("signup", { error: "Username is already taken." });
 
-  const hashedPassword = hashPassword(password);
+  const hashedPassword = await hashPassword(password);
 
   const user = await User.create({ email, username, hashedPassword });
   if (!user)
