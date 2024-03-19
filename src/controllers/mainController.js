@@ -120,5 +120,5 @@ export const authUser = async (req, res) => {
 export const logout = async (req, res) => {
   req.session.destroy();
 
-  return res.status(200).redirect("/landing");
+  return res.status(200).redirect("/");
 };

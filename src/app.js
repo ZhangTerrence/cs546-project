@@ -25,9 +25,9 @@ app.use(
   session({
     name: "nexus",
     secret: env.SESSION_SECRET,
-    saveUninitialized: true,
+    saveUninitialized: false,
     resave: false,
-    cookie: { maxAge: 7 * 24 * 60 * 60 * 1000, sameSite: "strict" }
+    cookie: { maxAge: 24 * 60 * 60 * 1000, sameSite: "strict" }
   })
 );
 
