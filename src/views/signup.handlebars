@@ -1,0 +1,10 @@
+<h1>Signup page.</h1>
+{{#if error}}
+  <p>{{error}}</p>
+{{/if}}
+<form action="/api/signup" method="post">
+  <input type="email" name="email" placeholder="Email..." />
+  <input type="text" name="username" placeholder="Username..." />
+  <input type="password" name="password" placeholder="Password..." />
+  <button type="submit">Signup</button>
+</form>
