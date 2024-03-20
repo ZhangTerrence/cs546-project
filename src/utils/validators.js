@@ -1,5 +1,6 @@
 import emailValidator from "email-validator";
 import User from "../models/userModel.js";
+import Server from "../models/serverModel.js";
 
 const MIN_USERNAME_LENGTH = 3;
 const MAX_USERNAME_LENGTH = 20;
@@ -63,4 +64,17 @@ export const validateUniqueUser = async (email, username) => {
 
   const usernameExists = await User.findOne({ username });
   if (usernameExists) throw new Error("Username is already taken.");
+};
+
+export const validateServerCreationInput = (name) => {
+  if (!name) throw new Error("Name field is required.");
+
+  if (typeof name !== "string") throw new Error("Name field must be a string.");
+
+  if (name.trim().length === 0) throw new Error("Name field is empty.");
+};
+
+export const validateUniqueServer = async (name) => {
+  const serverExists = await Server.findOne({ name });
+  if (serverExists) throw new Error("Name is already taken.");
 };

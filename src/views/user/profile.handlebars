@@ -1,4 +1,9 @@
 <h1>{{username}}</h1>
+<form action="/server" method="post">
+  <input type="text" name="name" placeholder="Name..." />
+  <button type="submit">Create Server</button>
+</form>
 <form action="/logout" method="post">
   <button type="submit">Logout</button>
 </form>
+<script src="/public/js/user.js"></script>

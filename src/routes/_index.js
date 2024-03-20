@@ -9,7 +9,7 @@ const constructorMethod = (app) => {
   app.use("/user", userRoutes);
   app.use("/server", serverRoutes);
   app.use("/server/:serverId/channel", channelRoutes);
-  app.use("/privateMessage", privateMessageRoutes)
+  app.use("/privateMessage", privateMessageRoutes);
   app.use("/message", messageRoutes);
   app.use("/", authRoutes);
 

@@ -4,7 +4,8 @@ const serverSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true
+      required: true,
+      unique: true
     },
     description: {
       type: String,
@@ -21,9 +22,14 @@ const serverSchema = new mongoose.Schema(
           permissionLevel: Number
         }
       ],
-      required: true
+      required: true,
+      _id: false
     },
     channels: {
+      type: [String],
+      default: []
+    },
+    blacklist: {
       type: [String],
       default: []
     }

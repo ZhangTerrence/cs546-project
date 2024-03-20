@@ -4,6 +4,8 @@ import express from "express";
 
 const router = express.Router();
 
-router.route("/").post(isAuthenticated(), privateMessageController.createPrivateMessage);
+router
+  .route("/")
+  .post(isAuthenticated(), privateMessageController.createPrivateMessage);
 
 export default router;

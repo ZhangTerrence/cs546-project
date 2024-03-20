@@ -12,7 +12,7 @@ import { hashPassword, comparePassword } from "../utils/password.js";
  * @access Public
  */
 export const renderSignupPage = async (_req, res) => {
-  return res.render("signup");
+  return res.render("auth/signup");
 };
 
 /**
@@ -21,12 +21,12 @@ export const renderSignupPage = async (_req, res) => {
  * @access Public
  */
 export const renderLoginPage = async (_req, res) => {
-  return res.render("login");
+  return res.render("auth/login");
 };
 
 /**
  * @description Creates an user
- * @route POST /api/signup
+ * @route POST /signup
  * @access Public
  */
 export const createUser = async (req, res) => {
@@ -35,13 +35,13 @@ export const createUser = async (req, res) => {
   try {
     validateSignupInput(email, username, password);
   } catch (error) {
-    return res.status(400).render("signup", { error: error.message });
+    return res.status(400).render("auth/signup", { error: error.message });
   }
 
   try {
     validateUniqueUser(email, username);
   } catch (error) {
-    return res.status(400).render("signup", { error: error.message });
+    return res.status(400).render("auth/signup", { error: error.message });
   }
 
   const hashedPassword = await hashPassword(password);
@@ -63,7 +63,7 @@ export const createUser = async (req, res) => {
 
 /**
  * @description Authenticates an existing user
- * @route POST /api/login
+ * @route POST /login
  * @access Public
  */
 export const authUser = async (req, res) => {
@@ -72,18 +72,18 @@ export const authUser = async (req, res) => {
   try {
     validateLoginInput(username, password);
   } catch (error) {
-    return res.status(400).render("login", { error: error.message });
+    return res.status(400).render("auth/login", { error: error.message });
   }
 
   const user = await User.findOne({ username });
   if (!user)
-    return res.status(400).render("login", {
+    return res.status(400).render("auth/login", {
       error: "User does not exist."
     });
 
   const passwordMatch = await comparePassword(password, user.hashedPassword);
   if (!passwordMatch)
-    return res.status(401).render("login", {
+    return res.status(401).render("auth/login", {
       error: "Invalid username or password."
     });
 
@@ -98,7 +98,7 @@ export const authUser = async (req, res) => {
 
 /**
  * @description Logs out an user
- * @route POST /api/logout
+ * @route POST /logout
  * @access Public
  */
 export const logout = async (req, res) => {

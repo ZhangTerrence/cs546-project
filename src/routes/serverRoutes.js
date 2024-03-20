@@ -4,6 +4,8 @@ import express from "express";
 
 const router = express.Router();
 
+router.route("/:serverId").get(serverController.renderServerPage);
+
 router.route("/").post(isAuthenticated(), serverController.createServer);
 
 export default router;

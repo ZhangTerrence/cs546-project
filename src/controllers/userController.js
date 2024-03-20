@@ -8,7 +8,7 @@ import Server from "../models/serverModel.js";
  */
 export const renderUserProfilePage = async (req, res) => {
   if (req.session.user.id !== req.params.id)
-    return res.status(401).redirect("/login");
+    return res.status(401).redirect("auth/login");
 
   const user = await User.findById(req.session.user.id);
   if (!user)
@@ -41,8 +41,6 @@ export const renderUserProfilePage = async (req, res) => {
       username: friend.username
     };
   });
-
-  console.log(servers, friends);
 
   return res.status(200).render("user/profile", {
     username: req.session.user.username,
