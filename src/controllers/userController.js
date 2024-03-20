@@ -29,14 +29,25 @@ export const renderUserProfilePage = async (req, res) => {
     };
   });
 
+  const friends = user.friends.map(async (friendId) => {
+    const friend = await User.findById(friendId);
+    if (!friend)
+      return res.status(500).render("error/500", {
+        error: "Unable to find user."
+      });
+
+    return {
+      id: friendId,
+      username: friend.username
+    };
+  });
+
+  console.log(servers, friends);
+
   return res.status(200).render("user/profile", {
     username: req.session.user.username,
     bio: user.bio,
     servers: servers,
-    friends: user.friends
+    friends: friends
   });
-};
-
-export const getUser = async (_req, res) => {
-  return res.status(200).json([]);
 };

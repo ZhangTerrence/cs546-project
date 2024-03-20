@@ -8,6 +8,4 @@ router
   .route("/:id")
   .get(isAuthenticated(), userController.renderUserProfilePage);
 
-router.route("/api/:id").get(userController.getUser);
-
 export default router;
