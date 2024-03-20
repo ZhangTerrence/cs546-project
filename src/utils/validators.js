@@ -1,4 +1,5 @@
 import emailValidator from "email-validator";
+import User from "../models/userModel.js";
 
 const MIN_USERNAME_LENGTH = 3;
 const MAX_USERNAME_LENGTH = 20;
@@ -54,4 +55,12 @@ export const validateSignupInput = (email, username, password) => {
     throw new Error(
       "Password must contain only alphanumeric characters as well as ., -, _, @, and !"
     );
+};
+
+export const validateUniqueUser = async (email, username) => {
+  const emailExists = await User.findOne({ email });
+  if (emailExists) throw new Error("Email is already taken.");
+
+  const usernameExists = await User.findOne({ username });
+  if (usernameExists) throw new Error("Username is already taken.");
 };

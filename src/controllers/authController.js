@@ -1,20 +1,10 @@
 import User from "../models/userModel.js";
 import {
   validateSignupInput,
-  validateLoginInput
+  validateLoginInput,
+  validateUniqueUser
 } from "../utils/validators.js";
 import { hashPassword, comparePassword } from "../utils/password.js";
-
-// View controllers
-
-/**
- * @description Renders landing page
- * @route GET /landing
- * @access Public
- */
-export const renderLandingPage = async (_req, res) => {
-  return res.render("landing");
-};
 
 /**
  * @description Renders signup page
@@ -34,8 +24,6 @@ export const renderLoginPage = async (_req, res) => {
   return res.render("login");
 };
 
-// API controllers
-
 /**
  * @description Creates an user
  * @route POST /api/signup
@@ -50,17 +38,11 @@ export const createUser = async (req, res) => {
     return res.status(400).render("signup", { error: error.message });
   }
 
-  const emailExists = await User.findOne({ email });
-  if (emailExists)
-    return res
-      .status(400)
-      .render("signup", { error: "Email is already taken." });
-
-  const usernameExists = await User.findOne({ username });
-  if (usernameExists)
-    return res
-      .status(400)
-      .render("signup", { error: "Username is already taken." });
+  try {
+    validateUniqueUser(email, username);
+  } catch (error) {
+    return res.status(400).render("signup", { error: error.message });
+  }
 
   const hashedPassword = await hashPassword(password);
 
@@ -72,7 +54,8 @@ export const createUser = async (req, res) => {
 
   req.session.user = {
     id: user._id,
-    username: user.username
+    username: user.username,
+    darkMode: user.darkMode
   };
 
   return res.status(201).redirect(`/user/${user._id}`);
@@ -106,7 +89,8 @@ export const authUser = async (req, res) => {
 
   req.session.user = {
     id: user._id,
-    username: user.username
+    username: user.username,
+    darkMode: user.darkMode
   };
 
   return res.status(200).redirect(`/user/${user._id}`);
