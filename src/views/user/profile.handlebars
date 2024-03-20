@@ -1,4 +1,16 @@
 <h1>{{username}}</h1>
+<h2>Servers</h2>
+{{#each servers}}
+  <div>
+    <a href=/server/{{id}}>{{name}}</a>
+  </div>
+{{/each}}
+<h2>Friends</h2>
+{{#each friends}}
+  <div>
+    <h3>{{username}}</h3>
+  </div>
+{{/each}}
 <form action="/server" method="post">
   <input type="text" name="name" placeholder="Name..." />
   <button type="submit">Create Server</button>

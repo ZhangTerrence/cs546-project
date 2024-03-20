@@ -16,31 +16,37 @@ export const renderUserProfilePage = async (req, res) => {
       error: "Unable to find user."
     });
 
-  const servers = user.servers.map(async (serverId) => {
-    const server = await Server.findById(serverId);
-    if (!server)
-      return res.status(500).render("error/500", {
-        error: "Unable to find server."
-      });
+  const servers = await Promise.all(
+    user.servers.map(async (serverId) => {
+      const server = await Server.findById(serverId);
+      if (!server)
+        return res.status(500).render("error/500", {
+          error: "Unable to find server."
+        });
 
-    return {
-      id: serverId,
-      name: server.name
-    };
-  });
+      return {
+        id: serverId,
+        name: server.name
+      };
+    })
+  );
 
-  const friends = user.friends.map(async (friendId) => {
-    const friend = await User.findById(friendId);
-    if (!friend)
-      return res.status(500).render("error/500", {
-        error: "Unable to find user."
-      });
+  const friends = await Promise.all(
+    user.friends.map(async (friendId) => {
+      const friend = await User.findById(friendId);
+      if (!friend)
+        return res.status(500).render("error/500", {
+          error: "Unable to find user."
+        });
 
-    return {
-      id: friendId,
-      username: friend.username
-    };
-  });
+      return await {
+        id: friendId,
+        username: friend.username
+      };
+    })
+  );
+
+  console.log(servers);
 
   return res.status(200).render("user/profile", {
     username: req.session.user.username,

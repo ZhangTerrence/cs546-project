@@ -1,5 +1,6 @@
 import Channel from "../models/channelModel.js";
 import Server from "../models/serverModel.js";
+import User from "../models/userModel.js";
 import {
   validateServerCreationInput,
   validateUniqueServer
@@ -53,6 +54,9 @@ export const createServer = async (req, res) => {
     return res.status(400).json({ error: error.message });
   }
 
+  const user = await User.findById(req.session.user.id);
+  if (!user) return res.status(500).json({ error: "Unable to find an user." });
+
   const serverId = new mongoose.Types.ObjectId();
 
   const channel = await Channel.create({
@@ -65,10 +69,10 @@ export const createServer = async (req, res) => {
   const server = await Server.create({
     _id: serverId,
     name,
-    creatorId: req.session.user.id,
+    creatorId: user._id,
     users: [
       {
-        id: req.session.user.id,
+        id: user._id,
         permissionLevel: 9
       }
     ],
@@ -77,7 +81,10 @@ export const createServer = async (req, res) => {
   if (!server)
     return res.status(500).json({ error: "Unable to create server." });
 
-  console.log(server);
+  user.servers.push(server._id);
+  const userSaved = await user.save();
+  if (!userSaved)
+    return res.status(500).json({ error: "Unable to update user servers." });
 
   return res.status(201).redirect(`/server/${server._id}`);
 };
