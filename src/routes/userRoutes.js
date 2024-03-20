@@ -4,8 +4,8 @@ import express from "express";
 
 const router = express.Router();
 
-router
-  .route("/:id")
-  .get(isAuthenticated(), userController.renderUserProfilePage);
+router.route("/").post(isAuthenticated(), userController.sendFriendRequest);
+
+router.route("/:id").get(userController.renderUserProfilePage);
 
 export default router;

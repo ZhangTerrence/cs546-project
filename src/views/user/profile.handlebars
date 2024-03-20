@@ -1,21 +1,30 @@
 <h1>{{username}}</h1>
-<h2>Servers</h2>
-{{#each servers}}
-  <div>
-    <a href=/server/{{id}}>{{name}}</a>
-  </div>
-{{/each}}
-<h2>Friends</h2>
-{{#each friends}}
-  <div>
-    <h3>{{username}}</h3>
-  </div>
-{{/each}}
-<form action="/server" method="post">
-  <input type="text" name="name" placeholder="Name..." />
-  <button type="submit">Create Server</button>
-</form>
-<form action="/logout" method="post">
-  <button type="submit">Logout</button>
-</form>
+<p>{{bio}}</p>
+{{#if authenticated}}
+  <h2>Servers</h2>
+  {{#each servers}}
+    <div>
+      <a href="/server/{{id}}">{{name}}</a>
+    </div>
+  {{/each}}
+  <h2>Friends</h2>
+  {{#each friends}}
+    <div>
+      <h3>{{username}}</h3>
+    </div>
+  {{/each}}
+  <h2>Create Server</h2>
+  <form action="/server" method="post">
+    <input type="text" name="name" placeholder="Name..." />
+    <button type="submit">Create Server</button>
+  </form>
+  <h2>Send Friend Request</h2>
+  <form action="/user" method="post">
+    <input type="text" name="username" placeholder="Username..." />
+    <button type="submit">Send Friend Request</button>
+  </form>
+  <form action="/logout" method="post">
+    <button type="submit">Logout</button>
+  </form>
+{{/if}}
 <script src="/public/js/user.js"></script>

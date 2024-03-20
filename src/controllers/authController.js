@@ -39,7 +39,7 @@ export const createUser = async (req, res) => {
   }
 
   try {
-    validateUniqueUser(email, username);
+    await validateUniqueUser(email, username);
   } catch (error) {
     return res.status(400).render("auth/signup", { error: error.message });
   }

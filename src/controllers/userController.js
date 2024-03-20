@@ -4,54 +4,96 @@ import Server from "../models/serverModel.js";
 /**
  * @description Renders an user's profile page
  * @route GET /user/:id
- * @access Private
+ * @access Public
  */
 export const renderUserProfilePage = async (req, res) => {
-  if (req.session.user.id !== req.params.id)
-    return res.status(401).redirect("auth/login");
+  if (
+    req.session.user &&
+    req.session.user.id &&
+    req.session.user.id === req.params.id
+  ) {
+    const user = await User.findById(req.session.user.id);
+    if (!user)
+      return res.status(500).render("error/500", {
+        error: "Unable to find user."
+      });
 
-  const user = await User.findById(req.session.user.id);
-  if (!user)
-    return res.status(500).render("error/500", {
-      error: "Unable to find user."
+    const servers = await Promise.all(
+      user.servers.map(async (serverId) => {
+        const server = await Server.findById(serverId);
+        if (!server)
+          return res.status(500).render("error/500", {
+            error: "Unable to find server."
+          });
+
+        return {
+          id: serverId,
+          name: server.name
+        };
+      })
+    );
+
+    const friends = await Promise.all(
+      user.friends.map(async (friendId) => {
+        const friend = await User.findById(friendId);
+        if (!friend)
+          return res.status(500).render("error/500", {
+            error: "Unable to find user."
+          });
+
+        return {
+          id: friendId,
+          username: friend.username
+        };
+      })
+    );
+
+    return res.status(200).render("user/profile", {
+      username: req.session.user.username,
+      bio: user.bio,
+      servers: servers,
+      friends: friends,
+      authenticated: true
     });
+  } else {
+    const user = await User.findById(req.params.id);
+    if (!user)
+      return res.status(500).render("error/500", {
+        error: "Unable to find user."
+      });
 
-  const servers = await Promise.all(
-    user.servers.map(async (serverId) => {
-      const server = await Server.findById(serverId);
-      if (!server)
-        return res.status(500).render("error/500", {
-          error: "Unable to find server."
-        });
+    return res.status(200).render("user/profile", {
+      username: user.username,
+      bio: user.bio,
+      authenticated: false
+    });
+  }
+};
 
-      return {
-        id: serverId,
-        name: server.name
-      };
-    })
-  );
+/**
+ * @description Sends a friend request to an user.
+ * @route POST /user
+ * @access Private
+ */
+export const sendFriendRequest = async (req, res) => {
+  const { username } = req.body;
 
-  const friends = await Promise.all(
-    user.friends.map(async (friendId) => {
-      const friend = await User.findById(friendId);
-      if (!friend)
-        return res.status(500).render("error/500", {
-          error: "Unable to find user."
-        });
+  const friendRequestedUser = await User.findOne({ username });
+  if (!friendRequestedUser)
+    return res.status(500).json({ error: "User cannot be found." });
 
-      return await {
-        id: friendId,
-        username: friend.username
-      };
-    })
-  );
+  if (friendRequestedUser._id === req.session.user.id)
+    return res
+      .status(400)
+      .json({ error: "Can't send friend request to yourself." });
 
-  console.log(servers);
+  if (friendRequestedUser.friendRequests.includes(req.session.user.id))
+    return res.status(400).json({ error: "Already sent friend request." });
 
-  return res.status(200).render("user/profile", {
-    username: req.session.user.username,
-    bio: user.bio,
-    servers: servers,
-    friends: friends
-  });
+  friendRequestedUser.friendRequests.push(req.session.user.id);
+  const success = await friendRequestedUser.save();
+  if (!success)
+    return res.status(500).json({ error: "Unable to send friend request." });
+
+  return res.json(200).json({ success: "Friend request sent." });
 };
