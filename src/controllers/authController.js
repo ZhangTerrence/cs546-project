@@ -7,7 +7,7 @@ import {
 import { hashPassword, comparePassword } from "../utils/password.js";
 
 /**
- * @description Renders signup page
+ * @description Renders signup page.
  * @route GET /signup
  * @access Public
  */
@@ -16,7 +16,7 @@ export const renderSignupPage = async (_req, res) => {
 };
 
 /**
- * @description Renders login page
+ * @description Renders login page.
  * @route GET /login
  * @access Public
  */
@@ -25,7 +25,7 @@ export const renderLoginPage = async (_req, res) => {
 };
 
 /**
- * @description Creates an user
+ * @description Creates an user.
  * @route POST /signup
  * @access Public
  */
@@ -35,34 +35,37 @@ export const createUser = async (req, res) => {
   try {
     validateSignupInput(email, username, password);
   } catch (error) {
-    return res.status(400).render("auth/signup", { error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 
   try {
     await validateUniqueUser(email, username);
   } catch (error) {
-    return res.status(400).render("auth/signup", { error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 
   const hashedPassword = await hashPassword(password);
 
   const user = await User.create({ email, username, hashedPassword });
-  if (!user)
-    return res
-      .status(500)
-      .render("signup", { error: "Unable to create an user." });
+  if (!user) {
+    return res.status(500).json({ error: "Unable to create user." });
+  }
 
   req.session.user = {
     id: user._id,
     username: user.username,
+    bio: user.bio,
+    friends: user.friends,
+    servers: user.servers,
+    friendRequests: user.friendRequests,
     darkMode: user.darkMode
   };
 
-  return res.status(201).redirect(`/user/${user._id}`);
+  return res.status(201).json({ success: `/user/${user._id}` });
 };
 
 /**
- * @description Authenticates an existing user
+ * @description Authenticates an existing user.
  * @route POST /login
  * @access Public
  */
@@ -72,28 +75,30 @@ export const authUser = async (req, res) => {
   try {
     validateLoginInput(username, password);
   } catch (error) {
-    return res.status(400).render("auth/login", { error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 
   const user = await User.findOne({ username });
-  if (!user)
-    return res.status(400).render("auth/login", {
-      error: "User does not exist."
-    });
+  if (!user) {
+    return res.status(400).json({ error: "User cannot be found." });
+  }
 
   const passwordMatch = await comparePassword(password, user.hashedPassword);
-  if (!passwordMatch)
-    return res.status(401).render("auth/login", {
-      error: "Invalid username or password."
-    });
+  if (!passwordMatch) {
+    return res.status(401).json({ error: "Invalid username or password." });
+  }
 
   req.session.user = {
     id: user._id,
     username: user.username,
+    bio: user.bio,
+    friends: user.friends,
+    servers: user.servers,
+    friendRequests: user.friendRequests,
     darkMode: user.darkMode
   };
 
-  return res.status(200).redirect(`/user/${user._id}`);
+  return res.status(200).json({ success: `/user/${user._id}` });
 };
 
 /**
