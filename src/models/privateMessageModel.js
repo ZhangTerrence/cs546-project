@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 const privateMessage = new mongoose.Schema(
   {
     users: {
-      type: [String]
+      type: [String],
+      required: true
     },
     messages: {
       type: [String],

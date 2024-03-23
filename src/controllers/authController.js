@@ -52,16 +52,13 @@ export const createUser = async (req, res) => {
   }
 
   req.session.user = {
-    id: user._id,
+    id: user.id,
     username: user.username,
     bio: user.bio,
-    friends: user.friends,
-    servers: user.servers,
-    friendRequests: user.friendRequests,
     darkMode: user.darkMode
   };
 
-  return res.status(201).json({ success: `/user/${user._id}` });
+  return res.status(201).json({ success: `/user/${user.id}` });
 };
 
 /**
@@ -80,7 +77,7 @@ export const authUser = async (req, res) => {
 
   const user = await User.findOne({ username });
   if (!user) {
-    return res.status(400).json({ error: "User cannot be found." });
+    return res.status(404).json({ error: "User cannot be found." });
   }
 
   const passwordMatch = await comparePassword(password, user.hashedPassword);
@@ -89,16 +86,13 @@ export const authUser = async (req, res) => {
   }
 
   req.session.user = {
-    id: user._id,
+    id: user.id,
     username: user.username,
     bio: user.bio,
-    friends: user.friends,
-    servers: user.servers,
-    friendRequests: user.friendRequests,
     darkMode: user.darkMode
   };
 
-  return res.status(200).json({ success: `/user/${user._id}` });
+  return res.status(200).json({ success: `/user/${user.id}` });
 };
 
 /**

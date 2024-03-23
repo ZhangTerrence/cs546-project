@@ -8,7 +8,7 @@ import {
 import mongoose from "mongoose";
 
 /**
- * @description Renders a server's main page
+ * @description Renders a server's main page.
  * @route Get /server/:serverId
  * @access Public
  */
@@ -35,8 +35,8 @@ export const renderServerPage = async (req, res) => {
 };
 
 /**
- * @description Creates a server
- * @route POST /server
+ * @description Creates a server.
+ * @route POST /server/create
  * @access Private
  */
 export const createServer = async (req, res) => {
@@ -63,8 +63,9 @@ export const createServer = async (req, res) => {
     name: "general",
     serverId
   });
-  if (!channel)
+  if (!channel) {
     return res.status(500).json({ error: "Unable to create general channel." });
+  }
 
   const server = await Server.create({
     _id: serverId,
@@ -78,13 +79,15 @@ export const createServer = async (req, res) => {
     ],
     channels: [channel._id]
   });
-  if (!server)
+  if (!server) {
     return res.status(500).json({ error: "Unable to create server." });
+  }
 
   user.servers.push(server._id);
   const userSaved = await user.save();
-  if (!userSaved)
+  if (!userSaved) {
     return res.status(500).json({ error: "Unable to update user servers." });
+  }
 
-  return res.status(201).redirect(`/server/${server._id}`);
+  return res.status(201).json({ success: `/server/${server._id}` });
 };

@@ -2,27 +2,48 @@
 <p>{{bio}}</p>
 {{#if authenticated}}
   <h2>Servers</h2>
-  {{#each servers}}
-    <div>
-      <a href="/server/{{id}}">{{name}}</a>
-    </div>
-  {{/each}}
+  <ul>
+    {{#each servers}}
+      <li><a id="{{id}}" href="/server/{{id}}">{{name}}</a></li>
+    {{/each}}
+  </ul>
+
   <h2>Friends</h2>
-  {{#each friends}}
-    <div>
-      <h3>{{username}}</h3>
-    </div>
-  {{/each}}
+  <ul id="friendsList">
+    {{#each friends}}
+      <li><a id="{{id}}" href="/user/{{id}}">{{username}}</a></li>
+    {{/each}}
+  </ul>
+
+  <h2>Friend Requests</h2>
+  <ul>
+    {{#each friendRequests}}
+      <li>
+        <form id="{{id}}">
+          <p>{{username}}</p>
+          <button class="acceptFriendRequest">Accept</button>
+          <button class="rejectFriendRequest">Reject</button>
+        </form>
+      </li>
+    {{/each}}
+  </ul>
+
   <h2>Create Server</h2>
-  <form action="/server" method="post">
-    <input type="text" name="name" placeholder="Name..." />
-    <button type="submit">Create Server</button>
+  <form>
+    <label for="name">Server Name:</label>
+    <input type="text" name="name" />
+
+    <button id="createServerButton">Create Server</button>
   </form>
+
   <h2>Send Friend Request</h2>
-  <form action="/user" method="post">
-    <input type="text" name="username" placeholder="Username..." />
-    <button type="submit">Send Friend Request</button>
+  <form>
+    <label for="username">Username:</label>
+    <input type="text" name="username" />
+
+    <button id="createFriendRequestButton">Send Friend Request</button>
   </form>
+
   <form action="/logout" method="post">
     <button type="submit">Logout</button>
   </form>

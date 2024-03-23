@@ -6,30 +6,28 @@ const MIN_USERNAME_LENGTH = 3;
 const MAX_USERNAME_LENGTH = 20;
 const MIN_PASSWORD_LENGTH = 3;
 
+export const validateStringInput = (input, inputName) => {
+  if (!input) throw new Error(`${inputName} field is required.`);
+
+  if (typeof input !== "string")
+    throw new Error(`${inputName} field is not a string.`);
+
+  if (input.trim().length === 0)
+    throw new Error(`${inputName} field is empty.`);
+};
+
 export const validateLoginInput = (username, password) => {
-  if (!username) throw new Error("Username field is required.");
-  if (!password) throw new Error("Password field is required.");
-
-  if (typeof username !== "string")
-    throw new Error("Username field is not a string.");
-  if (typeof password !== "string")
-    throw new Error("Password field is not a string.");
-
-  if (username.trim().length === 0) throw new Error("Username field is empty.");
-  if (password.trim().length === 0) throw new Error("Password field is empty.");
+  validateStringInput(username, "Username");
+  validateStringInput(password, "Password");
 };
 
 export const validateSignupInput = (email, username, password) => {
+  validateLoginInput(username, password);
+
   if (!email) throw new Error("Email field is required.");
-  if (!username) throw new Error("Username field is required.");
-  if (!password) throw new Error("Password field is required.");
 
   if (typeof email !== "string")
     throw new Error("Email field must be a string.");
-  if (typeof username !== "string")
-    throw new Error("Username field must be a string.");
-  if (typeof password !== "string")
-    throw new Error("Password field must be a string.");
 
   const trimmedEmail = email.trim();
   if (!emailValidator.validate(trimmedEmail))
@@ -58,20 +56,20 @@ export const validateSignupInput = (email, username, password) => {
     );
 };
 
+export const validateServerCreationInput = (name) => {
+  validateStringInput(name, "Name");
+};
+
+export const validateFriendRequestUsernameInput = (username) => {
+  validateStringInput(username, "Username");
+};
+
 export const validateUniqueUser = async (email, username) => {
   const emailExists = await User.findOne({ email });
   if (emailExists) throw new Error("Email is already taken.");
 
   const usernameExists = await User.findOne({ username });
   if (usernameExists) throw new Error("Username is already taken.");
-};
-
-export const validateServerCreationInput = (name) => {
-  if (!name) throw new Error("Name field is required.");
-
-  if (typeof name !== "string") throw new Error("Name field must be a string.");
-
-  if (name.trim().length === 0) throw new Error("Name field is empty.");
 };
 
 export const validateUniqueServer = async (name) => {

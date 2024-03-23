@@ -4,8 +4,14 @@ import express from "express";
 
 const router = express.Router();
 
-router.route("/").post(isAuthenticated(), userController.sendFriendRequest);
-
 router.route("/:id").get(userController.renderUserProfilePage);
+
+router
+  .route("/friendRequest/create")
+  .post(isAuthenticated(), userController.createFriendRequest);
+router
+  .route("/friendRequest/accept")
+  .post(isAuthenticated(), userController.acceptFriendRequest);
+router.route("/friendRequest/reject");
 
 export default router;
