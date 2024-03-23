@@ -1,7 +1,10 @@
 import User from "../models/userModel.js";
 import Server from "../models/serverModel.js";
 import PrivateMessage from "../models/privateMessageModel.js";
-import { validateFriendRequestUsernameInput } from "../utils/validators.js";
+import {
+  validateFriendRequestUsernameInput,
+  validateStringInput
+} from "../utils/validators.js";
 
 /**
  * @description Renders an user's profile page.
@@ -100,7 +103,7 @@ export const renderUserProfilePage = async (req, res) => {
 
 /**
  * @description Sends a friend request to an user.
- * @route POST /user/friendRequest/create
+ * @route POST /user/friend
  * @access Private
  */
 export const createFriendRequest = async (req, res) => {
@@ -146,12 +149,62 @@ export const createFriendRequest = async (req, res) => {
 };
 
 /**
+ * @description Removes an user from friends.
+ * @route DELETE /user/friend
+ * @access Private
+ */
+export const removeFriend = async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    validateStringInput(id, "Id");
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  const otherUser = await User.findById(id);
+  if (!otherUser) {
+    return res.status(404).json({ error: "Other user cannot be found." });
+  }
+
+  const user = await User.findById(req.session.user.id);
+  if (!user) {
+    return res.status(404).json({ error: "Current user cannot be found." });
+  }
+
+  const savedPrivateMessage = await PrivateMessage.deleteOne({
+    users: { $in: [otherUser.id, user.id] }
+  });
+  if (!savedPrivateMessage) {
+    return res.status(500).json({ error: "Unable to remove private message." });
+  }
+
+  otherUser.friends.splice(otherUser.friends.indexOf(user.id), 1);
+  user.friends.splice(user.friends.indexOf(otherUser.id), 1);
+  const savedOtherUser = await otherUser.save();
+  const savedUser = await user.save();
+  if (!savedOtherUser || !savedUser) {
+    return res
+      .status(500)
+      .json({ error: "Unable to remove user from friends." });
+  }
+
+  return res.status(200).json({ success: "Successfully removed user." });
+};
+
+/**
  * @description Accepts a friend request from an user.
  * @route POST /user/friendRequest/accept
  * @access Private
  */
 export const acceptFriendRequest = async (req, res) => {
   const { id } = req.body;
+
+  try {
+    validateStringInput(id, "Id");
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
 
   const senderUser = await User.findById(id);
   if (!senderUser) {
@@ -181,9 +234,9 @@ export const acceptFriendRequest = async (req, res) => {
     return res.status(500).json({ error: "Unable to create private message." });
   }
 
-  const success1 = await user.save();
-  const success2 = await senderUser.save();
-  if (!success1 || !success2) {
+  const savedUser = await user.save();
+  const savedSenderUser = await senderUser.save();
+  if (!savedUser || !savedSenderUser) {
     return res.status(500).json({ error: "Unable to add user as friend." });
   }
 
@@ -193,5 +246,35 @@ export const acceptFriendRequest = async (req, res) => {
       id: senderUser.id,
       username: senderUser.username
     }
+  });
+};
+
+/**
+ * @description Rejects a friend request from an user.
+ * @route POST /user/friendRequest/reject
+ * @access Private
+ */
+export const rejectFriendRequest = async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    validateStringInput(id, "Id");
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  const user = await User.findById(req.session.user.id);
+  if (!user) {
+    return res.status(404).json({ error: "Current user cannot be found." });
+  }
+
+  user.friendRequests.splice(user.friendRequests.indexOf(id), 1);
+  const success = await user.save();
+  if (!success) {
+    return res.status(500).json({ error: "Unable to reject friend request." });
+  }
+
+  return res.status(200).json({
+    success: `Successfully rejected friend request`
   });
 };

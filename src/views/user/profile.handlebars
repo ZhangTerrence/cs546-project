@@ -11,7 +11,12 @@
   <h2>Friends</h2>
   <ul id="friendsList">
     {{#each friends}}
-      <li><a id="{{id}}" href="/user/{{id}}">{{username}}</a></li>
+      <li>
+        <form id="{{id}}">
+          <a href="/user/{{id}}">{{username}}</a>
+          <button class="removeFriendButtons">Remove</button>
+        </form>
+      </li>
     {{/each}}
   </ul>
 
@@ -21,8 +26,8 @@
       <li>
         <form id="{{id}}">
           <p>{{username}}</p>
-          <button class="acceptFriendRequest">Accept</button>
-          <button class="rejectFriendRequest">Reject</button>
+          <button class="acceptFriendRequestButtons">Accept</button>
+          <button class="rejectFriendRequestButtons">Reject</button>
         </form>
       </li>
     {{/each}}
