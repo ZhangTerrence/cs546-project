@@ -21,15 +21,14 @@ const userSchema = new mongoose.Schema(
       default: ""
     },
     servers: {
-      type: [
-        {
-          id: String,
-          channelId: [String]
-        }
-      ],
+      type: [String],
       default: []
     },
     friends: {
+      type: [String],
+      default: []
+    },
+    friendRequests: {
       type: [String],
       default: []
     },

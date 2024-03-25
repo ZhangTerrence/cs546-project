@@ -4,10 +4,22 @@ import express from "express";
 
 const router = express.Router();
 
-router
-  .route("/:id")
-  .get(isAuthenticated(), userController.renderUserProfilePage);
+router.route("/:id").get(userController.renderUserProfilePage);
 
-router.route("/api/:id").get(userController.getUser);
+router
+  .route("/")
+  .patch(isAuthenticated(), userController.updateUser)
+  .delete(isAuthenticated(), userController.deleteUser);
+
+router
+  .route("/friend")
+  .post(isAuthenticated(), userController.createFriendRequest)
+  .delete(isAuthenticated(), userController.removeFriend);
+router
+  .route("/friendRequest/accept")
+  .post(isAuthenticated(), userController.acceptFriendRequest);
+router
+  .route("/friendRequest/reject")
+  .post(isAuthenticated(), userController.rejectFriendRequest);
 
 export default router;
