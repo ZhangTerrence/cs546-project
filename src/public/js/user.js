@@ -1,3 +1,4 @@
+const updateUserButton = document.getElementById("updateUserButton");
 const createServerButton = document.getElementById("createServerButton");
 const createFriendRequestButton = document.getElementById(
   "createFriendRequestButton"
@@ -11,8 +12,44 @@ const acceptFriendRequestButtons = document.getElementsByClassName(
 const rejectFriendRequestButtons = document.getElementsByClassName(
   "rejectFriendRequestButtons"
 );
+const deleteUserButton = document.getElementById("deleteUserButton");
 
-const friendsList = document.getElementById("friendsList");
+(function setRadio() {
+  const darkMode = document.getElementById("darkMode").innerText;
+
+  if (darkMode === "true") {
+    document.getElementById("darkRadio").checked = true;
+    document.getElementById("lightRadio").checked = false;
+  } else {
+    document.getElementById("darkRadio").checked = false;
+    document.getElementById("lightRadio").checked = true;
+  }
+})();
+
+updateUserButton.addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  const bio = document.getElementById("bio").value;
+  const darkMode = document.getElementById("darkRadio").checked;
+
+  const response = await fetch("/user", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      bio,
+      darkMode
+    })
+  });
+  const data = await response.json();
+
+  if (response.status === 200) {
+    window.alert(data.success);
+  } else {
+    window.alert(data.error);
+  }
+});
 
 createServerButton.addEventListener("click", async (e) => {
   e.preventDefault();
@@ -21,7 +58,7 @@ createServerButton.addEventListener("click", async (e) => {
   const formObject = Object.fromEntries(formData);
 
   const response = await fetch("/server/create", {
-    method: "post",
+    method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
@@ -43,7 +80,7 @@ createFriendRequestButton.addEventListener("click", async (e) => {
   const formObject = Object.fromEntries(formData);
 
   const response = await fetch("/user/friend", {
-    method: "post",
+    method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
@@ -65,7 +102,7 @@ Array.from(removeFriendButtons).forEach((button) => {
     const userId = button.form.id;
 
     const response = await fetch("/user/friend", {
-      method: "delete",
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json"
       },
@@ -88,10 +125,11 @@ Array.from(acceptFriendRequestButtons).forEach((button) => {
   button.addEventListener("click", async (e) => {
     e.preventDefault();
 
+    const friendsList = document.getElementById("friendsList");
     const userId = button.form.id;
 
     const response = await fetch("/user/friendRequest/accept", {
-      method: "post",
+      method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
@@ -124,7 +162,7 @@ Array.from(rejectFriendRequestButtons).forEach((button) => {
     const userId = button.form.id;
 
     const response = await fetch("/user/friendRequest/reject", {
-      method: "post",
+      method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
@@ -141,4 +179,19 @@ Array.from(rejectFriendRequestButtons).forEach((button) => {
       window.alert(data.error);
     }
   });
+});
+
+deleteUserButton.addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  const response = await fetch("/user", {
+    method: "DELETE"
+  });
+  const data = await response.json();
+
+  if (response.status === 200) {
+    window.location.replace("/");
+  } else {
+    window.alert(data.error);
+  }
 });

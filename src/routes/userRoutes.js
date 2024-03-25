@@ -7,6 +7,11 @@ const router = express.Router();
 router.route("/:id").get(userController.renderUserProfilePage);
 
 router
+  .route("/")
+  .patch(isAuthenticated(), userController.updateUser)
+  .delete(isAuthenticated(), userController.deleteUser);
+
+router
   .route("/friend")
   .post(isAuthenticated(), userController.createFriendRequest)
   .delete(isAuthenticated(), userController.removeFriend);

@@ -7,7 +7,7 @@ signupButton.addEventListener("click", async (e) => {
   const formObject = Object.fromEntries(formData);
 
   const response = await fetch("/signup", {
-    method: "post",
+    method: "POST",
     headers: {
       "Content-Type": "application/json"
     },

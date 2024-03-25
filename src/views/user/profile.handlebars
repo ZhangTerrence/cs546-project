@@ -1,6 +1,21 @@
 <h1>{{username}}</h1>
 <p>{{bio}}</p>
 {{#if authenticated}}
+  <p id="darkMode" hidden="true">{{darkMode}}</p>
+
+  <form>
+    <label for="bio"></label>
+    <textarea id="bio" name="bio">{{bio}}</textarea>
+
+    <label for="darkRadio">Dark</label>
+    <input type="radio" id="darkRadio" name="color" value="dark">
+
+    <label for="lightRadio">Light</label>
+    <input type="radio" id="lightRadio" name="color" value="light">
+
+    <button id="updateUserButton" type="submit">Update User</button>
+  </form>
+
   <h2>Servers</h2>
   <ul>
     {{#each servers}}
@@ -51,6 +66,10 @@
 
   <form action="/logout" method="post">
     <button type="submit">Logout</button>
+  </form>
+
+  <form>
+    <button id="deleteUserButton" type="submit">Delete User</button>
   </form>
 {{/if}}
 <script src="/public/js/user.js"></script>

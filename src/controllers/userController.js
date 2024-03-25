@@ -1,9 +1,11 @@
 import User from "../models/userModel.js";
 import Server from "../models/serverModel.js";
 import PrivateMessage from "../models/privateMessageModel.js";
+import Channel from "../models/channelModel.js";
 import {
   validateFriendRequestUsernameInput,
-  validateStringInput
+  validateStringInput,
+  validateUpdateUserInput
 } from "../utils/validators.js";
 
 /**
@@ -79,6 +81,7 @@ export const renderUserProfilePage = async (req, res) => {
     return res.status(200).render("user/profile", {
       username: req.session.user.username,
       bio: req.session.user.bio,
+      darkMode: req.session.user.darkMode,
       servers: servers,
       friends: friends,
       friendRequests: friendRequests,
@@ -99,6 +102,126 @@ export const renderUserProfilePage = async (req, res) => {
       authenticated: false
     });
   }
+};
+
+/**
+ * @description Updates an user's profile.
+ * @route PATCH /user
+ * @access Private
+ */
+export const updateUser = async (req, res) => {
+  const user = await User.findById(req.session.user.id);
+  if (!user) {
+    return res.status(404).json({ error: "Current user cannot be found." });
+  }
+
+  const { bio, darkMode } = req.body;
+
+  try {
+    validateUpdateUserInput(bio, darkMode);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  if (user.bio === bio && user.darkMode === darkMode) {
+    return res.status(400).json({ error: "Nothing has changed." });
+  }
+
+  user.bio = bio;
+  user.darkMode = darkMode;
+
+  const savedUser = await user.save();
+  if (!savedUser) {
+    return res.status(500).json({ error: "Unable to save user." });
+  }
+
+  return res.status(200).json({ success: "Successfully updated user." });
+};
+
+/**
+ * @description Deletes an user's account.
+ * @route DELETE /user
+ * @access Private
+ */
+export const deleteUser = async (req, res) => {
+  const user = await User.findById(req.session.user.id);
+  if (!user) {
+    return res.status(404).json({ error: "Current user cannot be found." });
+  }
+
+  const otherUsers = await User.find({
+    $or: [
+      {
+        friends: { $in: user.id }
+      },
+      {
+        friendRequests: { $in: user.id }
+      }
+    ]
+  });
+  otherUsers.forEach(async (otherUser) => {
+    if (otherUser.friends.includes(user.id)) {
+      otherUser.friends.splice(otherUser.friends.indexOf(user.id), 1);
+    }
+    if (otherUser.friendRequests.includes(user.id)) {
+      otherUser.friendRequests.splice(
+        otherUser.friendRequests.indexOf(user.id),
+        1
+      );
+    }
+    const savedOtherUser = await otherUser.save();
+    if (!savedOtherUser) {
+      return res
+        .status(500)
+        .json({ error: "Unable to remove user from other user." });
+    }
+  });
+
+  const servers = await Server.find({
+    users: { $elemMatch: { id: user.id } }
+  });
+  servers.forEach(async (server) => {
+    if (user.id === server.creatorId) {
+      const deletedChannels = await Channel.deleteMany({ serverId: server.id });
+      if (!deletedChannels) {
+        return res
+          .status(500)
+          .json({ error: "Unable to delete server channels." });
+      }
+
+      const deletedServer = await Server.deleteOne({ creatorId: user.id });
+      if (!deletedServer) {
+        return res.status(500).json({ error: "Unable to delete server." });
+      }
+    } else {
+      const index = server.users.map((server) => server.id).indexOf(user.id);
+
+      server.users.splice(index, 1);
+
+      const savedServer = await server.save();
+      if (!savedServer) {
+        return res
+          .status(500)
+          .json({ error: "Unable to remove user from server." });
+      }
+    }
+  });
+
+  const deletedPrivateMessages = await PrivateMessage.deleteMany({
+    users: { $in: user.id }
+  });
+  if (!deletedPrivateMessages) {
+    return res.status(500).json({ error: "Unable to delete private message." });
+  }
+
+  const deletedUser = await User.findByIdAndDelete(user.id);
+  if (!deletedUser) {
+    return res.status(500).json({ error: "Unable to delete user." });
+  }
+
+  req.session.destroy();
+
+  return res.status(200).json({ success: "Successfully deleted user." });
 };
 
 /**
@@ -140,8 +263,8 @@ export const createFriendRequest = async (req, res) => {
   }
 
   targetUser.friendRequests.push(req.session.user.id);
-  const success = await targetUser.save();
-  if (!success) {
+  const savedTargetUser = await targetUser.save();
+  if (!savedTargetUser) {
     return res.status(500).json({ error: "Unable to send friend request." });
   }
 
@@ -269,8 +392,8 @@ export const rejectFriendRequest = async (req, res) => {
   }
 
   user.friendRequests.splice(user.friendRequests.indexOf(id), 1);
-  const success = await user.save();
-  if (!success) {
+  const savedUser = await user.save();
+  if (!savedUser) {
     return res.status(500).json({ error: "Unable to reject friend request." });
   }
 

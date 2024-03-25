@@ -10,7 +10,7 @@ export const validateStringInput = (input, inputName) => {
   if (!input) throw new Error(`${inputName} field is required.`);
 
   if (typeof input !== "string")
-    throw new Error(`${inputName} field is not a string.`);
+    throw new Error(`${inputName} field must be a string.`);
 
   if (input.trim().length === 0)
     throw new Error(`${inputName} field is empty.`);
@@ -54,6 +54,12 @@ export const validateSignupInput = (email, username, password) => {
     throw new Error(
       "Password must contain only alphanumeric characters as well as ., -, _, @, and !"
     );
+};
+
+export const validateUpdateUserInput = (_bio, darkMode) => {
+  if (darkMode && typeof darkMode !== "boolean") {
+    throw new Error("darkMode field must be a boolean.");
+  }
 };
 
 export const validateServerCreationInput = (name) => {
