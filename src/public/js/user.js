@@ -1,5 +1,6 @@
+// DOM Selectors
+
 const updateUserButton = document.getElementById("updateUserButton");
-const createServerButton = document.getElementById("createServerButton");
 const createFriendRequestButton = document.getElementById(
   "createFriendRequestButton"
 );
@@ -14,19 +15,51 @@ const rejectFriendRequestButtons = document.getElementsByClassName(
 );
 const deleteUserButton = document.getElementById("deleteUserButton");
 
-(function setRadio() {
-  const darkMode = document.getElementById("darkMode").innerText;
+// IIFE Functions
 
-  if (darkMode === "true") {
-    document.getElementById("darkRadio").checked = true;
-    document.getElementById("lightRadio").checked = false;
-  } else {
-    document.getElementById("darkRadio").checked = false;
-    document.getElementById("lightRadio").checked = true;
+(function setRadio() {
+  const darkRadio = document.getElementById("darkRadio");
+  const lightRadio = document.getElementById("lightRadio");
+
+  if (darkRadio && lightRadio) {
+    const darkMode = document.getElementById("darkMode").innerText;
+
+    if (darkMode === "true") {
+      darkRadio.checked = true;
+      lightRadio.checked = false;
+    } else {
+      darkRadio.checked = false;
+      lightRadio.checked = true;
+    }
   }
 })();
 
-updateUserButton.addEventListener("click", async (e) => {
+// Helper functions
+
+function createFriendsListElement(userId, username) {
+  const li = document.createElement("li");
+
+  const form = document.createElement("form");
+  form.id = userId;
+
+  const a = document.createElement("a");
+  a.href = `/user/${userId}`;
+  a.innerText = username;
+
+  const button = document.createElement("button");
+  button.innerText = "Remove";
+  button.classList.add("removeFriendButtons");
+  button.addEventListener("click", (e) => removeFriend(e, button));
+
+  form.appendChild(a);
+  form.appendChild(button);
+
+  li.appendChild(form);
+
+  return li;
+}
+
+async function updateUser(e) {
   e.preventDefault();
 
   const bio = document.getElementById("bio").value;
@@ -46,34 +79,14 @@ updateUserButton.addEventListener("click", async (e) => {
 
   if (response.status === 200) {
     window.alert(data.success);
+  } else if (response.status === 401) {
+    window.location.replace(data.error);
   } else {
     window.alert(data.error);
   }
-});
+}
 
-createServerButton.addEventListener("click", async (e) => {
-  e.preventDefault();
-
-  const formData = new FormData(createServerButton.form);
-  const formObject = Object.fromEntries(formData);
-
-  const response = await fetch("/server/create", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(formObject)
-  });
-  const data = await response.json();
-
-  if (response.status === 201) {
-    window.location.replace(data.success);
-  } else {
-    window.alert(data.error);
-  }
-});
-
-createFriendRequestButton.addEventListener("click", async (e) => {
+async function createFriendRequest(e) {
   e.preventDefault();
 
   const formData = new FormData(createFriendRequestButton.form);
@@ -90,98 +103,97 @@ createFriendRequestButton.addEventListener("click", async (e) => {
 
   if (response.status === 200) {
     window.alert(data.success);
+  } else if (response.status === 401) {
+    window.location.replace(data.error);
   } else {
     window.alert(data.error);
   }
-});
+}
 
-Array.from(removeFriendButtons).forEach((button) => {
-  button.addEventListener("click", async (e) => {
-    e.preventDefault();
+async function removeFriend(e, button) {
+  e.preventDefault();
 
-    const userId = button.form.id;
+  const userId = button.form.id;
 
-    const response = await fetch("/user/friend", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        id: userId
-      })
-    });
-    const data = await response.json();
-
-    if (response.status === 200) {
-      window.alert(data.success);
-      button.form.remove();
-    } else {
-      window.alert(data.error);
-    }
+  const response = await fetch("/user/friend", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      userId
+    })
   });
-});
+  const data = await response.json();
 
-Array.from(acceptFriendRequestButtons).forEach((button) => {
-  button.addEventListener("click", async (e) => {
-    e.preventDefault();
+  if (response.status === 200) {
+    window.alert(data.success);
+    button.form.remove();
+  } else if (response.status === 401) {
+    window.location.replace(data.error);
+  } else {
+    window.alert(data.error);
+  }
+}
 
-    const friendsList = document.getElementById("friendsList");
-    const userId = button.form.id;
+async function acceptFriendRequest(e, button) {
+  e.preventDefault();
 
-    const response = await fetch("/user/friendRequest/accept", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        id: userId
-      })
-    });
-    const data = await response.json();
+  const userId = button.form.id;
 
-    if (response.status === 200) {
-      window.alert(data.success);
-      button.form.remove();
-
-      const outerNode = document.createElement("li");
-      const innerNode = document.createElement("a");
-      innerNode.href = `/user/${data.data.id}`;
-      innerNode.innerText = data.data.username;
-      outerNode.appendChild(innerNode);
-      friendsList.appendChild(outerNode);
-    } else {
-      window.alert(data.error);
-    }
+  const response = await fetch("/user/friendRequest/accept", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      userId
+    })
   });
-});
+  const data = await response.json();
 
-Array.from(rejectFriendRequestButtons).forEach((button) => {
-  button.addEventListener("click", async (e) => {
-    e.preventDefault();
+  if (response.status === 200) {
+    window.alert(data.success);
 
-    const userId = button.form.id;
+    button.form.remove();
 
-    const response = await fetch("/user/friendRequest/reject", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        id: userId
-      })
-    });
-    const data = await response.json();
+    document
+      .getElementById("friendsList")
+      .appendChild(createFriendsListElement(data.data.id, data.data.username));
+  } else if (response.status === 401) {
+    window.location.replace(data.error);
+  } else {
+    window.alert(data.error);
+  }
+}
 
-    if (response.status === 200) {
-      window.alert(data.success);
-      button.form.remove();
-    } else {
-      window.alert(data.error);
-    }
+async function rejectFriendRequest(e, button) {
+  e.preventDefault();
+
+  const userId = button.form.id;
+
+  const response = await fetch("/user/friendRequest/reject", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      userId
+    })
   });
-});
+  const data = await response.json();
 
-deleteUserButton.addEventListener("click", async (e) => {
+  if (response.status === 200) {
+    window.alert(data.success);
+    button.form.remove();
+  } else if (response.status === 401) {
+    window.location.replace(data.error);
+  } else {
+    window.alert(data.error);
+  }
+}
+
+async function deleteUser(e) {
   e.preventDefault();
 
   const response = await fetch("/user", {
@@ -191,7 +203,43 @@ deleteUserButton.addEventListener("click", async (e) => {
 
   if (response.status === 200) {
     window.location.replace("/");
+  } else if (response.status === 401) {
+    window.location.replace(data.error);
   } else {
     window.alert(data.error);
   }
-});
+}
+
+// Event Listeners
+
+if (updateUserButton) {
+  updateUserButton.addEventListener("click", (e) => updateUser(e));
+}
+
+if (createFriendRequestButton) {
+  createFriendRequestButton.addEventListener("click", (e) =>
+    createFriendRequest(e)
+  );
+}
+
+if (removeFriendButtons) {
+  Array.from(removeFriendButtons).forEach((button) => {
+    button.addEventListener("click", (e) => removeFriend(e, button));
+  });
+}
+
+if (acceptFriendRequestButtons) {
+  Array.from(acceptFriendRequestButtons).forEach((button) => {
+    button.addEventListener("click", (e) => acceptFriendRequest(e, button));
+  });
+}
+
+if (rejectFriendRequestButtons) {
+  Array.from(rejectFriendRequestButtons).forEach((button) =>
+    button.addEventListener("click", (e) => rejectFriendRequest(e, button))
+  );
+}
+
+if (deleteUserButton) {
+  deleteUserButton.addEventListener("click", (e) => deleteUser(e));
+}

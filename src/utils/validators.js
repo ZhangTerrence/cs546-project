@@ -1,4 +1,5 @@
 import emailValidator from "email-validator";
+import mongoose from "mongoose";
 import User from "../models/userModel.js";
 import Server from "../models/serverModel.js";
 
@@ -14,6 +15,14 @@ export const validateStringInput = (input, inputName) => {
 
   if (input.trim().length === 0)
     throw new Error(`${inputName} field is empty.`);
+};
+
+export const validateMongoIdInput = (id, inputName) => {
+  validateStringInput(id, inputName);
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new Error(`${inputName} is not a valid ObjectId.`);
+  }
 };
 
 export const validateLoginInput = (username, password) => {

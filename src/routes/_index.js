@@ -17,8 +17,15 @@ const constructorMethod = (app) => {
     return res.render("landing");
   });
 
+  app.route("/teapot").get(async (_req, res) => {
+    return res.status(418).json("I'm a teapot.");
+  });
+
   app.use("*", (_req, res) => {
-    return res.status(404).json({ error: "Route not found." });
+    return res.render("error/400", {
+      statusCode: 404,
+      error: "Route not found."
+    });
   });
 };
 

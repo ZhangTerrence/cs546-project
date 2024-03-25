@@ -4,7 +4,7 @@ import PrivateMessage from "../models/privateMessageModel.js";
 import Channel from "../models/channelModel.js";
 import {
   validateFriendRequestUsernameInput,
-  validateStringInput,
+  validateMongoIdInput,
   validateUpdateUserInput
 } from "../utils/validators.js";
 
@@ -23,7 +23,7 @@ export const renderUserProfilePage = async (req, res) => {
     if (!user) {
       return res.status(404).render("error/400", {
         statusCode: 404,
-        error: "Unable to find user."
+        error: "User not found."
       });
     }
 
@@ -33,7 +33,7 @@ export const renderUserProfilePage = async (req, res) => {
         if (!server) {
           return res.status(404).render("error/400", {
             statusCode: 404,
-            error: "Unable to find server."
+            error: "Server not found."
           });
         }
 
@@ -50,7 +50,7 @@ export const renderUserProfilePage = async (req, res) => {
         if (!friend) {
           return res.status(404).render("error/400", {
             statusCode: 404,
-            error: "Unable to find user."
+            error: "User not found."
           });
         }
 
@@ -67,7 +67,7 @@ export const renderUserProfilePage = async (req, res) => {
         if (!user) {
           return res.status(404).render("error/400", {
             statusCode: 404,
-            error: "Unable to find user."
+            error: "User not found."
           });
         }
 
@@ -85,21 +85,21 @@ export const renderUserProfilePage = async (req, res) => {
       servers: servers,
       friends: friends,
       friendRequests: friendRequests,
-      authenticated: true
+      owner: true
     });
   } else {
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).render("error/400", {
         statusCode: 404,
-        error: "Unable to find user."
+        error: "User not found."
       });
     }
 
     return res.status(200).render("user/profile", {
       username: user.username,
       bio: user.bio,
-      authenticated: false
+      owner: false
     });
   }
 };
@@ -112,7 +112,7 @@ export const renderUserProfilePage = async (req, res) => {
 export const updateUser = async (req, res) => {
   const user = await User.findById(req.session.user.id);
   if (!user) {
-    return res.status(404).json({ error: "Current user cannot be found." });
+    return res.status(404).json({ error: "Current user not found." });
   }
 
   const { bio, darkMode } = req.body;
@@ -146,7 +146,7 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   const user = await User.findById(req.session.user.id);
   if (!user) {
-    return res.status(404).json({ error: "Current user cannot be found." });
+    return res.status(404).json({ error: "Current user not found." });
   }
 
   const otherUsers = await User.find({
@@ -240,12 +240,12 @@ export const createFriendRequest = async (req, res) => {
 
   const targetUser = await User.findOne({ username });
   if (!targetUser) {
-    return res.status(404).json({ error: "Target user cannot be found." });
+    return res.status(404).json({ error: "Target user not found." });
   }
 
   const user = await User.findById(req.session.user.id);
   if (!user) {
-    return res.status(404).json({ error: "Current user cannot be found." });
+    return res.status(404).json({ error: "Current user not found." });
   }
 
   if (targetUser.id === req.session.user.id) {
@@ -277,22 +277,22 @@ export const createFriendRequest = async (req, res) => {
  * @access Private
  */
 export const removeFriend = async (req, res) => {
-  const { id } = req.body;
+  const { userId } = req.body;
 
   try {
-    validateStringInput(id, "Id");
+    validateMongoIdInput(userId, "User id");
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
 
-  const otherUser = await User.findById(id);
+  const otherUser = await User.findById(userId);
   if (!otherUser) {
-    return res.status(404).json({ error: "Other user cannot be found." });
+    return res.status(404).json({ error: "Other user not found." });
   }
 
   const user = await User.findById(req.session.user.id);
   if (!user) {
-    return res.status(404).json({ error: "Current user cannot be found." });
+    return res.status(404).json({ error: "Current user not found." });
   }
 
   const savedPrivateMessage = await PrivateMessage.deleteOne({
@@ -321,22 +321,22 @@ export const removeFriend = async (req, res) => {
  * @access Private
  */
 export const acceptFriendRequest = async (req, res) => {
-  const { id } = req.body;
+  const { userId } = req.body;
 
   try {
-    validateStringInput(id, "Id");
+    validateMongoIdInput(userId, "User id");
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
 
-  const senderUser = await User.findById(id);
+  const senderUser = await User.findById(userId);
   if (!senderUser) {
-    return res.status(404).json({ error: "Sender user cannot be found." });
+    return res.status(404).json({ error: "Sender user not found." });
   }
 
   const user = await User.findById(req.session.user.id);
   if (!user) {
-    return res.status(404).json({ error: "Current user cannot be found." });
+    return res.status(404).json({ error: "Current user not found." });
   }
 
   if (
@@ -378,20 +378,20 @@ export const acceptFriendRequest = async (req, res) => {
  * @access Private
  */
 export const rejectFriendRequest = async (req, res) => {
-  const { id } = req.body;
+  const { userId } = req.body;
 
   try {
-    validateStringInput(id, "Id");
+    validateMongoIdInput(userId, "User id");
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
 
   const user = await User.findById(req.session.user.id);
   if (!user) {
-    return res.status(404).json({ error: "Current user cannot be found." });
+    return res.status(404).json({ error: "Current user not found." });
   }
 
-  user.friendRequests.splice(user.friendRequests.indexOf(id), 1);
+  user.friendRequests.splice(user.friendRequests.indexOf(userId), 1);
   const savedUser = await user.save();
   if (!savedUser) {
     return res.status(500).json({ error: "Unable to reject friend request." });

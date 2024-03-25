@@ -18,8 +18,14 @@ const serverSchema = new mongoose.Schema(
     users: {
       type: [
         {
-          id: String,
-          permissionLevel: Number
+          id: {
+            type: String,
+            required: true
+          },
+          permissionLevel: {
+            type: Number,
+            required: true
+          }
         }
       ],
       required: true,
