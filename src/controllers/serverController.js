@@ -58,11 +58,25 @@ export const renderServerPage = async (req, res) => {
     })
   );
 
-  return res.render("server/server", {
-    name: server.name,
-    description: server.description,
-    users: users
-  });
+  if (
+    req.session.user &&
+    req.session.user.id &&
+    req.session.user.id === server.creatorId
+  ) {
+    return res.render("server/server", {
+      name: server.name,
+      description: server.description,
+      users: users,
+      owner: true
+    });
+  } else {
+    return res.render("server/server", {
+      name: server.name,
+      description: server.description,
+      users: users,
+      owner: false
+    });
+  }
 };
 
 /**
@@ -95,7 +109,7 @@ export const createServer = async (req, res) => {
   }
 
   try {
-    validateUniqueServer(name);
+    await validateUniqueServer(name);
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
@@ -254,7 +268,10 @@ export const leaveServer = async (req, res) => {
     return res.status(400).json({ error: error.message });
   }
 
+  console.log(serverId, typeof serverId);
+
   const server = await Server.findById(serverId);
+  console.log(server);
   if (!server) {
     return res.status(404).json({ error: "Server not found." });
   }
@@ -307,4 +324,54 @@ export const leaveServer = async (req, res) => {
   }
 
   return res.status(200).json({ success: "Successfully left server." });
+};
+
+/**
+ * @description Kicks user from a server.
+ * @route POST /server/blacklist
+ * @access Private
+ */
+export const kickUser = async (req, res) => {
+  const { serverId, userId } = req.body;
+
+  try {
+    validateStringInput(serverId, "Server id");
+    validateStringInput(userId, "User id");
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  const server = await Server.findById(serverId);
+  if (!server) {
+    return res.status(404).json({ error: "Server not found." });
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.status(404).json({ error: "User not found." });
+  }
+
+  if (user.id === server.creatorId) {
+    return res
+      .status(400)
+      .json({ error: "You are the owner. Delete instead." });
+  }
+
+  user.servers.splice(user.servers.indexOf(server.id), 1);
+
+  const savedUser = await user.save();
+  if (!savedUser) {
+    return res.status(500).json({ error: "Unable to kick user." });
+  }
+
+  const index = server.users.map((userObj) => userObj.id).indexOf(user.id);
+  server.users.splice(index, 1);
+  server.blacklist.push(user.id);
+
+  const savedServer = await server.save();
+  if (!savedServer) {
+    return res.status(500).json({ error: "Unable to kick user." });
+  }
+
+  return res.status(200).json({ success: "Successfully kicked user." });
 };

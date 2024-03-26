@@ -4,6 +4,9 @@ const serverSearchbar = document.getElementById("serverSearchbar");
 const createServerButton = document.getElementById("createServerButton");
 const leaveServerButtons =
   document.getElementsByClassName("leaveServerButtons");
+const kickUserButtons = document.getElementsByClassName("kickUserButtons");
+const deleteServerButton = document.getElementById("deleteServerButton");
+const leaveServerButton = document.getElementById("leaveServerButton");
 
 // Helper Functions
 
@@ -131,7 +134,8 @@ async function createServer(e) {
 async function leaveServer(e, button) {
   e.preventDefault();
 
-  const serverId = button.form.id;
+  const url = window.location.pathname;
+  const serverId = url.substring(url.lastIndexOf("/") + 1);
 
   const response = await fetch("/server/leave", {
     method: "DELETE",
@@ -154,6 +158,61 @@ async function leaveServer(e, button) {
   }
 }
 
+async function kickUser(e, button) {
+  e.preventDefault();
+
+  const userId = button.form.id;
+  const url = window.location.pathname;
+  const serverId = url.substring(url.lastIndexOf("/") + 1);
+
+  const response = await fetch("/server/blacklist", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      userId,
+      serverId
+    })
+  });
+  const data = await response.json();
+  if (response.status === 200) {
+    window.alert(data.success);
+    button.form.remove();
+  } else if (response.status === 401) {
+    window.location.replace(data.error);
+  } else {
+    window.alert(data.error);
+  }
+}
+
+async function deleteServer(e) {
+  e.preventDefault();
+
+  const url = window.location.pathname;
+  const serverId = url.substring(url.lastIndexOf("/") + 1);
+
+  const response = await fetch("/server", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      serverId
+    })
+  });
+  const data = await response.json();
+
+  if (response.status === 200) {
+    window.alert(data.success);
+    window.location.replace("/");
+  } else if (response.status === 401) {
+    window.location.replace(data.error);
+  } else {
+    window.alert(data.error);
+  }
+}
+
 // Event Listeners
 
 if (serverSearchbar) {
@@ -167,5 +226,21 @@ if (createServerButton) {
 if (leaveServerButtons) {
   Array.from(leaveServerButtons).forEach((button) =>
     button.addEventListener("click", (e) => leaveServer(e, button))
+  );
+}
+
+if (kickUserButtons) {
+  Array.from(kickUserButtons).forEach((button) =>
+    button.addEventListener("click", (e) => kickUser(e, button))
+  );
+}
+
+if (deleteServerButton) {
+  deleteServerButton.addEventListener("click", (e) => deleteServer(e));
+}
+
+if (leaveServerButton) {
+  leaveServerButton.addEventListener("click", (e) =>
+    leaveServer(e, leaveServerButton)
   );
 }

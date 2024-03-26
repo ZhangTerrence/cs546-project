@@ -16,4 +16,6 @@ router
 router.route("/join").post(isAuthenticated(), serverController.joinServer);
 router.route("/leave").delete(isAuthenticated(), serverController.leaveServer);
 
+router.route("/blacklist").post(isAuthenticated(), serverController.kickUser);
+
 export default router;
