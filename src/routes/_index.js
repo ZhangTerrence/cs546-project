@@ -1,30 +1,21 @@
-import authRoutes from "./authRoutes.js";
-import userRoutes from "./userRoutes.js";
-import serverRoutes from "./serverRoutes.js";
-import channelRoutes from "./channelRoutes.js";
-import privateMessageRoutes from "./privateMessageRoutes.js";
-import messageRoutes from "./messageRoutes.js";
+import viewRoutes from "./view/_index.js";
+import apiRoutes from "./api/_index.js";
 
 const constructorMethod = (app) => {
-  app.use("/", authRoutes);
-  app.use("/user", userRoutes);
-  app.use("/server", serverRoutes);
-  app.use("/server/:serverId/channel", channelRoutes);
-  app.use("/privateMessage", privateMessageRoutes);
-  app.use("/message", messageRoutes);
-
-  app.route("/").get(async (_req, res) => {
-    return res.render("landing");
-  });
+  app.use("/", viewRoutes);
+  app.use("/api", apiRoutes);
 
   app.route("/teapot").get(async (_req, res) => {
-    return res.status(418).json("I'm a teapot.");
+    return res.status(418).render("error/400", {
+      statusCode: 418,
+      message: "Teapot."
+    });
   });
 
   app.use("*", (_req, res) => {
-    return res.render("error/400", {
+    return res.status(404).render("error/400", {
       statusCode: 404,
-      error: "Route not found."
+      message: "Route not found."
     });
   });
 };

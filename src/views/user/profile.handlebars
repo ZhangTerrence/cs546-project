@@ -1,5 +1,6 @@
 <h1>{{username}}</h1>
 <p>{{bio}}</p>
+
 {{#if owner}}
   <p id="darkMode" hidden="true">{{darkMode}}</p>
 
@@ -77,11 +78,12 @@
     <button id="createFriendRequestButton">Send Friend Request</button>
   </form>
 
-  <form action="/logout" method="post">
+  <form action="/api/user/logout" method="post">
     <button type="submit">Logout</button>
   </form>
 
   <button id="deleteUserButton">Delete User</button>
 {{/if}}
+
 <script src="/public/js/user.js"></script>
 <script src="/public/js/server.js"></script>

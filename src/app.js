@@ -1,9 +1,9 @@
 import express from "express";
-import path from "path";
-import database from "./config/database.js";
 import session from "express-session";
+import path from "path";
 import logger from "./middleware/logger.js";
 import configRoutes from "./routes/_index.js";
+import database from "./config/database.js";
 import env from "./config/env.js";
 import { fileURLToPath } from "url";
 import { engine } from "express-handlebars";
@@ -43,7 +43,7 @@ configRoutes(app);
 
 if (env.NODE_ENV == "dev") {
   app.listen(env.PORT, () => {
-    console.log(`Server listening on port ${env.PORT}.`);
+    console.log(`Server listening on http://localhost:${env.PORT}.`);
   });
 }
 

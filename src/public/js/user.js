@@ -65,148 +65,160 @@ async function updateUser(e) {
   const bio = document.getElementById("bio").value;
   const darkMode = document.getElementById("darkRadio").checked;
 
-  const response = await fetch("/user", {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      bio,
-      darkMode
-    })
-  });
-  const data = await response.json();
+  try {
+    const response = await fetch("/api/user", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        bio: bio,
+        darkMode: darkMode
+      })
+    });
 
-  if (response.status === 200) {
-    window.alert(data.success);
-  } else if (response.status === 401) {
-    window.location.replace(data.error);
-  } else {
-    window.alert(data.error);
+    if (response.ok) {
+      window.alert("Successfully updated user.");
+    } else {
+      const json = await response.json();
+      console.log(json.error);
+    }
+  } catch (error) {
+    console.log(error);
   }
 }
 
 async function createFriendRequest(e) {
   e.preventDefault();
 
-  const formData = new FormData(createFriendRequestButton.form);
-  const formObject = Object.fromEntries(formData);
+  const body = Object.fromEntries(new FormData(createFriendRequestButton.form));
 
-  const response = await fetch("/user/friend", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(formObject)
-  });
-  const data = await response.json();
+  try {
+    const response = await fetch("/api/user/friend/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
 
-  if (response.status === 200) {
-    window.alert(data.success);
-  } else if (response.status === 401) {
-    window.location.replace(data.error);
-  } else {
-    window.alert(data.error);
+    if (response.ok) {
+      window.alert("Successfully sent friend request.");
+    } else {
+      const data = await response.json();
+      console.log(data.error);
+    }
+  } catch (error) {
+    console.log(error);
   }
 }
 
 async function removeFriend(e, button) {
   e.preventDefault();
 
-  const userId = button.form.id;
+  const friendId = button.form.id;
 
-  const response = await fetch("/user/friend", {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      userId
-    })
-  });
-  const data = await response.json();
+  try {
+    const response = await fetch("/api/user/friend/remove", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        friendId: friendId
+      })
+    });
 
-  if (response.status === 200) {
-    window.alert(data.success);
-    button.form.remove();
-  } else if (response.status === 401) {
-    window.location.replace(data.error);
-  } else {
-    window.alert(data.error);
+    if (response.ok) {
+      window.alert("Successfully removed friend.");
+      button.form.remove();
+    } else {
+      const json = await response.json();
+      console.log(json.error);
+    }
+  } catch (error) {
+    console.log(error);
   }
 }
 
 async function acceptFriendRequest(e, button) {
   e.preventDefault();
 
-  const userId = button.form.id;
+  const requesterId = button.form.id;
 
-  const response = await fetch("/user/friendRequest/accept", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      userId
-    })
-  });
-  const data = await response.json();
+  try {
+    const response = await fetch("/api/user/friend/accept", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        requesterId: requesterId
+      })
+    });
+    const json = await response.json();
 
-  if (response.status === 200) {
-    window.alert(data.success);
+    if (response.ok) {
+      window.alert("Successfully accepted friend request.");
 
-    button.form.remove();
-
-    document
-      .getElementById("friendsList")
-      .appendChild(createFriendsListElement(data.data.id, data.data.username));
-  } else if (response.status === 401) {
-    window.location.replace(data.error);
-  } else {
-    window.alert(data.error);
+      button.form.remove();
+      document
+        .getElementById("friendsList")
+        .appendChild(
+          createFriendsListElement(json.data.id, json.data.username)
+        );
+    } else {
+      console.log(json.error);
+    }
+  } catch (error) {
+    console.log(error);
   }
 }
 
 async function rejectFriendRequest(e, button) {
   e.preventDefault();
 
-  const userId = button.form.id;
+  const requesterId = button.form.id;
 
-  const response = await fetch("/user/friendRequest/reject", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      userId
-    })
-  });
-  const data = await response.json();
+  try {
+    const response = await fetch("/user/friendRequest/reject", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        requesterId: requesterId
+      })
+    });
 
-  if (response.status === 200) {
-    window.alert(data.success);
-    button.form.remove();
-  } else if (response.status === 401) {
-    window.location.replace(data.error);
-  } else {
-    window.alert(data.error);
+    if (response.ok) {
+      window.alert("Successfully rejected friend request.");
+      button.form.remove();
+    } else {
+      const json = await response.json();
+      console.log(json.error);
+    }
+  } catch (error) {
+    console.log(error);
   }
 }
 
 async function deleteUser(e) {
   e.preventDefault();
 
-  const response = await fetch("/user", {
-    method: "DELETE"
-  });
-  const data = await response.json();
+  try {
+    const response = await fetch("/api/user", {
+      method: "DELETE"
+    });
 
-  if (response.status === 200) {
-    window.location.replace("/");
-  } else if (response.status === 401) {
-    window.location.replace(data.error);
-  } else {
-    window.alert(data.error);
+    if (response.ok) {
+      window.location.replace("/");
+    } else {
+      const json = await response.json();
+      console.log(json.error);
+    }
+  } catch (error) {
+    console.log(error);
   }
 }
 

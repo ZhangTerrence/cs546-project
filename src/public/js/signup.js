@@ -3,21 +3,24 @@ const signupButton = document.getElementById("signupButton");
 signupButton.addEventListener("click", async (e) => {
   e.preventDefault();
 
-  const formData = new FormData(signupButton.form);
-  const formObject = Object.fromEntries(formData);
+  const body = Object.fromEntries(new FormData(signupButton.form));
 
-  const response = await fetch("/signup", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(formObject)
-  });
-  const data = await response.json();
+  try {
+    const response = await fetch("/api/user/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+    const json = await response.json();
 
-  if (response.status === 201) {
-    window.location.replace(data.success);
-  } else {
-    window.alert(data.error);
+    if (response.ok) {
+      window.location.replace(json.data.url);
+    } else {
+      console.log(json.error);
+    }
+  } catch (error) {
+    console.log(error);
   }
 });

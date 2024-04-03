@@ -1,93 +1,144 @@
-import emailValidator from "email-validator";
+import { BadRequestError } from "./errors.js";
 import mongoose from "mongoose";
-import User from "../models/userModel.js";
-import Server from "../models/serverModel.js";
+import emailValidator from "email-validator";
+class BaseValidator {
+  static validateString = (_variable, _variableName) => {
+    if (!_variable) {
+      throw new BadRequestError(400, _variableName, "Missing field.");
+    }
 
-const MIN_USERNAME_LENGTH = 3;
-const MAX_USERNAME_LENGTH = 20;
-const MIN_PASSWORD_LENGTH = 3;
+    if (typeof _variable !== "string") {
+      throw new BadRequestError(400, _variableName, "Expected type string.");
+    }
 
-export const validateStringInput = (input, inputName) => {
-  if (!input) throw new Error(`${inputName} field is required.`);
+    const variable = _variable.trim();
+    if (variable.length === 0) {
+      throw new BadRequestError(
+        400,
+        _variableName,
+        "Expected nonempty string."
+      );
+    }
 
-  if (typeof input !== "string")
-    throw new Error(`${inputName} field must be a string.`);
+    return variable;
+  };
 
-  if (input.trim().length === 0)
-    throw new Error(`${inputName} field is empty.`);
-};
+  static validateMongooseId = (_id, _idName) => {
+    const id = this.validateString(_id, _idName);
 
-export const validateMongoIdInput = (id, inputName) => {
-  validateStringInput(id, inputName);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestError(400, _idName, "Expected valid ObjectId.");
+    }
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw new Error(`${inputName} is not a valid ObjectId.`);
-  }
-};
+    return id;
+  };
+}
 
-export const validateLoginInput = (username, password) => {
-  validateStringInput(username, "Username");
-  validateStringInput(password, "Password");
-};
+export class UserValidator extends BaseValidator {
+  static minUsernameLength = 3;
+  static maxUsernameLength = 20;
+  static minPasswordLength = 3;
+  static maxPasswordLength = 20;
 
-export const validateSignupInput = (email, username, password) => {
-  validateLoginInput(username, password);
+  static validateSignupInfo = (_email, _username, _password) => {
+    const email = this.validateString(_email, "email");
+    const username = this.validateString(_username, "username");
+    const password = this.validateString(_password, "password");
 
-  if (!email) throw new Error("Email field is required.");
+    if (!emailValidator.validate(email)) {
+      throw new BadRequestError(400, "email", "Expected valid email.");
+    }
 
-  if (typeof email !== "string")
-    throw new Error("Email field must be a string.");
+    if (
+      username.length < this.minUsernameLength ||
+      username.length > this.maxUsernameLength
+    ) {
+      throw new BadRequestError(
+        400,
+        "username",
+        `Expected between ${this.minUsernameLength} and ${this.maxUsernameLength} characters without whitespace.`
+      );
+    }
+    if (_username.match("^[a-z0-9]+$/i")) {
+      throw new BadRequestError(
+        400,
+        "username",
+        "Expected only alphanumeric characters."
+      );
+    }
 
-  const trimmedEmail = email.trim();
-  if (!emailValidator.validate(trimmedEmail))
-    throw new Error("Invalid email format.");
+    if (
+      password.length < this.minPasswordLength ||
+      password.length > this.maxPasswordLength
+    ) {
+      throw new BadRequestError(
+        400,
+        "password",
+        `Expected between ${this.minUsernameLength} and ${this.maxUsernameLength} characters without whitespace.`
+      );
+    }
+    if (password.match("^[a-z0-9]+$/i")) {
+      throw new BadRequestError(
+        400,
+        "password",
+        "Expected only alphanumeric characters."
+      );
+    }
 
-  const trimmedUsername = username.trim();
-  if (trimmedUsername.length < MIN_USERNAME_LENGTH)
-    throw new Error(
-      `Username must have a minimum length of ${MIN_USERNAME_LENGTH} characters.`
-    );
-  if (trimmedUsername.length > MAX_USERNAME_LENGTH)
-    throw new Error(
-      `Username must have a maximum length of ${MAX_USERNAME_LENGTH} characters.`
-    );
-  if (new RegExp("^[a-z0-9]+$/i").test(trimmedUsername))
-    throw new Error("Username must contain only alphanumeric characters.");
+    return {
+      email: email,
+      username: username,
+      password: password
+    };
+  };
 
-  const trimmedPassword = password.trim();
-  if (trimmedPassword.length < MIN_PASSWORD_LENGTH)
-    throw new Error(
-      `Password must have a minimum length of ${MIN_PASSWORD_LENGTH} characters.`
-    );
-  if (new RegExp("^[a-z0-9.-_@!]+$/i").test(trimmedPassword))
-    throw new Error(
-      "Password must contain only alphanumeric characters as well as ., -, _, @, and !"
-    );
-};
+  static validateLoginCredentials = (_username, _password) => {
+    const username = this.validateString(_username, "username");
+    const password = this.validateString(_password, "password");
 
-export const validateUpdateUserInput = (_bio, darkMode) => {
-  if (darkMode && typeof darkMode !== "boolean") {
-    throw new Error("darkMode field must be a boolean.");
-  }
-};
+    return {
+      username: username,
+      password: password
+    };
+  };
 
-export const validateServerCreationInput = (name) => {
-  validateStringInput(name, "Name");
-};
+  static validateUpdateInfo = (_darkMode) => {
+    if (typeof _darkMode !== "boolean") {
+      throw new BadRequestError(400, "bio", "Expected type boolean.");
+    }
 
-export const validateFriendRequestUsernameInput = (username) => {
-  validateStringInput(username, "Username");
-};
+    return {
+      darkMode: _darkMode
+    };
 
-export const validateUniqueUser = async (email, username) => {
-  const emailExists = await User.findOne({ email });
-  if (emailExists) throw new Error("Email is already taken.");
+    // Object.entries(args).forEach((entry) => {
+    //   const [key, value] = entry;
 
-  const usernameExists = await User.findOne({ username });
-  if (usernameExists) throw new Error("Username is already taken.");
-};
+    //   if (key === "darkMode") {
+    //     if (typeof value !== "boolean") {
+    //       throw new BadRequestError(400, key, "Expected type boolean.");
+    //     }
+    //   } else {
+    //     this.validateString({ variable: value, variableName: key });
+    //   }
+    // });
+  };
 
-export const validateUniqueServer = async (name) => {
-  const serverExists = await Server.findOne({ name });
-  if (serverExists) throw new Error("Name is already taken.");
-};
+  static validateCreateFriendRequestInfo = (_username) => {
+    const username = this.validateString(_username, "username");
+
+    return {
+      username: username
+    };
+  };
+}
+
+export class ServerValidator extends BaseValidator {
+  static validateCreationInfo = (_name) => {
+    const name = this.validateString(_name, "name");
+
+    return {
+      name: name
+    };
+  };
+}
