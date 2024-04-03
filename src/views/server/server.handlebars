@@ -24,6 +24,8 @@
 {{#if owner}}
   <button id="deleteServerButton">Delete Server</button>
 {{else}}
-  <button id="leaveServerButton">Leave Server</button>
+  {{#if member}}
+    <button id="leaveServerButton">Leave Server</button>
+  {{/if}}
 {{/if}}
 <script src="/public/js/server.js"></script>

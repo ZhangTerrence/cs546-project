@@ -9,7 +9,7 @@ const messageSchema = new mongoose.Schema(
     channelId: {
       type: String
     },
-    pmId: {
+    privateMessageId: {
       type: String
     },
     message: {
