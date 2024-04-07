@@ -7,5 +7,6 @@
   "trailingComma": "none",
   "bracketSpacing": true,
   "bracketSameLine": true,
-  "arrowParens": "always"
+  "arrowParens": "always",
+  "overrides": [{ "files": "main.handlebars", "options": { "parser": "html" } }]
 }
