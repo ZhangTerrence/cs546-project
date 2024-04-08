@@ -9,7 +9,7 @@ import bcryptjs from "bcryptjs";
 import env from "../config/env.js";
 
 export default class UserService {
-  static saltLength = 10;
+  static saltRounds = 16;
 
   /**
    * @description Gets an user by their id.
@@ -82,12 +82,16 @@ export default class UserService {
    * @throws InternalServerError If it fails to create the user.
    */
   static createUser = async (email, username, password) => {
-    const emailExists = await UserRepository.findOne({ email: email });
+    const emailExists = await UserRepository.findOne({
+      email: { $regex: email, $options: "i" }
+    });
     if (emailExists) {
       throw new BadRequestError(400, `email: ${email}`, "Email is taken.");
     }
 
-    const usernameExists = await UserRepository.findOne({ username });
+    const usernameExists = await UserRepository.findOne({
+      username: { $regex: username, $options: "i" }
+    });
     if (usernameExists) {
       throw new BadRequestError(
         400,
@@ -123,8 +127,17 @@ export default class UserService {
    * @returns User.
    * @throws AuthenticationError If credentials are incorrect.
    */
-  static authUser = async (username, password) => {
-    const user = await this.getUserByUsername(username);
+  static authenticateUser = async (username, password) => {
+    const user = await UserRepository.findOne({
+      username: { $regex: username, $options: "i" }
+    });
+    if (!user) {
+      throw new BadRequestError(
+        404,
+        `username: ${username}`,
+        "User not found."
+      );
+    }
 
     const authenticated = await this.comparePassword(
       password,
@@ -451,7 +464,7 @@ export default class UserService {
   };
 
   static hashPassword = async (password) => {
-    return await bcryptjs.hash(password, this.saltLength);
+    return await bcryptjs.hash(password, this.saltRounds);
   };
 
   static comparePassword = async (password, hashedPassword) => {

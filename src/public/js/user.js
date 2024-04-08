@@ -80,6 +80,10 @@ async function updateUser(e) {
     if (response.ok) {
       window.alert("Successfully updated user.");
     } else {
+      if (response.statusText === "Unauthorized") {
+        window.location.replace("/login");
+        return;
+      }
       const json = await response.json();
       console.log(json.error);
     }
@@ -105,6 +109,10 @@ async function createFriendRequest(e) {
     if (response.ok) {
       window.alert("Successfully sent friend request.");
     } else {
+      if (response.statusText === "Unauthorized") {
+        window.location.replace("/login");
+        return;
+      }
       const data = await response.json();
       console.log(data.error);
     }
@@ -133,6 +141,10 @@ async function removeFriend(e, button) {
       window.alert("Successfully removed friend.");
       button.form.remove();
     } else {
+      if (response.statusText === "Unauthorized") {
+        window.location.replace("/login");
+        return;
+      }
       const json = await response.json();
       console.log(json.error);
     }
@@ -168,6 +180,10 @@ async function acceptFriendRequest(e, button) {
           createFriendsListElement(json.data.id, json.data.username)
         );
     } else {
+      if (response.statusText === "Unauthorized") {
+        window.location.replace("/login");
+        return;
+      }
       console.log(json.error);
     }
   } catch (error) {
@@ -195,6 +211,10 @@ async function rejectFriendRequest(e, button) {
       window.alert("Successfully rejected friend request.");
       button.form.remove();
     } else {
+      if (response.statusText === "Unauthorized") {
+        window.location.replace("/login");
+        return;
+      }
       const json = await response.json();
       console.log(json.error);
     }
@@ -214,6 +234,10 @@ async function deleteUser(e) {
     if (response.ok) {
       window.location.replace("/");
     } else {
+      if (response.statusText === "Unauthorized") {
+        window.location.replace("/login");
+        return;
+      }
       const json = await response.json();
       console.log(json.error);
     }

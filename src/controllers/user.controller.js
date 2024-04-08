@@ -148,14 +148,14 @@ export default class UserController {
    * @route POST /api/user/login
    * @access Public
    */
-  static authUser = async (req, res) => {
+  static authenticateUser = async (req, res) => {
     try {
       const { username, password } = UserValidator.validateLoginCredentials(
         req.body.username,
         req.body.password
       );
 
-      const user = await UserService.authUser(username, password);
+      const user = await UserService.authenticateUser(username, password);
 
       req.session.user = {
         id: user.id,

@@ -81,6 +81,10 @@ async function joinServer(e, serverId, serverName) {
         .getElementById("serversList")
         .appendChild(createServerListElement(serverId, serverName));
     } else {
+      if (response.statusText === "Unauthorized") {
+        window.location.replace("/login");
+        return;
+      }
       const json = await response.json();
       console.log(json.error);
     }
@@ -128,6 +132,10 @@ async function createServer(e) {
     if (response.ok) {
       window.location.replace(json.data.url);
     } else {
+      if (response.statusText === "Unauthorized") {
+        window.location.replace("/login");
+        return;
+      }
       console.log(json.error);
     }
   } catch (error) {
@@ -166,6 +174,10 @@ async function leaveServer(e, button) {
         button.form.remove();
       }
     } else {
+      if (response.statusText === "Unauthorized") {
+        window.location.replace("/login");
+        return;
+      }
       const json = await response.json();
       console.log(json.error);
     }
@@ -197,6 +209,10 @@ async function kickUser(e, button) {
       window.alert("Successfully kicked user.");
       button.form.remove();
     } else {
+      if (response.statusText === "Unauthorized") {
+        window.location.replace("/login");
+        return;
+      }
       const json = await response.json();
       console.log(json.error);
     }
@@ -226,6 +242,10 @@ async function deleteServer(e) {
       window.alert("Successfully deleted server.");
       window.location.replace("/");
     } else {
+      if (response.statusText === "Unauthorized") {
+        window.location.replace("/login");
+        return;
+      }
       const json = await response.json();
       console.log(json.error);
     }

@@ -1,11 +1,11 @@
 import UserController from "../../controllers/user.controller.js";
-import isAuthenticated from "../../middleware/auth.js";
+import isAuthenticated from "../../middleware/authentication.js";
 import express from "express";
 
 const router = express.Router({ mergeParams: true });
 
 router.route("/signup").post(UserController.createUser);
-router.route("/login").post(UserController.authUser);
+router.route("/login").post(UserController.authenticateUser);
 router.route("/logout").post(UserController.logoutUser);
 
 router
