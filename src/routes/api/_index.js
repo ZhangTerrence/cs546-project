@@ -10,7 +10,7 @@ const router = express.Router({ mergeParams: true });
 router.use("/user", userRoutes);
 router.use("/server", serverRoutes);
 router.use("/privateMessage", privateMessageRoutes);
-router.use("/server/:serverId/channel", channelRoutes);
+router.use("/channel", channelRoutes);
 router.use("/message", messageRoutes);
 
 export default router;

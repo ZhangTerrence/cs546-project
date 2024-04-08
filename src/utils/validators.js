@@ -142,3 +142,5 @@ export class ServerValidator extends BaseValidator {
     };
   };
 }
+
+export class ChannelValidator extends BaseValidator {}

@@ -30,6 +30,17 @@ export default class ServerController {
         })
       );
 
+      const channels = await Promise.all(
+        server.channels.map(async (channelId) => {
+          const channel = await ChannelService.getChannelById(channelId);
+
+          return {
+            id: channel.id,
+            name: channel.name
+          };
+        })
+      );
+
       if (req.session.user && req.session.user.id) {
         const userId = req.session.user.id;
 
@@ -38,6 +49,7 @@ export default class ServerController {
             name: server.name,
             description: server.description,
             users: users,
+            channels: channels,
             owner: true,
             member: true
           });
@@ -46,6 +58,7 @@ export default class ServerController {
             name: server.name,
             description: server.description,
             users: users,
+            channels: channels,
             owner: false,
             member: true
           });

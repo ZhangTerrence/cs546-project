@@ -1,7 +1,26 @@
 import ChannelRepository from "../models/channel.js";
-import { InternalServerError } from "../utils/errors.js";
+import { InternalServerError, NotFoundError } from "../utils/errors.js";
 
 export default class ChannelService {
+  /**
+   * @description Gets a channel by its id.
+   * @param {string} userId The given channel id.
+   * @returns Channel.
+   * @throws NotFoundError If the channel is not found.
+   */
+  static getChannelById = async (channelId) => {
+    const channel = await ChannelRepository.findById(channelId);
+    if (!channel) {
+      throw new NotFoundError(
+        404,
+        `channelId: ${channelId}`,
+        "Channel not found."
+      );
+    }
+
+    return channel;
+  };
+
   /**
    * @description Creates the general channel for a server.
    * @param {string} serverId The given server id.

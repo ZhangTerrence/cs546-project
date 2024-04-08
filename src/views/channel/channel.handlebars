@@ -1,0 +1,16 @@
+<h1>{{name}}</h1>
+<p>{{description}}</p>
+<ul>
+    {{#each messages}}
+        <li id="{{id}}">
+            <a href="/user/{{userId}}">{{username}}</a>
+            <p>{{message}}</p>
+        </li>
+    {{/each}}
+</ul>
+{{#if canSend}}
+<form action="/message" method="post">
+    <input type="text" name="message">
+    <button type="submit">Send</button>
+</form>
+{{/if}}

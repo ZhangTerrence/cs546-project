@@ -1,5 +1,6 @@
 import UserController from "../../controllers/user.controller.js";
 import ServerController from "../../controllers/server.controller.js";
+import ChannelController from "../../controllers/channel.controller.js";
 import express from "express";
 
 const router = express.Router({ mergeParams: true });
@@ -24,5 +25,8 @@ router.route("/user/:userId").get(UserController.renderUserProfilePage);
 
 // Server Page
 router.route("/server/:serverId").get(ServerController.renderServerPage);
+
+// Channel Page
+router.route("/channel/:channelId").get(ChannelController.renderChannelPage);
 
 export default router;

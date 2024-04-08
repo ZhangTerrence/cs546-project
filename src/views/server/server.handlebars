@@ -1,29 +1,55 @@
 <h1>{{name}}</h1>
 <p>{{description}}</p>
-<h2>Users</h2>
-<ul>
-  {{#if owner}}
-    {{#each users}}
-      <li>
-        <form id="{{id}}">
-          <a href="/user/{{id}}">{{username}}</a>
-          <button class="kickUserButtons">Kick</button>
-        </form>
-      </li>
-    {{/each}}
-  {{else}}
-    {{#each users}}
-      <li>
-        <form id="{{id}}">
-          <a href="/user/{{id}}">{{username}}</a>
-        </form>
-      </li>
-    {{/each}}
-  {{/if}}
-</ul>
 {{#if owner}}
+  <h2>Users</h2>
+  <ul>
+  {{#each users}}
+    <li>
+      <form id="{{id}}">
+        <a href="/user/{{id}}">{{username}}</a>
+        <button class="kickUserButtons">Kick</button>
+      </form>
+    </li>
+  {{/each}}
+  </ul>
+
+  <h2>Channels</h2>
+  <ul>
+  {{#each channels}}
+    <li>
+      <form id="{{id}}">
+        <a href="/channel/{{id}}">{{name}}</a>
+        <button class="deleteChannelButtons">Delete</button>
+      </form>
+    </li>
+  {{/each}}
+  </ul>
+
   <button id="deleteServerButton">Delete Server</button>
 {{else}}
+  <h2>Users</h2>
+  <ul>
+  {{#each users}}
+    <li>
+      <form id="{{id}}">
+        <a href="/user/{{id}}">{{username}}</a>
+      </form>
+    </li>
+  {{/each}}
+  </ul>
+
+  <h2>Channels</h2>
+  <ul>
+  {{#each channels}}
+    <li>
+      <form id="{{id}}">
+        <a href="/channel/{{id}}">{{name}}</a>
+      </form>
+    </li>
+  {{/each}}
+  </ul>
+
+
   {{#if member}}
     <button id="leaveServerButton">Leave Server</button>
   {{/if}}
