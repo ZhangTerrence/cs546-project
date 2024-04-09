@@ -299,10 +299,10 @@ export default class UserService {
 
     const friendRequestIndex = user.friendRequests.indexOf(requester.id);
     if (friendRequestIndex === -1) {
-      throw new BadRequestError(
-        400,
+      throw new NotFoundError(
+        404,
         `requester: ${[user.friendRequests, requester.id]}`,
-        "No friend request found."
+        "Friend request not found."
       );
     }
 
@@ -340,10 +340,10 @@ export default class UserService {
   static rejectFriendRequest = async (user, requesterId) => {
     const friendRequestIndex = user.friendRequests.indexOf(requesterId);
     if (friendRequestIndex === -1) {
-      throw new BadRequestError(
-        400,
+      throw new NotFoundError(
+        404,
         `requester: ${[user.friendRequests, requesterId]}`,
-        "No friend request found."
+        "Friend request not found."
       );
     }
 
@@ -445,8 +445,8 @@ export default class UserService {
 
     const serverIndex = user.servers.indexOf(server.id);
     if (serverIndex === -1) {
-      throw new BadRequestError(
-        400,
+      throw new NotFoundError(
+        404,
         `server: ${[user.servers, server.id]}`,
         "Server not found."
       );

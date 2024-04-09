@@ -94,12 +94,19 @@ export default class ServerService {
    * @description Creates a server.
    * @param {string} serverId The given server id.
    * @param {string} name The given server name.
+   * @param {string} description The given server description.
    * @param {string} creatorId The given creator id.
    * @param {string} generalChannelId The given general channel id.
    * @throws BadRequestError If the name is taken.
    * @throws InternalServerError If it fails to create the server.
    */
-  static createServer = async (serverId, name, creatorId, generalChannelId) => {
+  static createServer = async (
+    serverId,
+    name,
+    description,
+    creatorId,
+    generalChannelId
+  ) => {
     const serverExists = await ServerRepository.findOne({
       name: { $regex: name, $options: "i" }
     });
@@ -110,6 +117,7 @@ export default class ServerService {
     const newServer = await ServerRepository.create({
       _id: serverId,
       name: name,
+      description: description,
       creatorId: creatorId,
       users: [
         {
@@ -217,12 +225,20 @@ export default class ServerService {
   /**
    * @description Removes an user from a server.
    * @param {ServerDocument} server The server which the user will leave.
-   * @param {UserDocument} user The user who will leave the server.
+   * @param {string} userId The id of the user who will leave the server.
    * @throws InternalServerError If it fails to update the server.
    */
   static removeUser = async (server, userId) => {
-    const index = server.users.map((server) => server.id).indexOf(userId);
-    server.users.splice(index, 1);
+    const userIndex = server.users.map((server) => server.id).indexOf(userId);
+    if (userIndex === -1) {
+      throw new NotFoundError(
+        404,
+        `user:${[server.users, userId]}`,
+        "User not found."
+      );
+    }
+
+    server.users.splice(userIndex, 1);
 
     const removedUser = await server.save();
     if (!removedUser) {
@@ -237,7 +253,7 @@ export default class ServerService {
   /**
    * @description Blacklists an user from a server.
    * @param {ServerDocument} server The server which the user will be blacklisted from.
-   * @param {UserDocument} user The user who will be blacklisted.
+   * @param {string} userId The id of the user who will be blacklisted.
    * @throws BadRequestError If the user is the creator.
    * @throws InternalServerError If it fails to update the server.
    */
@@ -260,6 +276,63 @@ export default class ServerService {
         500,
         `save(): ${[server.blacklist, userId]}`,
         "Unable to blacklist user from server."
+      );
+    }
+  };
+
+  /**
+   * @description Adds a channel to a server.
+   * @param {ServerDocument} server The server which the channel will be added to.
+   * @param {string} channelId The id of the channel which will be added.
+   * @throws BadRequestError If the channel already exists in the server.
+   * @throws InternalServerError If it fails to update the server.
+   */
+  static addChannel = async (server, channelId) => {
+    if (server.channels.includes(channelId)) {
+      throw new BadRequestError(
+        400,
+        `server: ${[server.channels, channelId]}`,
+        "Channel already exists in server."
+      );
+    }
+
+    server.channels.push(channelId);
+
+    const addedChannel = await server.save();
+    if (!addedChannel) {
+      throw new InternalServerError(
+        500,
+        `save(): ${[server.channels, channelId]}`,
+        "Unable to add channel to server."
+      );
+    }
+  };
+
+  /**
+   * @description Deletes a channel from a server.
+   * @param {ServerDocument} server The server which the channel will be deleted from.
+   * @param {string} channelId The id of the channel which will be deleted.
+   * @throws NotFoundError If the channel is not found.
+   * @throws InternalServerError If it fails to update the server.
+   */
+  static deleteChannel = async (server, channelId) => {
+    const channelIndex = server.channels.indexOf(channelId);
+    if (channelIndex === -1) {
+      throw new NotFoundError(
+        404,
+        `channel: ${[server.channels, channelId]}`,
+        "Channel not found."
+      );
+    }
+
+    server.channels.splice(channelIndex, 1);
+
+    const removedChannel = await server.save();
+    if (!removedChannel) {
+      throw new InternalServerError(
+        500,
+        `save(): ${[server.channels, channelId]}`,
+        "Unable to delete channel from server."
       );
     }
   };

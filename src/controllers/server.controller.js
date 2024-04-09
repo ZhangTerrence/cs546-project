@@ -126,7 +126,10 @@ export default class ServerController {
    */
   static createServer = async (req, res) => {
     try {
-      const { name } = ServerValidator.validateCreationInfo(req.body.name);
+      const { name, description } = ServerValidator.validateCreationInfo(
+        req.body.name,
+        req.body.description
+      );
       const userId = req.session.user.id;
 
       const user = await UserService.getUserById(userId);
@@ -141,6 +144,7 @@ export default class ServerController {
       await ServerService.createServer(
         newServerId,
         name,
+        description,
         userId,
         newGeneralChannel.id
       );
@@ -175,14 +179,14 @@ export default class ServerController {
 
       const server = await ServerService.getServerById(serverId);
 
-      await ChannelService.deleteServerChannels(server.id);
-
       const joinedUsers = await UserService.getJoinedUsers(server.id);
       joinedUsers.forEach(async (user) => {
         await UserService.removeServer(user, server);
       });
 
       await ServerService.deleteServer(server.id);
+
+      await ChannelService.deleteServerChannels(server.id);
 
       return res.status(204).json();
     } catch (error) {
@@ -242,20 +246,9 @@ export default class ServerController {
       const server = await ServerService.getServerById(serverId);
       const user = await UserService.getUserById(userId);
 
-      if (user.id === server.creatorId) {
-        await ChannelService.deleteServerChannels(server.id);
+      await UserService.removeServer(user, server);
 
-        const joinedUsers = await UserService.getJoinedUsers(server.id);
-        joinedUsers.forEach(async (user) => {
-          await UserService.removeServer(user, server);
-        });
-
-        await ServerService.deleteServer(server.id);
-      } else {
-        await UserService.removeServer(user, server);
-
-        await ServerService.removeUser(server, user.id);
-      }
+      await ServerService.removeUser(server, user.id);
 
       return res.status(204).json();
     } catch (error) {

@@ -1,9 +1,9 @@
+import UserService from "../services/user.service.js";
 import ChannelService from "../services/channel.service.js";
 import ServerService from "../services/server.service.js";
 import MessageService from "../services/message.service.js";
 import { BaseError, InternalServerError } from "../utils/errors.js";
-import { ChannelValidator } from "../utils/validators.js";
-import UserService from "../services/user.service.js";
+import { ChannelValidator, ServerValidator } from "../utils/validators.js";
 
 export default class ChannelController {
   /**
@@ -17,7 +17,6 @@ export default class ChannelController {
         req.params.channelId,
         "channelId"
       );
-      console.log(channelId);
 
       const channel = await ChannelService.getChannelById(channelId);
 
@@ -77,6 +76,83 @@ export default class ChannelController {
           statusCode: 500,
           message: "Code went boom."
         });
+      }
+    }
+  };
+
+  /**
+   * @description Creates a channel.
+   * @route POST /api/channel
+   * @access Private
+   */
+  static createChannel = async (req, res) => {
+    try {
+      const { name, description, permissionLevel } =
+        ChannelValidator.validateCreationInfo(
+          req.body.name,
+          req.body.description,
+          req.body.permissionLevel
+        );
+      const serverId = ServerValidator.validateMongooseId(
+        req.body.serverId,
+        "serverId"
+      );
+
+      const server = await ServerService.getServerById(serverId);
+
+      const newChannel = await ChannelService.createChannel(
+        name,
+        description,
+        server.id,
+        permissionLevel
+      );
+
+      await ServerService.addChannel(server, newChannel.id);
+
+      return res.status(200).json({
+        data: {
+          url: `/channel/${newChannel.id}`
+        }
+      });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} - ${error.originName}`);
+        return res.status(error.statusCode).json({ error: error.message });
+      } else {
+        console.log(error);
+        return res.status(500).json({ error: "Code went boom." });
+      }
+    }
+  };
+
+  /**
+   * @description Deletes a channel.
+   * @route DELETE /api/channel
+   * @access Private
+   */
+  static deleteChannel = async (req, res) => {
+    try {
+      const channelId = ChannelValidator.validateMongooseId(
+        req.body.channelId,
+        "channelId"
+      );
+
+      const channel = await ChannelService.getChannelById(channelId);
+
+      const server = await ServerService.getServerById(channel.serverId);
+
+      await ServerService.deleteChannel(server, channel.id);
+
+      await ChannelService.deleteChannel(channel.id);
+
+      return res.status(204).json();
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} - ${error.originName}`);
+        return res.status(error.statusCode).json({ error: error.message });
+      } else {
+        console.log(error);
+        return res.status(500).json({ error: "Code went boom." });
       }
     }
   };

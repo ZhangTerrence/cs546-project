@@ -3,52 +3,65 @@
 {{#if owner}}
   <h2>Users</h2>
   <ul>
-  {{#each users}}
-    <li>
-      <form id="{{id}}">
-        <a href="/user/{{id}}">{{username}}</a>
-        <button class="kickUserButtons">Kick</button>
-      </form>
-    </li>
-  {{/each}}
+    {{#each users}}
+      <li>
+        <form id="{{id}}">
+          <a href="/user/{{id}}">{{username}}</a>
+          <button class="kickUserButtons">Kick</button>
+        </form>
+      </li>
+    {{/each}}
   </ul>
 
   <h2>Channels</h2>
   <ul>
-  {{#each channels}}
-    <li>
-      <form id="{{id}}">
-        <a href="/channel/{{id}}">{{name}}</a>
-        <button class="deleteChannelButtons">Delete</button>
-      </form>
-    </li>
-  {{/each}}
+    {{#each channels}}
+      <li>
+        <form id="{{id}}">
+          <a href="/channel/{{id}}">{{name}}</a>
+          <button class="deleteChannelButtons">Delete</button>
+        </form>
+      </li>
+    {{/each}}
   </ul>
+
+  <h2>Create Channel</h2>
+  <form>
+    <label for="name">Channel Name:</label>
+    <input type="text" name="name" />
+
+    <label for="description">Channel Description:</label>
+    <input type="text" name="description" />
+
+
+    <input type="range" min="0" max="9" name="permissionLevel">
+
+    <button id="createChannelButton">Create</button>
+  </form>
 
   <button id="deleteServerButton">Delete Server</button>
 {{else}}
   <h2>Users</h2>
   <ul>
-  {{#each users}}
-    <li>
-      <form id="{{id}}">
-        <a href="/user/{{id}}">{{username}}</a>
-      </form>
-    </li>
-  {{/each}}
+    {{#each users}}
+      <li>
+        <form id="{{id}}">
+          <a href="/user/{{id}}">{{username}}</a>
+        </form>
+      </li>
+    {{/each}}
   </ul>
 
   <h2>Channels</h2>
   <ul>
-  {{#each channels}}
-    <li>
-      <form id="{{id}}">
-        <a href="/channel/{{id}}">{{name}}</a>
-      </form>
-    </li>
-  {{/each}}
+    {{#each channels}}
+      <li>
+        <form id="{{id}}">
+          <a href="/channel/{{id}}">{{name}}</a>
+        </form>
+      </li>
+    {{/each}}
   </ul>
-
 
   {{#if member}}
     <button id="leaveServerButton">Leave Server</button>
@@ -56,3 +69,4 @@
 {{/if}}
 
 <script src="/public/js/server.js"></script>
+<script src="/public/js/channel.js"></script>

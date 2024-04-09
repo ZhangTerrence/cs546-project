@@ -134,13 +134,43 @@ export class UserValidator extends BaseValidator {
 }
 
 export class ServerValidator extends BaseValidator {
-  static validateCreationInfo = (_name) => {
+  static validateCreationInfo = (_name, _description) => {
     const name = this.validateString(_name, "name");
+    const description = this.validateString(_description, "description");
 
     return {
-      name: name
+      name: name,
+      description: description
     };
   };
 }
 
-export class ChannelValidator extends BaseValidator {}
+export class ChannelValidator extends BaseValidator {
+  static validateCreationInfo = (_name, _description, _permissionLevel) => {
+    const name = this.validateString(_name, "name");
+    const description = this.validateString(_description, "description");
+
+    const permissionLevel = parseInt(_permissionLevel);
+    if (Number.isNaN(permissionLevel) || typeof permissionLevel !== "number") {
+      throw new BadRequestError(
+        400,
+        "permissionLevel",
+        "Expected type number."
+      );
+    }
+
+    if (_permissionLevel < 0 || _permissionLevel > 9) {
+      throw new BadRequestError(
+        400,
+        "permissionLevel",
+        "Permission level must be between 0 and 9 inclusive."
+      );
+    }
+
+    return {
+      name: name,
+      description: description,
+      permissionLevel: permissionLevel
+    };
+  };
+}

@@ -14,6 +14,10 @@ const channelSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    permissionLevel: {
+      type: Number,
+      required: true
+    },
     messages: {
       type: [String],
       default: []
