@@ -16,7 +16,10 @@ router.route("/signup").get(async (_req, res) => {
 });
 
 // Login Page
-router.route("/login").get(async (_req, res) => {
+router.route("/login").get(async (req, res) => {
+  if (req.session.user) {
+    return res.redirect(`/user/${req.session.user.id}`);
+  }
   return res.render("login");
 });
 

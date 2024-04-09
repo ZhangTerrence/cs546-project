@@ -33,7 +33,9 @@ export default class ServerService {
    * @throws NotFoundError If the server is not found.
    */
   static getServerByName = async (name) => {
-    const server = await ServerRepository.findOne({ name });
+    const server = await ServerRepository.findOne({
+      name: { $regex: name, $options: "i" }
+    });
     if (!server) {
       throw new NotFoundError(404, `name: ${name}`, "Server not found.");
     }
@@ -74,7 +76,9 @@ export default class ServerService {
    * @throws BadRequestError If the name is taken.
    */
   static generateNewServerIdFromName = async (name) => {
-    const serverExists = await ServerRepository.findOne({ name });
+    const serverExists = await ServerRepository.findOne({
+      name: { $regex: name, $options: "i" }
+    });
     if (serverExists) {
       throw new BadRequestError(
         400,
@@ -96,7 +100,9 @@ export default class ServerService {
    * @throws InternalServerError If it fails to create the server.
    */
   static createServer = async (serverId, name, creatorId, generalChannelId) => {
-    const serverExists = await ServerRepository.findOne({ name });
+    const serverExists = await ServerRepository.findOne({
+      name: { $regex: name, $options: "i" }
+    });
     if (serverExists) {
       throw new BadRequestError(400, `name: ${name}`, "Name is taken.");
     }

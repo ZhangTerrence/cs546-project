@@ -33,7 +33,9 @@ export default class UserService {
    * @throws NotFoundError If the user is not found.
    */
   static getUserByUsername = async (username) => {
-    const user = await UserRepository.findOne({ username: username });
+    const user = await UserRepository.findOne({
+      username: { $regex: username, $options: "i" }
+    });
     if (!user) {
       throw new NotFoundError(404, `username: ${username}`, "User not found.");
     }
@@ -128,16 +130,7 @@ export default class UserService {
    * @throws AuthenticationError If credentials are incorrect.
    */
   static authenticateUser = async (username, password) => {
-    const user = await UserRepository.findOne({
-      username: { $regex: username, $options: "i" }
-    });
-    if (!user) {
-      throw new BadRequestError(
-        404,
-        `username: ${username}`,
-        "User not found."
-      );
-    }
+    const user = await this.getUserByUsername(username);
 
     const authenticated = await this.comparePassword(
       password,
@@ -442,6 +435,14 @@ export default class UserService {
    * @throws InternalServerError If it fails to update the user.
    */
   static removeServer = async (user, server) => {
+    if (server.creatorId === user.id) {
+      throw new BadRequestError(
+        400,
+        `user: ${[server.creatorId, user.id]}`,
+        "You are the owner. Delete server instead."
+      );
+    }
+
     const serverIndex = user.servers.indexOf(server.id);
     if (serverIndex === -1) {
       throw new BadRequestError(

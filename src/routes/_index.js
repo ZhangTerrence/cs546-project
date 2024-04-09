@@ -5,7 +5,11 @@ const constructorMethod = (app) => {
   app.use("/", viewRoutes);
   app.use("/api", apiRoutes);
 
-  app.route("/teapot").get(async (_req, res) => {
+  app.route("/favicon.ico").get((_req, res) => {
+    res.status(204);
+  });
+
+  app.route("/teapot").get((_req, res) => {
     return res.status(418).render("error/400", {
       statusCode: 418,
       message: "Teapot."
