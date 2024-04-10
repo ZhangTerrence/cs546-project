@@ -117,11 +117,10 @@ export default class ChannelController {
       );
 
       const server = await ServerService.getServerById(serverId);
-
       const newChannel = await ChannelService.createChannel(
         name,
         description,
-        server.id,
+        server,
         permissionLevel
       );
 
@@ -153,11 +152,13 @@ export default class ChannelController {
         req.body.channelId,
         "channelId"
       );
+      const userId = req.session.user.id;
 
+      const user = await UserService.getUserById(userId);
       const channel = await ChannelService.getChannelById(channelId);
       const server = await ServerService.getServerById(channel.serverId);
 
-      await ServerService.deleteChannel(server, channel);
+      await ServerService.removeChannel(server, channel, user);
       await ChannelService.deleteChannel(channel.id);
 
       return res.status(204).json();

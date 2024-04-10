@@ -1,5 +1,5 @@
 import PrivateMessageRepository from "../models/privateMessage.js";
-import { InternalServerError } from "../utils/errors.js";
+import { InternalServerError, NotFoundError } from "../utils/errors.js";
 
 export default class PrivateMessageService {
   static getPrivateMessages = async () => {
@@ -20,6 +20,24 @@ export default class PrivateMessageService {
   };
 
   static deletePrivateMessage = async (userA, userB) => {
+    const userBIndex = userA.friends.indexOf(userB.id);
+    if (userBIndex == -1) {
+      throw new NotFoundError(
+        404,
+        this.removeFriend.name,
+        `${userB.username} not found in ${userA.username}'s friends.`
+      );
+    }
+
+    const userAIndex = userB.friends.indexOf(userA.id);
+    if (userAIndex == -1) {
+      throw new NotFoundError(
+        404,
+        this.removeFriend.name,
+        `${userA.username} not found in ${userB.username}'s friends.`
+      );
+    }
+
     const deletedPrivateMessage = await PrivateMessageRepository.deleteOne({
       users: { $in: [userA.id, userB.id] }
     });

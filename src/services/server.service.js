@@ -1,11 +1,14 @@
 import ServerRepository from "../models/server.js";
 import {
+  AuthorizationError,
   BadRequestError,
   InternalServerError,
   NotFoundError
 } from "../utils/errors.js";
 
 export default class ServerService {
+  static minKickPerms = 5;
+
   static getServers = async () => {
     return await ServerRepository.find();
   };
@@ -36,7 +39,7 @@ export default class ServerService {
 
   static getSimilarServersByName = async (name) => {
     const servers = await ServerRepository.find({
-      name: { $regex: name, $options: "i" }
+      name: { $regex: `^${name}`, $options: "i" }
     });
 
     return servers;
@@ -84,8 +87,16 @@ export default class ServerService {
     return newServer;
   };
 
-  static deleteServer = async (serverId) => {
-    const deletedServer = await ServerRepository.findByIdAndDelete(serverId);
+  static deleteServer = async (server, user) => {
+    if (server.creatorId !== user.id) {
+      throw new AuthorizationError(
+        403,
+        this.deleteServer.name,
+        "Unauthorized to delete server."
+      );
+    }
+
+    const deletedServer = await ServerRepository.findByIdAndDelete(server.id);
     if (!deletedServer) {
       throw new InternalServerError(
         500,
@@ -97,8 +108,8 @@ export default class ServerService {
 
   static addUser = async (server, user) => {
     if (server.blacklist.includes(user.id)) {
-      throw new BadRequestError(
-        400,
+      throw new AuthorizationError(
+        403,
         this.addUser.name,
         `${user.username} is blacklisted from ${server.name}.`
       );
@@ -128,16 +139,6 @@ export default class ServerService {
       );
     }
 
-    user.servers.push(server.id);
-    const addedServer = await user.save();
-    if (!addedServer) {
-      throw new InternalServerError(
-        500,
-        this.addUser.name,
-        `Unable to add ${user.username} to ${server.name}'s users.`
-      );
-    }
-
     server.users.push({
       id: user.id,
       permissionLevel: 0
@@ -162,6 +163,14 @@ export default class ServerService {
       );
     }
 
+    if (server.creatorId === user.id) {
+      throw new BadRequestError(
+        400,
+        this.blacklistUser.name,
+        `${user.username} is ${server.name}'s creator. They cannot be removed without deleting the server.`
+      );
+    }
+
     server.users.splice(userIndex, 1);
     const removedUser = await server.save();
     if (!removedUser) {
@@ -173,24 +182,53 @@ export default class ServerService {
     }
   };
 
-  static blacklistUser = async (server, user) => {
-    if (server.creatorId === user.id) {
-      throw new BadRequestError(
-        400,
-        this.blacklistUser.name,
-        `Cannot blacklist ${user.username} from ${server.name}. ${user.username} is the creator.`
+  static blacklistUser = async (server, kicked, kicker) => {
+    const kickedIndex = server.users
+      .map((server) => server.id)
+      .indexOf(kicked.id);
+    if (kickedIndex === -1) {
+      throw new NotFoundError(
+        404,
+        this.removeUser.name,
+        `${kicked.username} not found in ${server.name}'s users.`
       );
     }
 
-    await this.removeUser(server, user.id);
+    const kickerIndex = server.users
+      .map((server) => server.id)
+      .indexOf(kicker.id);
+    if (kickerIndex === -1) {
+      throw new NotFoundError(
+        404,
+        this.removeUser.name,
+        `${kicker.username} not found in ${server.name}'s users.`
+      );
+    }
 
-    server.blacklist.push(user.id);
+    const kickedPerms = server.users.find(
+      (userObj) => userObj.id === kicked.id
+    ).permissionLevel;
+    const kickerPerms = server.users.find(
+      (userObj) => userObj.id === kicker.id
+    ).permissionLevel;
+
+    if (kickerPerms < this.minKickPerms || kickedPerms >= kickerPerms) {
+      throw new AuthorizationError(
+        403,
+        this.blacklistUser.name,
+        `Unauthorized to kick ${kicked.username}.`
+      );
+    }
+
+    await this.removeUser(server, kicked);
+
+    server.blacklist.push(kicked.id);
     const blacklistedUser = await server.save();
     if (!blacklistedUser) {
       throw new InternalServerError(
         500,
         this.blacklistUser.name,
-        `Unable to add ${user.username} to ${server.name}'s blacklisst.`
+        `Unable to add ${kicked.username} to ${server.name}'s blacklisst.`
       );
     }
   };
@@ -215,13 +253,41 @@ export default class ServerService {
     }
   };
 
-  static deleteChannel = async (server, channel) => {
+  static removeChannel = async (server, channel, user) => {
     const channelIndex = server.channels.indexOf(channel.id);
     if (channelIndex === -1) {
       throw new NotFoundError(
         404,
-        this.deleteChannel.name,
+        this.removeChannel.name,
         `${channel.name} not found in ${server.name}'s channels.`
+      );
+    }
+
+    if (channel.name === "general") {
+      throw new BadRequestError(
+        400,
+        this.deleteChannel.name,
+        "General channel cannot be deleted."
+      );
+    }
+
+    const userIndex = server.users
+      .map((userObj) => userObj.id)
+      .indexOf(user.id);
+    if (userIndex === -1) {
+      throw new NotFoundError(
+        404,
+        this.removeChannel.name,
+        `${user.username} not found in ${server.name}'s users.`
+      );
+    }
+
+    const userPerms = server.users[userIndex].permissionLevel;
+    if (userPerms < channel.permissionLevel) {
+      throw new AuthorizationError(
+        403,
+        this.removeChannel.name,
+        `Unauthorized to delete ${channel.name}.`
       );
     }
 
@@ -230,7 +296,7 @@ export default class ServerService {
     if (!removedChannel) {
       throw new InternalServerError(
         500,
-        this.deleteChannel.name,
+        this.removeChannel.name,
         `Unable to delete ${channel.name} from ${server.name}'s channels.`
       );
     }

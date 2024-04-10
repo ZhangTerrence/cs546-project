@@ -3,7 +3,8 @@ import {
   BadRequestError,
   NotFoundError,
   AuthenticationError,
-  InternalServerError
+  InternalServerError,
+  AuthorizationError
 } from "../utils/errors.js";
 import bcryptjs from "bcryptjs";
 
@@ -24,7 +25,7 @@ export default class UserService {
 
   static getUserByUsername = async (username) => {
     const user = await UserRepository.findOne({
-      username: { $regex: username, $options: "i" }
+      username: { $regex: `^${username}$`, $options: "i" }
     });
     if (!user) {
       throw new NotFoundError(
@@ -63,7 +64,7 @@ export default class UserService {
 
   static createUser = async (email, username, password) => {
     const emailExists = await UserRepository.findOne({
-      email: { $regex: email, $options: "i" }
+      email: { $regex: `^${email}$`, $options: "i" }
     });
     if (emailExists) {
       throw new BadRequestError(
@@ -74,7 +75,7 @@ export default class UserService {
     }
 
     const usernameExists = await UserRepository.findOne({
-      username: { $regex: username, $options: "i" }
+      username: { $regex: `^${username}$`, $options: "i" }
     });
     if (usernameExists) {
       throw new BadRequestError(
@@ -298,8 +299,8 @@ export default class UserService {
 
     const userAIndex = userB.friends.indexOf(userA.id);
     if (userAIndex == -1) {
-      throw new BadRequestError(
-        400,
+      throw new NotFoundError(
+        404,
         this.removeFriend.name,
         `${userA.username} not found in ${userB.username}'s friends.`
       );
@@ -316,7 +317,41 @@ export default class UserService {
     }
   };
 
-  static addServer = async (user, server) => {
+  static addServer = async (user, server, creation) => {
+    if (server.blacklist.includes(user.id)) {
+      throw new AuthorizationError(
+        403,
+        this.addServer.name,
+        `${user.username} is blacklisted from ${server.name}.`
+      );
+    }
+
+    if (server.creatorId === user.id) {
+      throw new BadRequestError(
+        400,
+        this.addServer.name,
+        `${user.username} is already in ${server.name}.`
+      );
+    }
+
+    if (creation) {
+      if (server.users.map((userObj) => userObj.id).includes(user.id)) {
+        throw new BadRequestError(
+          400,
+          this.addServer.name,
+          `${user.username} is already in ${server.name}.`
+        );
+      }
+    }
+
+    if (user.servers.includes(server.id)) {
+      throw new BadRequestError(
+        400,
+        this.addServer.name,
+        `${user.username} is already in ${server.name}.`
+      );
+    }
+
     user.servers.push(server.id);
     const addedServer = await user.save();
     if (!addedServer) {
@@ -333,7 +368,7 @@ export default class UserService {
       throw new BadRequestError(
         400,
         this.removeServer.name,
-        `${user.username} is ${server.name}'s creator. They cannot be removed without deleting server.`
+        `${user.username} is ${server.name}'s creator. They cannot be removed without deleting the server.`
       );
     }
 

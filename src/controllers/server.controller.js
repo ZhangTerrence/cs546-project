@@ -159,7 +159,7 @@ export default class ServerController {
         await ChannelService.createGeneralChannelForServer(newServer);
 
       await ServerService.addChannel(newServer, newGeneralChannel);
-      await UserService.addServer(user, newServer);
+      await UserService.addServer(user, newServer, true);
 
       return res.status(201).json({
         data: {
@@ -187,8 +187,12 @@ export default class ServerController {
         req.body.serverId,
         "serverId"
       );
+      const userId = req.session.user.id;
 
       const server = await ServerService.getServerById(serverId);
+      const user = await UserService.getUserById(userId);
+
+      await ServerService.deleteServer(server, user);
 
       const joinedUsers = await UserService.getJoinedUsers(server.id);
       await Promise.all(
@@ -197,7 +201,6 @@ export default class ServerController {
         })
       );
 
-      await ServerService.deleteServer(server.id);
       await ChannelService.deleteServerChannels(server);
 
       return res.status(204).json();
@@ -228,6 +231,7 @@ export default class ServerController {
       const user = await UserService.getUserById(userId);
 
       await ServerService.addUser(server, user);
+      await UserService.addServer(user, server, false);
 
       return res.status(204).json();
     } catch (error) {
@@ -281,16 +285,18 @@ export default class ServerController {
         req.body.serverId,
         "serverId"
       );
-      const userId = ServerValidator.validateMongooseId(
+      const kickedId = ServerValidator.validateMongooseId(
         req.body.userId,
         "userId"
       );
+      const kickerId = req.session.user.id;
 
       const server = await ServerService.getServerById(serverId);
-      const user = await UserService.getUserById(userId);
+      const kicked = await UserService.getUserById(kickedId);
+      const kicker = await UserService.getUserById(kickerId);
 
-      await UserService.removeServer(user, server);
-      await ServerService.blacklistUser(server, user);
+      await ServerService.blacklistUser(server, kicked, kicker);
+      await UserService.removeServer(kicked, server);
 
       return res.status(204).json();
     } catch (error) {

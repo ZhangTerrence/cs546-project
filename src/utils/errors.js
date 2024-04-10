@@ -28,6 +28,12 @@ export class AuthenticationError extends BaseError {
   }
 }
 
+export class AuthorizationError extends BaseError {
+  constructor(statusCode, origin, message) {
+    super(statusCode, origin, message);
+  }
+}
+
 export class InternalServerError extends BaseError {
   constructor(statusCode, origin, message) {
     super(statusCode, origin, message);

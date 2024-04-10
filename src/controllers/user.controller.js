@@ -257,8 +257,8 @@ export default class UserController {
       );
       joinedServers.forEach(async (joinedServer) => {
         if (removedUser.id === joinedServer.creatorId) {
+          await ServerService.deleteServer(joinedServer, removedUser);
           await ChannelService.deleteServerChannels(joinedServer);
-          await ServerService.deleteServer(joinedServer.id);
         } else {
           await ServerService.removeUser(joinedServer, removedUser);
         }
@@ -295,7 +295,13 @@ export default class UserController {
       const target = await UserService.getUserByUsername(username);
       const requester = await UserService.getUserById(userId);
 
-      await UserService.sendFriendRequest(target, requester);
+      if (requester.friendRequests.includes(target.id)) {
+        await UserService.sendFriendRequest(target, requester);
+        await UserService.acceptFriendRequest(target, requester);
+        await PrivateMessageService.createPrivateMessage(target, requester);
+      } else {
+        await UserService.sendFriendRequest(target, requester);
+      }
 
       return res.status(204).json();
     } catch (error) {
@@ -353,8 +359,8 @@ export default class UserController {
       const target = await UserService.getUserById(userId);
       const requester = await UserService.getUserById(requesterId);
 
-      await PrivateMessageService.createPrivateMessage(target, requester);
       await UserService.acceptFriendRequest(target, requester);
+      await PrivateMessageService.createPrivateMessage(target, requester);
 
       return res.status(200).json({
         data: {
