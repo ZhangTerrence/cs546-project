@@ -7,7 +7,6 @@ import { ChannelValidator, ServerValidator } from "../utils/validators.js";
 
 export default class ChannelController {
   /**
-   * @description Renders a channel page.
    * @route GET /channel/:channelId
    * @access Public
    */
@@ -58,7 +57,7 @@ export default class ChannelController {
       });
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         if ((!error) instanceof InternalServerError) {
           return res.status(error.statusCode).render("error/500", {
             statusCode: error.statusCode,
@@ -81,7 +80,6 @@ export default class ChannelController {
   };
 
   /**
-   * @description Gets all channels.
    * @route GET /api/channel
    * @access Public
    */
@@ -92,7 +90,7 @@ export default class ChannelController {
       return res.status(200).json({ data: { channels: channels } });
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -102,7 +100,6 @@ export default class ChannelController {
   };
 
   /**
-   * @description Creates a channel.
    * @route POST /api/channel
    * @access Private
    */
@@ -128,7 +125,7 @@ export default class ChannelController {
         permissionLevel
       );
 
-      await ServerService.addChannel(server, newChannel.id);
+      await ServerService.addChannel(server, newChannel);
 
       return res.status(200).json({
         data: {
@@ -137,7 +134,7 @@ export default class ChannelController {
       });
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -147,7 +144,6 @@ export default class ChannelController {
   };
 
   /**
-   * @description Deletes a channel.
    * @route DELETE /api/channel
    * @access Private
    */
@@ -159,17 +155,15 @@ export default class ChannelController {
       );
 
       const channel = await ChannelService.getChannelById(channelId);
-
       const server = await ServerService.getServerById(channel.serverId);
 
-      await ServerService.deleteChannel(server, channel.id);
-
+      await ServerService.deleteChannel(server, channel);
       await ChannelService.deleteChannel(channel.id);
 
       return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);

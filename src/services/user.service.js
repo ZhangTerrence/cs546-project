@@ -6,56 +6,133 @@ import {
   InternalServerError
 } from "../utils/errors.js";
 import bcryptjs from "bcryptjs";
-import env from "../config/env.js";
 
 export default class UserService {
   static saltRounds = 16;
 
-  /**
-   * Gets all users.
-   * @returns User array.
-   */
   static getUsers = async () => {
     return await UserRepository.find();
   };
 
-  /**
-   * @description Gets an user by their id.
-   * @param {string} userId The given user id.
-   * @returns User.
-   * @throws NotFoundError If the user is not found.
-   */
   static getUserById = async (userId) => {
     const user = await UserRepository.findById(userId);
     if (!user) {
-      throw new NotFoundError(404, `userId: ${userId}`, "User not found.");
+      throw new NotFoundError(404, this.getUserById.name, "User not found.");
     }
-
     return user;
   };
 
-  /**
-   * @description Gets an user by their username.
-   * @param {string} username The given username.
-   * @returns User.
-   * @throws NotFoundError If the user is not found.
-   */
   static getUserByUsername = async (username) => {
     const user = await UserRepository.findOne({
       username: { $regex: username, $options: "i" }
     });
     if (!user) {
-      throw new NotFoundError(404, `username: ${username}`, "User not found.");
+      throw new NotFoundError(
+        404,
+        this.getUserByUsername.name,
+        "User not found."
+      );
+    }
+    return user;
+  };
+
+  static getJoinedUsers = async (serverId) => {
+    const joinedUsers = await UserRepository.find({
+      servers: { $in: serverId }
+    });
+    return joinedUsers;
+  };
+
+  static authenticateCredentials = async (username, password) => {
+    const user = await this.getUserByUsername(username);
+
+    const authenticated = await this.comparePassword(
+      password,
+      user.hashedPassword
+    );
+    if (!authenticated) {
+      throw new AuthenticationError(
+        401,
+        this.authenticateCredentials.name,
+        "Invalid username or password."
+      );
     }
 
     return user;
   };
 
-  /**
-   * @description Gets all the users who are in an user's friends or friend requests list.
-   * @param {string} userId The given user id.
-   * @returns User array.
-   */
+  static createUser = async (email, username, password) => {
+    const emailExists = await UserRepository.findOne({
+      email: { $regex: email, $options: "i" }
+    });
+    if (emailExists) {
+      throw new BadRequestError(
+        400,
+        this.createUser.name,
+        `${email} is taken.`
+      );
+    }
+
+    const usernameExists = await UserRepository.findOne({
+      username: { $regex: username, $options: "i" }
+    });
+    if (usernameExists) {
+      throw new BadRequestError(
+        400,
+        this.createUser.name,
+        `${username} is taken.`
+      );
+    }
+
+    const hashedPassword = await this.hashPassword(password);
+
+    const newUser = await UserRepository.create({
+      email: email,
+      username: username,
+      hashedPassword: hashedPassword
+    });
+    if (!newUser) {
+      throw new InternalServerError(
+        500,
+        this.createUser.name,
+        "Unable to create user."
+      );
+    }
+
+    return newUser;
+  };
+
+  static updateUser = async (userId, bio, theme) => {
+    const user = await this.getUserById(userId);
+
+    if (user.bio === bio && user.theme === theme) {
+      return;
+    }
+
+    const updatedUser = await UserRepository.findByIdAndUpdate(userId, {
+      bio: bio,
+      theme: theme
+    });
+    if (!updatedUser) {
+      throw new InternalServerError(
+        500,
+        this.updateUser.name,
+        "Unable to update user."
+      );
+    }
+  };
+
+  static deleteUser = async (userId) => {
+    const deletedUser = await UserRepository.findByIdAndDelete(userId);
+    if (!deletedUser) {
+      throw new InternalServerError(
+        500,
+        this.deleteUser.name,
+        "Unable to delete user."
+      );
+    }
+  };
+
   static getAssociatedUsers = async (userId) => {
     const associatedUsers = await UserRepository.find({
       $or: [
@@ -70,158 +147,16 @@ export default class UserService {
     return associatedUsers;
   };
 
-  /**
-   * @description Gets all the users who have joined the server.
-   * @param {string} serverId The given server id.
-   * @returns User array.
-   */
-  static getJoinedUsers = async (serverId) => {
-    const joinedUsers = await UserRepository.find({
-      servers: { $in: serverId }
-    });
-    return joinedUsers;
-  };
-
-  /**
-   * @description Creates a new user.
-   * @param {string} email The given email.
-   * @param {string} username The given username.
-   * @param {string} password The given password.
-   * @returns User.
-   * @throws BadRequestError If either the email or username is taken.
-   * @throws InternalServerError If it fails to create the user.
-   */
-  static createUser = async (email, username, password) => {
-    const emailExists = await UserRepository.findOne({
-      email: { $regex: email, $options: "i" }
-    });
-    if (emailExists) {
-      throw new BadRequestError(400, `email: ${email}`, "Email is taken.");
-    }
-
-    const usernameExists = await UserRepository.findOne({
-      username: { $regex: username, $options: "i" }
-    });
-    if (usernameExists) {
-      throw new BadRequestError(
-        400,
-        `username: ${username}`,
-        "Username is taken."
+  static removeUserAssociations = async (associatedUser, removedUser) => {
+    if (associatedUser.friends.includes(removedUser.id)) {
+      associatedUser.friends.splice(
+        associatedUser.friends.indexOf(removedUser.id),
+        1
       );
     }
-
-    const hashedPassword = await this.hashPassword(password);
-
-    const newUser = await UserRepository.create({
-      email: email,
-      username: username,
-      hashedPassword: hashedPassword
-    });
-    if (!newUser) {
-      throw new InternalServerError(
-        500,
-        env.NODE_ENV === "dev"
-          ? `create(): ${[email, username, hashedPassword]}`
-          : "create()",
-        "Unable to create user."
-      );
-    }
-
-    return newUser;
-  };
-
-  /**
-   * @description Authenticates credentials.
-   * @param {string} username The given username.
-   * @param {string} password The given password.
-   * @returns User.
-   * @throws AuthenticationError If credentials are incorrect.
-   */
-  static authenticateUser = async (username, password) => {
-    const user = await this.getUserByUsername(username);
-
-    const authenticated = await this.comparePassword(
-      password,
-      user.hashedPassword
-    );
-    if (!authenticated) {
-      throw new AuthenticationError(
-        401,
-        env.NODE_ENV === "dev"
-          ? `credentials: ${[username, password]}`
-          : "credentials",
-        "Invalid username or password."
-      );
-    }
-
-    return user;
-  };
-
-  /**
-   * @description Updates an user.
-   * @param {string} userId The given user id.
-   * @param {string} bio The given bio.
-   * @param {boolean} darkMode The given color mode.
-   * @throws BadRequestError If nothing has been changed.
-   * @throws NotFoundError If the user if not found.
-   * @throws InternalServerError If it fails to update the user.
-   */
-  static updateUser = async (userId, bio, darkMode) => {
-    const user = await this.getUserById(userId);
-
-    if (user.bio === bio && user.darkMode === darkMode) {
-      throw new BadRequestError(
-        400,
-        `body: ${[bio, darkMode]}`,
-        "Nothing has changed."
-      );
-    }
-
-    const updatedUser = await UserRepository.findByIdAndUpdate(userId, {
-      bio: bio,
-      darkMode: darkMode
-    });
-    if (!updatedUser) {
-      throw new InternalServerError(
-        500,
-        `findByIdAndUpdate(): ${[userId, bio, darkMode]}`,
-        "Unable to update user."
-      );
-    }
-  };
-
-  /**
-   * @description Deletes an user.
-   * @param {string} userId The given user id.
-   * @throws NotFoundError If the user is not found.
-   * @throws InternalServerError If it fails to delete the user.
-   */
-  static deleteUser = async (userId) => {
-    await this.getUserById(userId);
-
-    const deletedUser = await UserRepository.findByIdAndDelete(userId);
-    if (!deletedUser) {
-      throw new InternalServerError(
-        500,
-        `findByIdAndDelete(): ${userId}`,
-        "Unable to delete user."
-      );
-    }
-  };
-
-  /**
-   * @description Removes all records of an user from an associated user's friends and/or friend requests list.
-   * @param {UserDocument} associatedUser The associated user who the user will be removed from.
-   * @param {string} userId The id of the user who will be removed.
-   * @throws InternalServerError If it fails to update the associated user.
-   */
-  static removeUserAssociations = async (associatedUser, userId) => {
-    if (associatedUser.friends.includes(userId)) {
-      associatedUser.friends.splice(associatedUser.friends.indexOf(userId), 1);
-    }
-    if (associatedUser.friendRequests.includes(userId)) {
+    if (associatedUser.friendRequests.includes(removedUser.id)) {
       associatedUser.friendRequests.splice(
-        associatedUser.friendRequests.indexOf(userId),
+        associatedUser.friendRequests.indexOf(removedUser.id),
         1
       );
     }
@@ -230,244 +165,194 @@ export default class UserService {
     if (!updatedUser) {
       throw new InternalServerError(
         500,
-        `save(): ${[associatedUser.friends, associatedUser.friendRequests, userId]}`,
-        "Unable to update user."
+        this.removeUserAssociations.name,
+        `Unable to remove ${removedUser.username} from ${associatedUser.username}'s lists.`
       );
     }
   };
 
-  /**
-   * @description Creates a friend request from an user to a target user.
-   * @param {UserDocument} targetUser The user who the friend request is sent to.
-   * @param {UserDocument} user The user who sends the friend request.
-   * @throws BadRequestError If the user is the target user, both users are already friends, or a
-   * friend request has already been sent to the target user.
-   * @throws InternalServerError If it fails to update the target user.
-   */
-  static createFriendRequest = async (targetUser, user) => {
-    if (targetUser.id === user.id) {
+  static sendFriendRequest = async (target, requester) => {
+    if (target.id === requester.id) {
       throw new BadRequestError(
         400,
-        `targetUser: ${user}`,
-        "Can't send friend request to yourself."
+        this.sendFriendRequest.name,
+        `Can't send friend request from ${target.username} to ${requester.username}. They are the same user.`
       );
     }
 
-    if (user.friends.includes(targetUser.id)) {
+    if (requester.friends.includes(target.id)) {
       throw new BadRequestError(
         400,
-        `targetUser: ${targetUser}`,
-        "User is already a friend."
+        this.sendFriendRequest.name,
+        `${target.username} and ${requester.username} are already friends.`
       );
     }
 
-    if (targetUser.friendRequests.includes(user.id)) {
+    if (target.friendRequests.includes(requester.id)) {
       throw new BadRequestError(
         400,
-        `user: ${user}`,
-        "Already sent friend request."
+        this.sendFriendRequest.name,
+        `Already sent friend request to ${target.username}.`
       );
     }
 
-    targetUser.friendRequests.push(user.id);
-
-    const sentFriendRequest = await targetUser.save();
+    target.friendRequests.push(requester.id);
+    const sentFriendRequest = await target.save();
     if (!sentFriendRequest) {
       throw new InternalServerError(
         500,
-        `save(): ${[targetUser.friendRequests, user.id]}`,
-        "Unable to send friend request."
+        this.sendFriendRequest.name,
+        `Unable to send friend request to ${target.username}.`
       );
     }
   };
 
-  /**
-   * @description Accepts a friend request from a requester.
-   * @param {UserDocument} requester The user who sent the friend request.
-   * @param {UserDocument} user The user who the friend request is sent to.
-   * @throws BadRequestError If both users are already friends or no friend request is found.
-   * @throw InternalServerError If it fails to update either user.
-   */
-  static acceptFriendRequest = async (requester, user) => {
-    if (requester.friends.includes(user.id)) {
+  static acceptFriendRequest = async (target, requester) => {
+    if (requester.friends.includes(target.id)) {
       throw new BadRequestError(
         400,
-        `requester: ${[requester.friends, user.id]}`,
-        "User is already a friend."
+        this.acceptFriendRequest.name,
+        `${target.username} and ${requester.username} already friends.`
       );
     }
 
-    if (user.friends.includes(requester.id)) {
+    if (target.friends.includes(requester.id)) {
       throw new BadRequestError(
         400,
-        `user: ${[user.friends, requester.id]}`,
-        "User is already a friend."
+        this.acceptFriendRequest.name,
+        `${target.username} and ${requester.username} already friends.`
       );
     }
 
-    const friendRequestIndex = user.friendRequests.indexOf(requester.id);
+    const friendRequestIndex = target.friendRequests.indexOf(requester.id);
     if (friendRequestIndex === -1) {
       throw new NotFoundError(
         404,
-        `requester: ${[user.friendRequests, requester.id]}`,
-        "Friend request not found."
+        this.acceptFriendRequest.name,
+        `${requester.username} not found in ${target.username}'s friend requests.`
       );
     }
 
-    user.friendRequests.splice(friendRequestIndex, 1);
-    user.friends.push(requester.id);
-
-    const friendedRequester = await user.save();
+    target.friendRequests.splice(friendRequestIndex, 1);
+    target.friends.push(requester.id);
+    const friendedRequester = await target.save();
     if (!friendedRequester) {
       throw new InternalServerError(
         500,
-        `save(): ${[user.friends, user.friendRequests, requester.id]}`,
-        "Unable to add user as friend."
+        this.acceptFriendRequest.name,
+        `Unable to accept friend request from ${requester.username}.`
       );
     }
 
-    requester.friends.push(user.id);
-
-    const friendedUser = await requester.save();
-    if (!friendedUser) {
+    requester.friends.push(target.id);
+    const friendedTarget = await requester.save();
+    if (!friendedTarget) {
       throw new InternalServerError(
         500,
-        `save(): ${[requester.friends, user.id]}`,
-        "Unable to add user as friend."
+        this.acceptFriendRequest.name,
+        `Unable to accept friend request from ${requester.username}.`
       );
     }
   };
 
-  /**
-   * @description Rejects a friend request from a requester.
-   * @param {UserDocument} user The user who the friend request is sent to.
-   * @param {string} requesterId The id of the user who sent the friend request.
-   * @throws BadRequestError If no friend request is found.
-   * @throws InternalServerError If it fails to update the user.
-   */
-  static rejectFriendRequest = async (user, requesterId) => {
-    const friendRequestIndex = user.friendRequests.indexOf(requesterId);
+  static rejectFriendRequest = async (target, requester) => {
+    const friendRequestIndex = target.friendRequests.indexOf(requester.id);
     if (friendRequestIndex === -1) {
       throw new NotFoundError(
         404,
-        `requester: ${[user.friendRequests, requesterId]}`,
-        "Friend request not found."
+        this.rejectFriendRequest.name,
+        `${requester.username} not found in ${target.username}'s friend requests.`
       );
     }
 
-    user.friendRequests.splice(friendRequestIndex, 1);
-
-    const rejectedFriendRequest = await user.save();
+    target.friendRequests.splice(friendRequestIndex, 1);
+    const rejectedFriendRequest = await target.save();
     if (!rejectedFriendRequest) {
       throw new InternalServerError(
         500,
-        `save(): ${[user.friendRequests, requesterId]}`,
-        "Unable to reject friend request."
+        this.rejectFriendRequest.name,
+        `Unable to reject friend request from ${requester.username}.`
       );
     }
   };
 
-  /**
-   * @description Removes friend by deleting records of both users from their respective friends list.
-   * @param {UserDocument} friend The friend.
-   * @param {UserDocument} user The user.
-   * @throws BadRequestError If the either user was not a friend of the other user.
-   * @throws InternalServerError If it fails to update either user.
-   */
-  static removeFriend = async (friend, user) => {
-    const userIndex = friend.friends.indexOf(user.id);
-    if (userIndex == -1) {
-      throw new BadRequestError(
-        400,
-        `friend: ${[friend.friends, user.id]}`,
-        "User was not a friend."
+  static removeFriend = async (userA, userB) => {
+    const userBIndex = userA.friends.indexOf(userB.id);
+    if (userBIndex == -1) {
+      throw new NotFoundError(
+        404,
+        this.removeFriend.name,
+        `${userB.username} not found in ${userA.username}'s friends.`
       );
     }
 
-    friend.friends.splice(userIndex, 1);
-
-    const savedUser = await friend.save();
-    if (!savedUser) {
+    userA.friends.splice(userBIndex, 1);
+    const removedUserB = await userA.save();
+    if (!removedUserB) {
       throw new InternalServerError(
         500,
-        `save(): ${[friend.friends, user.id]}`,
-        "Unable to delete friend."
+        this.removeFriend.name,
+        `Unable to remove ${userB.username} from ${userA.username}'s friends.`
       );
     }
 
-    const friendIndex = user.friends.indexOf(friend.id);
-    if (friendIndex == -1) {
+    const userAIndex = userB.friends.indexOf(userA.id);
+    if (userAIndex == -1) {
       throw new BadRequestError(
         400,
-        `user: ${[user.friends, friend.id]}`,
-        "User was not a friend."
+        this.removeFriend.name,
+        `${userA.username} not found in ${userB.username}'s friends.`
       );
     }
 
-    user.friends.splice(friendIndex, 1);
-
-    const savedFriend = await user.save();
-    if (!savedFriend) {
+    userB.friends.splice(userAIndex, 1);
+    const removedUserA = await userB.save();
+    if (!removedUserA) {
       throw new InternalServerError(
         500,
-        `save(): ${[user.friends, friend.id]}`,
-        "Unable to delete friend."
+        this.removeFriend.name,
+        `Unable to remove ${userA.username} from ${userB.username}'s friends.`
       );
     }
   };
 
-  /**
-   * @description Adds a server from an user's server list.
-   * @param {UserDocument} user The user who will join the server.
-   * @param {string} serverId The id of the server which the user will join.
-   * @throws InternalServerError If it fails to update the user.
-   */
-  static addServer = async (user, serverId) => {
-    user.servers.push(serverId);
-
+  static addServer = async (user, server) => {
+    user.servers.push(server.id);
     const addedServer = await user.save();
     if (!addedServer) {
       throw new InternalServerError(
         500,
-        `save(): ${[user.servers, serverId]}`,
-        "Unable to join server."
+        this.addServer.name,
+        `Unable to add ${server.name} to ${user.username}'s servers.`
       );
     }
   };
 
-  /**
-   * @description Removes a server from an user's server list.
-   * @param {UserDocument} user The user who will leave the server.
-   * @param {ServerDocument} server The server which the user will leave.
-   * @throws BadRequestError If the server is not found.
-   * @throws InternalServerError If it fails to update the user.
-   */
   static removeServer = async (user, server) => {
     if (server.creatorId === user.id) {
       throw new BadRequestError(
         400,
-        `user: ${[server.creatorId, user.id]}`,
-        "You are the owner. Delete server instead."
+        this.removeServer.name,
+        `${user.username} is ${server.name}'s creator. They cannot be removed without deleting server.`
       );
     }
 
     const serverIndex = user.servers.indexOf(server.id);
     if (serverIndex === -1) {
-      throw new NotFoundError(
+      throw new BadRequestError(
         404,
-        `server: ${[user.servers, server.id]}`,
-        "Server not found."
+        this.removeServer.name,
+        `${server.id} not found in ${user.username}'s servers.`
       );
     }
 
     user.servers.splice(serverIndex, 1);
-
     const removedServer = await user.save();
     if (!removedServer) {
       throw new InternalServerError(
         500,
-        `save(): ${[user.servers, server.id]}`,
-        "Unable to leave user"
+        this.removeServer.name,
+        `Unable to remove ${server.name} from ${user.username}'s servers.`
       );
     }
   };

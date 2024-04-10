@@ -4,19 +4,27 @@ import emailValidator from "email-validator";
 class BaseValidator {
   static validateString = (_variable, _variableName) => {
     if (!_variable) {
-      throw new BadRequestError(400, _variableName, "Missing field.");
+      throw new BadRequestError(
+        400,
+        this.validateString.name,
+        `Missing ${_variableName} field.`
+      );
     }
 
     if (typeof _variable !== "string") {
-      throw new BadRequestError(400, _variableName, "Expected type string.");
+      throw new BadRequestError(
+        400,
+        this.validateString.name,
+        `Expected a string for ${_variableName}.`
+      );
     }
 
     const variable = _variable.trim();
     if (variable.length === 0) {
       throw new BadRequestError(
         400,
-        _variableName,
-        "Expected nonempty string."
+        this.validateString.name,
+        `Expected a nonempty string for ${_variableName}.`
       );
     }
 
@@ -27,7 +35,11 @@ class BaseValidator {
     const id = this.validateString(_id, _idName);
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new BadRequestError(400, _idName, "Expected valid ObjectId.");
+      throw new BadRequestError(
+        400,
+        this.validateMongooseId.name,
+        `Expected a valid ObjectId for ${_idName}.`
+      );
     }
 
     return id;
@@ -46,7 +58,11 @@ export class UserValidator extends BaseValidator {
     const password = this.validateString(_password, "password");
 
     if (!emailValidator.validate(email)) {
-      throw new BadRequestError(400, "email", "Expected valid email.");
+      throw new BadRequestError(
+        400,
+        this.validateSignupInfo.name,
+        "Expected a valid email."
+      );
     }
 
     if (
@@ -55,15 +71,15 @@ export class UserValidator extends BaseValidator {
     ) {
       throw new BadRequestError(
         400,
-        "username",
-        `Expected between ${this.minUsernameLength} and ${this.maxUsernameLength} characters without whitespace.`
+        this.validateSignupInfo.name,
+        `Expected between ${this.minUsernameLength} and ${this.maxUsernameLength} characters without whitespace for username.`
       );
     }
     if (!/^[a-z0-9]+$/i.test(username)) {
       throw new BadRequestError(
         400,
-        "username",
-        "Expected only alphanumeric characters."
+        this.validateSignupInfo.name,
+        "Expected only alphanumeric characters for username."
       );
     }
 
@@ -73,15 +89,15 @@ export class UserValidator extends BaseValidator {
     ) {
       throw new BadRequestError(
         400,
-        "password",
-        `Expected between ${this.minUsernameLength} and ${this.maxUsernameLength} characters without whitespace.`
+        this.validateSignupInfo.name,
+        `Expected between ${this.minPasswordLength} and ${this.maxPasswordLength} characters without whitespace for password.`
       );
     }
     if (!/^[a-z0-9]+$/i.test(password)) {
       throw new BadRequestError(
         400,
-        "password",
-        "Expected only alphanumeric characters."
+        this.validateSignupInfo.name,
+        "Expected only alphanumeric characters for username."
       );
     }
 
@@ -102,13 +118,21 @@ export class UserValidator extends BaseValidator {
     };
   };
 
-  static validateUpdateInfo = (_darkMode) => {
-    if (typeof _darkMode !== "boolean") {
-      throw new BadRequestError(400, "bio", "Expected type boolean.");
+  static validateUpdateInfo = (_bio, _theme) => {
+    const bio = this.validateString(_bio, "bio");
+    const theme = this.validateString(_theme, "theme");
+
+    if (theme !== "light" && theme !== "dark") {
+      throw new BadRequestError(
+        400,
+        this.validateUpdateInfo.name,
+        "Expected either 'light' or 'dark' for theme."
+      );
     }
 
     return {
-      darkMode: _darkMode
+      bio: bio,
+      theme: theme
     };
 
     // Object.entries(args).forEach((entry) => {
@@ -154,15 +178,15 @@ export class ChannelValidator extends BaseValidator {
     if (Number.isNaN(permissionLevel) || typeof permissionLevel !== "number") {
       throw new BadRequestError(
         400,
-        "permissionLevel",
-        "Expected type number."
+        this.validateCreationInfo.name,
+        "Expected a number for permission level."
       );
     }
 
-    if (_permissionLevel < 0 || _permissionLevel > 9) {
+    if (permissionLevel < 0 || permissionLevel > 9) {
       throw new BadRequestError(
         400,
-        "permissionLevel",
+        this.validateCreationInfo.name,
         "Permission level must be between 0 and 9 inclusive."
       );
     }

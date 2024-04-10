@@ -1,56 +1,35 @@
 export class BaseError extends Error {
-  /**
-   * @param {number} statusCode
-   * @param {string} originName
-   * @param {string} message
-   */
-  constructor(statusCode, originName, message) {
+  constructor(statusCode, origin, message) {
     super(message);
     this.statusCode = statusCode;
-    this.originName = originName;
+    this.origin = origin;
   }
+
+  toString = () => {
+    return `${this.statusCode} - ${this.origin}: ${this.message}`;
+  };
 }
 
 export class BadRequestError extends BaseError {
-  /**
-   * @param {number} statusCode
-   * @param {string} originName
-   * @param {string} message
-   */
-  constructor(statusCode, originName, message) {
-    super(statusCode, originName, message);
+  constructor(statusCode, origin, message) {
+    super(statusCode, origin, message);
   }
 }
 
 export class NotFoundError extends BaseError {
-  /**
-   * @param {number} statusCode
-   * @param {string} originName
-   * @param {string} message
-   */
-  constructor(statusCode, originName, message) {
-    super(statusCode, originName, message);
+  constructor(statusCode, origin, message) {
+    super(statusCode, origin, message);
   }
 }
 
 export class AuthenticationError extends BaseError {
-  /**
-   * @param {number} statusCode
-   * @param {string} originName
-   * @param {string} message
-   */
-  constructor(statusCode, originName, message) {
-    super(statusCode, originName, message);
+  constructor(statusCode, origin, message) {
+    super(statusCode, origin, message);
   }
 }
 
 export class InternalServerError extends BaseError {
-  /**
-   * @param {number} statusCode
-   * @param {string} originName
-   * @param {string} message
-   */
-  constructor(statusCode, originName, message) {
-    super(statusCode, originName, message);
+  constructor(statusCode, origin, message) {
+    super(statusCode, origin, message);
   }
 }

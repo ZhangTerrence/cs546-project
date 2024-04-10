@@ -2,67 +2,45 @@ import PrivateMessageRepository from "../models/privateMessage.js";
 import { InternalServerError } from "../utils/errors.js";
 
 export default class PrivateMessageService {
-  /**
-   * Gets all private messages.
-   * @returns Private Message array.
-   */
   static getPrivateMessages = async () => {
     return await PrivateMessageRepository.find();
   };
 
-  /**
-   * @description Creates a private message between two user.
-   * @param {string} userId1 The id of the first user.
-   * @param {string} userId2 The id of the second user.
-   * @throws InternalServerError If it fails to create the private message.
-   */
-  static createPrivateMessage = async (userId1, userId2) => {
+  static createPrivateMessage = async (userA, userB) => {
     const createdPrivateMessage = await PrivateMessageRepository.create({
-      users: [userId1, userId2]
+      users: [userA.id, userB.id]
     });
     if (!createdPrivateMessage) {
       throw new InternalServerError(
         500,
-        `create(): ${[userId1, userId2]}`,
-        "Unable to create private message."
+        this.createPrivateMessage.name,
+        `Unable to create private message between ${userA.username} and ${userB.username}.`
       );
     }
   };
 
-  /**
-   * @description Deletes a private message.
-   * @param {string} userId1 The id of the first user.
-   * @param {string} userId2 The id of the second user.
-   * @throws InternalServerError If it fails to delete the private message.
-   */
-  static deletePrivateMessage = async (userId1, userId2) => {
+  static deletePrivateMessage = async (userA, userB) => {
     const deletedPrivateMessage = await PrivateMessageRepository.deleteOne({
-      users: { $in: [userId1, userId2] }
+      users: { $in: [userA.id, userB.id] }
     });
     if (!deletedPrivateMessage) {
       throw new InternalServerError(
         500,
-        `deleteOne(): ${[userId1, userId2]}`,
-        "Unable to delete private message."
+        this.deletePrivateMessage.name,
+        `Unable to delete private message between ${userA.username} and ${userB.username}.`
       );
     }
   };
 
-  /**
-   * @description Deletes all of an user's private messages.
-   * @param {string} userId The given user id.
-   * @throws InternalServerError If it fails to delete the private messages.
-   */
-  static deleteUserPrivateMessages = async (userId) => {
+  static deleteUserPrivateMessages = async (user) => {
     const deletedPrivateMessages = await PrivateMessageRepository.deleteMany({
-      users: { $in: userId }
+      users: { $in: user.id }
     });
-
     if (!deletedPrivateMessages) {
       throw new InternalServerError(
         500,
-        `deleteMany(): ${userId}`,
-        "Unable to delete private messages."
+        this.deleteUserPrivateMessages.name,
+        `Unable to delete ${user.username}'s private messages.`
       );
     }
   };

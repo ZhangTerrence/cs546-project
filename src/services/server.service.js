@@ -4,23 +4,12 @@ import {
   InternalServerError,
   NotFoundError
 } from "../utils/errors.js";
-import mongoose from "mongoose";
 
 export default class ServerService {
-  /**
-   * Gets all servers.
-   * @returns Server array.
-   */
   static getServers = async () => {
     return await ServerRepository.find();
   };
 
-  /**
-   * @description Gets a server by its id.
-   * @param {string} serverId The given server id.
-   * @returns Server.
-   * @throws NotFoundError If the server is not found.
-   */
   static getServerById = async (serverId) => {
     const server = await ServerRepository.findById(serverId);
     if (!server) {
@@ -34,12 +23,6 @@ export default class ServerService {
     return server;
   };
 
-  /**
-   * @description Gets a server by its name.
-   * @param {string} name The given server name.
-   * @returns Server.
-   * @throws NotFoundError If the server is not found.
-   */
   static getServerByName = async (name) => {
     const server = await ServerRepository.findOne({
       name: { $regex: name, $options: "i" }
@@ -51,11 +34,6 @@ export default class ServerService {
     return server;
   };
 
-  /**
-   * @description Gets all servers whose names begin with the given name.
-   * @param {string} name The given name.
-   * @returns Server array.
-   */
   static getSimilarServersByName = async (name) => {
     const servers = await ServerRepository.find({
       name: { $regex: name, $options: "i" }
@@ -64,11 +42,6 @@ export default class ServerService {
     return servers;
   };
 
-  /**
-   * @description Gets all the servers which an user is in.
-   * @param {string} userId The given user id.
-   * @returns Server array.
-   */
   static getJoinedServers = async (userId) => {
     const joinedServers = await ServerRepository.find({
       users: { $elemMatch: { id: userId } }
@@ -77,53 +50,19 @@ export default class ServerService {
     return joinedServers;
   };
 
-  /**
-   * @description Generates a new MongoDB ObjectId.
-   * @param {string} name The given server name.
-   * @returns MongoDB ObjectId.
-   * @throws BadRequestError If the name is taken.
-   */
-  static generateNewServerIdFromName = async (name) => {
+  static createServer = async (name, description, creatorId) => {
     const serverExists = await ServerRepository.findOne({
       name: { $regex: name, $options: "i" }
     });
     if (serverExists) {
       throw new BadRequestError(
         400,
-        `name: ${name}`,
-        "Server name already taken."
+        this.createServer.name,
+        `${name} is taken.`
       );
     }
 
-    return new mongoose.Types.ObjectId();
-  };
-
-  /**
-   * @description Creates a server.
-   * @param {string} serverId The given server id.
-   * @param {string} name The given server name.
-   * @param {string} description The given server description.
-   * @param {string} creatorId The given creator id.
-   * @param {string} generalChannelId The given general channel id.
-   * @throws BadRequestError If the name is taken.
-   * @throws InternalServerError If it fails to create the server.
-   */
-  static createServer = async (
-    serverId,
-    name,
-    description,
-    creatorId,
-    generalChannelId
-  ) => {
-    const serverExists = await ServerRepository.findOne({
-      name: { $regex: name, $options: "i" }
-    });
-    if (serverExists) {
-      throw new BadRequestError(400, `name: ${name}`, "Name is taken.");
-    }
-
     const newServer = await ServerRepository.create({
-      _id: serverId,
       name: name,
       description: description,
       creatorId: creatorId,
@@ -132,86 +71,70 @@ export default class ServerService {
           id: creatorId,
           permissionLevel: 9
         }
-      ],
-      channels: [generalChannelId]
+      ]
     });
     if (!newServer) {
       throw new InternalServerError(
         500,
-        `create(): ${[serverId, name, creatorId, generalChannelId]}`,
+        this.createServer.name,
         "Unable to create server."
       );
     }
+
+    return newServer;
   };
 
-  /**
-   * @description Deletes a server.
-   * @param {string} serverId The given server id.
-   * @throws NotFoundError If the server is not found.
-   * @throws InternalServerError If it fails to delete the server.
-   */
   static deleteServer = async (serverId) => {
-    await this.getServerById(serverId);
-
     const deletedServer = await ServerRepository.findByIdAndDelete(serverId);
-
     if (!deletedServer) {
       throw new InternalServerError(
         500,
-        `findByIdAndDelete(): ${serverId}`,
+        this.deleteServer.name,
         "Unable to delete server."
       );
     }
   };
 
-  /**
-   * @description Adds an user to a server.
-   * @param {ServerDocument} server The server which the user will join.
-   * @param {UserDocument} user The user who will join the server.
-   * @throws BadRequestError If the user is blacklisted or is already in the server.
-   * @throws InternalServerError If it fails to update either the server or the user.
-   */
   static addUser = async (server, user) => {
     if (server.blacklist.includes(user.id)) {
       throw new BadRequestError(
         400,
-        `user: ${[server.blacklist, user.id]}`,
-        "User is blacklisted from server."
+        this.addUser.name,
+        `${user.username} is blacklisted from ${server.name}.`
       );
     }
 
     if (server.creatorId === user.id) {
       throw new BadRequestError(
         400,
-        `user: ${[server.creatorId, user.id]}`,
-        "User is already in server."
+        this.addUser.name,
+        `${user.username} is already in ${server.name}.`
       );
     }
 
     if (server.users.map((userObj) => userObj.id).includes(user.id)) {
       throw new BadRequestError(
         400,
-        `user: ${[server.users, user.id]}`,
-        "User is already in server."
+        this.addUser.name,
+        `${user.username} is already in ${server.name}.`
       );
     }
 
     if (user.servers.includes(server.id)) {
       throw new BadRequestError(
         400,
-        `user: ${[user.servers, server.id]}`,
-        "User is already in server."
+        this.addUser.name,
+        `${user.username} is already in ${server.name}.`
       );
     }
 
     user.servers.push(server.id);
-
     const addedServer = await user.save();
     if (!addedServer) {
       throw new InternalServerError(
         500,
-        `save(): ${[user.servers, server.id]}`,
-        "Unable to join server."
+        this.addUser.name,
+        `Unable to add ${user.username} to ${server.name}'s users.`
       );
     }
 
@@ -219,128 +142,96 @@ export default class ServerService {
       id: user.id,
       permissionLevel: 0
     });
-
     const savedUser = await server.save();
     if (!savedUser) {
       throw new InternalServerError(
         500,
-        `save(): ${[server.users, user.id]}`,
-        "Unable to join server."
+        this.addUser.name,
+        `Unable to add ${user.username} to ${server.name}'s users.`
       );
     }
   };
 
-  /**
-   * @description Removes an user from a server.
-   * @param {ServerDocument} server The server which the user will leave.
-   * @param {string} userId The id of the user who will leave the server.
-   * @throws InternalServerError If it fails to update the server.
-   */
-  static removeUser = async (server, userId) => {
-    const userIndex = server.users.map((server) => server.id).indexOf(userId);
+  static removeUser = async (server, user) => {
+    const userIndex = server.users.map((server) => server.id).indexOf(user.id);
     if (userIndex === -1) {
       throw new NotFoundError(
         404,
-        `user:${[server.users, userId]}`,
-        "User not found."
+        this.removeUser.name,
+        `${user.username} not found in ${server.name}'s users.`
       );
     }
 
     server.users.splice(userIndex, 1);
-
     const removedUser = await server.save();
     if (!removedUser) {
       throw new InternalServerError(
         500,
-        `save(): ${[server, userId]}`,
-        "Unable to delete user from server."
+        this.removeUser.name,
+        `Unable to remove ${user.username} from ${server.name}'s users.`
       );
     }
   };
 
-  /**
-   * @description Blacklists an user from a server.
-   * @param {ServerDocument} server The server which the user will be blacklisted from.
-   * @param {string} userId The id of the user who will be blacklisted.
-   * @throws BadRequestError If the user is the creator.
-   * @throws InternalServerError If it fails to update the server.
-   */
-  static blacklistUser = async (server, userId) => {
-    if (server.creatorId === userId) {
+  static blacklistUser = async (server, user) => {
+    if (server.creatorId === user.id) {
       throw new BadRequestError(
         400,
-        `user: ${[server.creatorId, userId]}`,
-        "You are the owner. Delete server instead."
+        this.blacklistUser.name,
+        `Cannot blacklist ${user.username} from ${server.name}. ${user.username} is the creator.`
       );
     }
 
-    await this.removeUser(server, userId);
+    await this.removeUser(server, user.id);
 
-    server.blacklist.push(userId);
-
+    server.blacklist.push(user.id);
     const blacklistedUser = await server.save();
     if (!blacklistedUser) {
       throw new InternalServerError(
         500,
-        `save(): ${[server.blacklist, userId]}`,
-        "Unable to blacklist user from server."
+        this.blacklistUser.name,
+        `Unable to add ${user.username} to ${server.name}'s blacklisst.`
       );
     }
   };
 
-  /**
-   * @description Adds a channel to a server.
-   * @param {ServerDocument} server The server which the channel will be added to.
-   * @param {string} channelId The id of the channel which will be added.
-   * @throws BadRequestError If the channel already exists in the server.
-   * @throws InternalServerError If it fails to update the server.
-   */
-  static addChannel = async (server, channelId) => {
-    if (server.channels.includes(channelId)) {
+  static addChannel = async (server, channel) => {
+    if (server.channels.includes(channel.id)) {
       throw new BadRequestError(
         400,
-        `server: ${[server.channels, channelId]}`,
-        "Channel already exists in server."
+        this.addChannel.name,
+        `${channel.name} already exists in ${server.name}.`
       );
     }
 
-    server.channels.push(channelId);
-
+    server.channels.push(channel.id);
     const addedChannel = await server.save();
     if (!addedChannel) {
       throw new InternalServerError(
         500,
-        `save(): ${[server.channels, channelId]}`,
-        "Unable to add channel to server."
+        this.channel.name,
+        `Unable to add ${channel.name} to ${server.name}'s channels.`
       );
     }
   };
 
-  /**
-   * @description Deletes a channel from a server.
-   * @param {ServerDocument} server The server which the channel will be deleted from.
-   * @param {string} channelId The id of the channel which will be deleted.
-   * @throws NotFoundError If the channel is not found.
-   * @throws InternalServerError If it fails to update the server.
-   */
-  static deleteChannel = async (server, channelId) => {
-    const channelIndex = server.channels.indexOf(channelId);
+  static deleteChannel = async (server, channel) => {
+    const channelIndex = server.channels.indexOf(channel.id);
     if (channelIndex === -1) {
       throw new NotFoundError(
         404,
-        `channel: ${[server.channels, channelId]}`,
-        "Channel not found."
+        this.deleteChannel.name,
+        `${channel.name} not found in ${server.name}'s channels.`
       );
     }
 
     server.channels.splice(channelIndex, 1);
-
     const removedChannel = await server.save();
     if (!removedChannel) {
       throw new InternalServerError(
         500,
-        `save(): ${[server.channels, channelId]}`,
-        "Unable to delete channel from server."
+        this.deleteChannel.name,
+        `Unable to delete ${channel.name} from ${server.name}'s channels.`
       );
     }
   };

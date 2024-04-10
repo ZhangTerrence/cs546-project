@@ -6,7 +6,6 @@ import { ServerValidator } from "../utils/validators.js";
 
 export default class ServerController {
   /**
-   * @description Renders a server's main page.
    * @route GET /server/:serverId
    * @access Public
    */
@@ -74,7 +73,7 @@ export default class ServerController {
       });
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         if ((!error) instanceof InternalServerError) {
           return res.status(error.statusCode).render("error/500", {
             statusCode: error.statusCode,
@@ -97,7 +96,28 @@ export default class ServerController {
   };
 
   /**
-   * @description Gets all servers.
+   * @route GET /api/server/:name
+   * @access Public
+   */
+  static getServersByName = async (req, res) => {
+    try {
+      const { name } = req.params;
+
+      const servers = await ServerService.getSimilarServersByName(name);
+
+      return res.status(200).json({ data: { servers: servers } });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        return res.status(error.statusCode).json({ error: error.message });
+      } else {
+        console.log(error);
+        return res.status(500).json({ error: "Code went boom." });
+      }
+    }
+  };
+
+  /**
    * @route GET /api/server
    * @access Public
    */
@@ -108,7 +128,7 @@ export default class ServerController {
       return res.status(200).json({ data: { servers: servers } });
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -118,30 +138,6 @@ export default class ServerController {
   };
 
   /**
-   * @description Gets servers by name.
-   * @route GET /api/server/:name
-   * @access Public
-   */
-  static getServersByName = async (req, res) => {
-    try {
-      const { name } = req.params;
-
-      const servers = await ServerService.getSimilarServersByName(name);
-
-      return res.status(200).json({ data: { servers } });
-    } catch (error) {
-      if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
-        return res.status(error.statusCode).json({ error: error.message });
-      } else {
-        console.log(error);
-        return res.status(500).json({ error: "Code went boom." });
-      }
-    }
-  };
-
-  /**
-   * @description Creates a server.
    * @route POST /api/server
    * @access Private
    */
@@ -154,30 +150,25 @@ export default class ServerController {
       const userId = req.session.user.id;
 
       const user = await UserService.getUserById(userId);
-
-      const newServerId = await ServerService.generateNewServerIdFromName(name);
-
-      const newGeneralChannel =
-        await ChannelService.createGeneralChannelForServer(newServerId);
-
-      await UserService.addServer(user, newServerId);
-
-      await ServerService.createServer(
-        newServerId,
+      const newServer = await ServerService.createServer(
         name,
         description,
-        userId,
-        newGeneralChannel.id
+        userId
       );
+      const newGeneralChannel =
+        await ChannelService.createGeneralChannelForServer(newServer);
+
+      await ServerService.addChannel(newServer, newGeneralChannel);
+      await UserService.addServer(user, newServer);
 
       return res.status(201).json({
         data: {
-          url: `/server/${newServerId}`
+          url: `/server/${newServer.id}`
         }
       });
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -187,7 +178,6 @@ export default class ServerController {
   };
 
   /**
-   * @description Deletes a server.
    * @route DELETE /api/server
    * @access Private
    */
@@ -208,13 +198,12 @@ export default class ServerController {
       );
 
       await ServerService.deleteServer(server.id);
-
-      await ChannelService.deleteServerChannels(server.id);
+      await ChannelService.deleteServerChannels(server);
 
       return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -224,7 +213,6 @@ export default class ServerController {
   };
 
   /**
-   * @description Joins a server.
    * @route POST /api/server/join
    * @access Private
    */
@@ -244,7 +232,7 @@ export default class ServerController {
       return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -254,7 +242,6 @@ export default class ServerController {
   };
 
   /**
-   * @description Leaves a server.
    * @route DELETE /api/server/leave
    * @access Private
    */
@@ -270,13 +257,12 @@ export default class ServerController {
       const user = await UserService.getUserById(userId);
 
       await UserService.removeServer(user, server);
-
-      await ServerService.removeUser(server, user.id);
+      await ServerService.removeUser(server, user);
 
       return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -286,7 +272,6 @@ export default class ServerController {
   };
 
   /**
-   * @description Kicks user from a server.
    * @route DELETE /api/server/kick
    * @access Private
    */
@@ -305,13 +290,12 @@ export default class ServerController {
       const user = await UserService.getUserById(userId);
 
       await UserService.removeServer(user, server);
-
-      await ServerService.blacklistUser(server, user.id);
+      await ServerService.blacklistUser(server, user);
 
       return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);

@@ -3,7 +3,6 @@ import { BaseError } from "../utils/errors.js";
 
 export default class PrivateMessageController {
   /**
-   * @description Gets all private messages.
    * @route GET /api/privateMessage
    * @access Public
    */
@@ -16,7 +15,7 @@ export default class PrivateMessageController {
         .json({ data: { privateMessages: privateMessages } });
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);

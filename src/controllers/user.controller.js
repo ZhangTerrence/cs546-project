@@ -7,7 +7,6 @@ import { UserValidator } from "../utils/validators.js";
 
 export default class UserController {
   /**
-   * @description Renders an user's profile page.
    * @route GET /user/:userId
    * @access Public
    */
@@ -83,7 +82,7 @@ export default class UserController {
       }
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         if (!(error instanceof InternalServerError)) {
           return res.status(error.statusCode).render("error/400", {
             statusCode: error.statusCode,
@@ -106,7 +105,54 @@ export default class UserController {
   };
 
   /**
-   * @description Gets all users.
+   * @route POST /api/user/login
+   * @access Public
+   */
+  static loginUser = async (req, res) => {
+    try {
+      const { username, password } = UserValidator.validateLoginCredentials(
+        req.body.username,
+        req.body.password
+      );
+
+      const user = await UserService.authenticateCredentials(
+        username,
+        password
+      );
+
+      req.session.user = {
+        id: user.id,
+        username: user.username,
+        bio: user.bio,
+        theme: user.theme
+      };
+
+      return res.status(200).json({
+        data: {
+          url: `/user/${user.id}`
+        }
+      });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        return res.status(error.statusCode).json({ error: error.message });
+      } else {
+        console.log(error);
+        return res.status(500).json({ error: "Code went boom." });
+      }
+    }
+  };
+
+  /**
+   * @route POST /api/user/logout
+   * @access Public
+   */
+  static logoutUser = async (req, res) => {
+    req.session.destroy();
+    return res.status(204).redirect("/");
+  };
+
+  /**
    * @route GET /api/user
    * @access Public
    */
@@ -117,7 +163,7 @@ export default class UserController {
       return res.status(200).json({ data: { users: users } });
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -127,8 +173,7 @@ export default class UserController {
   };
 
   /**
-   * @description Creates a new user.
-   * @route POST /api/user/signup
+   * @route POST /api/user
    * @access Public
    */
   static createUser = async (req, res) => {
@@ -145,7 +190,7 @@ export default class UserController {
         id: user.id,
         username: user.username,
         bio: user.bio,
-        darkMode: user.darkMode
+        theme: user.theme
       };
 
       return res.status(201).json({
@@ -155,7 +200,7 @@ export default class UserController {
       });
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -165,69 +210,23 @@ export default class UserController {
   };
 
   /**
-   * @description Authenticates an user.
-   * @route POST /api/user/login
-   * @access Public
-   */
-  static authenticateUser = async (req, res) => {
-    try {
-      const { username, password } = UserValidator.validateLoginCredentials(
-        req.body.username,
-        req.body.password
-      );
-
-      const user = await UserService.authenticateUser(username, password);
-
-      req.session.user = {
-        id: user.id,
-        username: user.username,
-        bio: user.bio,
-        darkMode: user.darkMode
-      };
-
-      return res.status(200).json({
-        data: {
-          url: `/user/${user.id}`
-        }
-      });
-    } catch (error) {
-      if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
-        return res.status(error.statusCode).json({ error: error.message });
-      } else {
-        console.log(error);
-        return res.status(500).json({ error: "Code went boom." });
-      }
-    }
-  };
-
-  /**
-   * @description Logs out an user.
-   * @route POST /api/user/logout
-   * @access Public
-   */
-  static logoutUser = async (req, res) => {
-    req.session.destroy();
-    return res.status(204).redirect("/");
-  };
-
-  /**
-   * @description Updates an user.
    * @route PATCH /api/user
    * @access Private
    */
   static updateUser = async (req, res) => {
     try {
-      const { darkMode } = UserValidator.validateUpdateInfo(req.body.darkMode);
-      const bio = req.body.bio;
+      const { bio, theme } = UserValidator.validateUpdateInfo(
+        req.body.bio,
+        req.body.theme
+      );
       const userId = req.session.user.id;
 
-      await UserService.updateUser(userId, bio, darkMode);
+      await UserService.updateUser(userId, bio, theme);
 
       return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -237,7 +236,6 @@ export default class UserController {
   };
 
   /**
-   * @description Deletes an user.
    * @route DELETE /api/user
    * @access Private
    */
@@ -245,33 +243,36 @@ export default class UserController {
     try {
       const userId = req.session.user.id;
 
-      const user = await UserService.getUserById(userId);
+      const removedUser = await UserService.getUserById(userId);
 
-      const associatedUsers = await UserService.getAssociatedUsers(user.id);
+      const associatedUsers = await UserService.getAssociatedUsers(
+        removedUser.id
+      );
       associatedUsers.forEach(async (associatedUser) => {
-        await UserService.removeUserAssociations(associatedUser, user.id);
+        await UserService.removeUserAssociations(associatedUser, removedUser);
       });
 
-      const joinedServers = await ServerService.getJoinedServers(user.id);
+      const joinedServers = await ServerService.getJoinedServers(
+        removedUser.id
+      );
       joinedServers.forEach(async (joinedServer) => {
-        if (user.id === joinedServer.creatorId) {
-          await ChannelService.deleteServerChannels(joinedServer.id);
+        if (removedUser.id === joinedServer.creatorId) {
+          await ChannelService.deleteServerChannels(joinedServer);
           await ServerService.deleteServer(joinedServer.id);
         } else {
-          await ServerService.removeUser(joinedServer, user.id);
+          await ServerService.removeUser(joinedServer, removedUser);
         }
       });
 
-      await PrivateMessageService.deleteUserPrivateMessages(user.id);
-
-      await UserService.deleteUser(user.id);
+      await PrivateMessageService.deleteUserPrivateMessages(removedUser);
+      await UserService.deleteUser(removedUser.id);
 
       req.session.destroy();
 
       return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -281,26 +282,25 @@ export default class UserController {
   };
 
   /**
-   * @description Sends a friend request to another user.
-   * @route POST /api/user/friend/create
+   * @route POST /api/user/friend/send
    * @access Private
    */
-  static createFriendRequest = async (req, res) => {
+  static sendFriendRequest = async (req, res) => {
     try {
       const { username } = UserValidator.validateCreateFriendRequestInfo(
         req.body.username
       );
       const userId = req.session.user.id;
 
-      const targetUser = await UserService.getUserByUsername(username);
-      const user = await UserService.getUserById(userId);
+      const target = await UserService.getUserByUsername(username);
+      const requester = await UserService.getUserById(userId);
 
-      await UserService.createFriendRequest(targetUser, user);
+      await UserService.sendFriendRequest(target, requester);
 
       return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -310,44 +310,6 @@ export default class UserController {
   };
 
   /**
-   * @description Accepts a friend request from another user.
-   * @route POST /api/user/friend/accept
-   * @access Private
-   */
-  static acceptFriendRequest = async (req, res) => {
-    try {
-      const requesterId = UserValidator.validateMongooseId(
-        req.body.requesterId,
-        "requesterId"
-      );
-      const userId = req.session.user.id;
-
-      const requester = await UserService.getUserById(requesterId);
-      const user = await UserService.getUserById(userId);
-
-      await PrivateMessageService.createPrivateMessage(requester.id, user.id);
-
-      await UserService.acceptFriendRequest(requester, user);
-
-      return res.status(200).json({
-        data: {
-          id: requester.id,
-          username: requester.username
-        }
-      });
-    } catch (error) {
-      if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
-        return res.status(error.statusCode).json({ error: error.message });
-      } else {
-        console.log(error);
-        return res.status(500).json({ error: "Code went boom." });
-      }
-    }
-  };
-
-  /**
-   * @description Rejects a friend request from another user.
    * @route DELETE /api/user/friend/reject
    * @access Private
    */
@@ -359,14 +321,15 @@ export default class UserController {
       );
       const userId = req.session.user.id;
 
-      const user = await UserService.getUserById(userId);
+      const target = await UserService.getUserById(userId);
+      const requester = await UserService.getUserById(requesterId);
 
-      await UserService.rejectFriendRequest(user, requesterId);
+      await UserService.rejectFriendRequest(target, requester);
 
       return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -376,8 +339,42 @@ export default class UserController {
   };
 
   /**
-   * @description Removes another user from friends list.
-   * @route DELETE /api/user/friend/remove
+   * @route POST /api/user/friend
+   * @access Private
+   */
+  static addFriend = async (req, res) => {
+    try {
+      const requesterId = UserValidator.validateMongooseId(
+        req.body.requesterId,
+        "requesterId"
+      );
+      const userId = req.session.user.id;
+
+      const target = await UserService.getUserById(userId);
+      const requester = await UserService.getUserById(requesterId);
+
+      await PrivateMessageService.createPrivateMessage(target, requester);
+      await UserService.acceptFriendRequest(target, requester);
+
+      return res.status(200).json({
+        data: {
+          id: requester.id,
+          username: requester.username
+        }
+      });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        return res.status(error.statusCode).json({ error: error.message });
+      } else {
+        console.log(error);
+        return res.status(500).json({ error: "Code went boom." });
+      }
+    }
+  };
+
+  /**
+   * @route DELETE /api/user/friend
    * @access Private
    */
   static removeFriend = async (req, res) => {
@@ -388,17 +385,16 @@ export default class UserController {
       );
       const userId = req.session.user.id;
 
-      const friend = await UserService.getUserById(friendId);
-      const user = await UserService.getUserById(userId);
+      const userA = await UserService.getUserById(friendId);
+      const userB = await UserService.getUserById(userId);
 
-      await PrivateMessageService.deletePrivateMessage(friend.id, user.id);
-
-      await UserService.removeFriend(friend, user);
+      await PrivateMessageService.deletePrivateMessage(userA, userB);
+      await UserService.removeFriend(userA, userB);
 
       return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
