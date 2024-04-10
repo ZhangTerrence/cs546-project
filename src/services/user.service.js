@@ -12,6 +12,14 @@ export default class UserService {
   static saltRounds = 16;
 
   /**
+   * Gets all users.
+   * @returns User array.
+   */
+  static getUsers = async () => {
+    return await UserRepository.find();
+  };
+
+  /**
    * @description Gets an user by their id.
    * @param {string} userId The given user id.
    * @returns User.

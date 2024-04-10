@@ -81,6 +81,27 @@ export default class ChannelController {
   };
 
   /**
+   * @description Gets all channels.
+   * @route GET /api/channel
+   * @access Public
+   */
+  static getChannels = async (_req, res) => {
+    try {
+      const channels = await ChannelService.getChannels();
+
+      return res.status(200).json({ data: { channels: channels } });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} - ${error.originName}`);
+        return res.status(error.statusCode).json({ error: error.message });
+      } else {
+        console.log(error);
+        return res.status(500).json({ error: "Code went boom." });
+      }
+    }
+  };
+
+  /**
    * @description Creates a channel.
    * @route POST /api/channel
    * @access Private

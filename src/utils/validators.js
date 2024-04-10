@@ -59,7 +59,7 @@ export class UserValidator extends BaseValidator {
         `Expected between ${this.minUsernameLength} and ${this.maxUsernameLength} characters without whitespace.`
       );
     }
-    if (_username.match("^[a-z0-9]+$/i")) {
+    if (!/^[a-z0-9]+$/i.test(username)) {
       throw new BadRequestError(
         400,
         "username",
@@ -77,7 +77,7 @@ export class UserValidator extends BaseValidator {
         `Expected between ${this.minUsernameLength} and ${this.maxUsernameLength} characters without whitespace.`
       );
     }
-    if (password.match("^[a-z0-9]+$/i")) {
+    if (!/^[a-z0-9]+$/i.test(password)) {
       throw new BadRequestError(
         400,
         "password",

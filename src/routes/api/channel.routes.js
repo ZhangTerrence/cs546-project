@@ -7,6 +7,7 @@ const router = express.Router({ mergeParams: true });
 
 router
   .route("/")
+  .get(ChannelController.getChannels)
   .post(isAuthenticated(), ChannelController.createChannel)
   .delete(isAuthenticated(), ChannelController.deleteChannel);
 

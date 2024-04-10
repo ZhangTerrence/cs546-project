@@ -10,6 +10,7 @@ router.route("/logout").post(UserController.logoutUser);
 
 router
   .route("/")
+  .get(UserController.getUsers)
   .patch(isAuthenticated(), UserController.updateUser)
   .delete(isAuthenticated(), UserController.deleteUser);
 
@@ -21,7 +22,7 @@ router
   .post(isAuthenticated(), UserController.acceptFriendRequest);
 router
   .route("/friend/reject")
-  .post(isAuthenticated(), UserController.rejectFriendRequest);
+  .delete(isAuthenticated(), UserController.rejectFriendRequest);
 router
   .route("/friend/remove")
   .delete(isAuthenticated(), UserController.removeFriend);

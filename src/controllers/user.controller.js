@@ -106,6 +106,27 @@ export default class UserController {
   };
 
   /**
+   * @description Gets all users.
+   * @route GET /api/user
+   * @access Public
+   */
+  static getUsers = async (_req, res) => {
+    try {
+      const users = await UserService.getUsers();
+
+      return res.status(200).json({ data: { users: users } });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} - ${error.originName}`);
+        return res.status(error.statusCode).json({ error: error.message });
+      } else {
+        console.log(error);
+        return res.status(500).json({ error: "Code went boom." });
+      }
+    }
+  };
+
+  /**
    * @description Creates a new user.
    * @route POST /api/user/signup
    * @access Public
@@ -327,7 +348,7 @@ export default class UserController {
 
   /**
    * @description Rejects a friend request from another user.
-   * @route POST /api/user/friend/reject
+   * @route DELETE /api/user/friend/reject
    * @access Private
    */
   static rejectFriendRequest = async (req, res) => {

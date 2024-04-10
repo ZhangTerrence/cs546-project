@@ -3,6 +3,14 @@ import { InternalServerError } from "../utils/errors.js";
 
 export default class PrivateMessageService {
   /**
+   * Gets all private messages.
+   * @returns Private Message array.
+   */
+  static getPrivateMessages = async () => {
+    return await PrivateMessageRepository.find();
+  };
+
+  /**
    * @description Creates a private message between two user.
    * @param {string} userId1 The id of the first user.
    * @param {string} userId2 The id of the second user.

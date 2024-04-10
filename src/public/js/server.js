@@ -195,7 +195,7 @@ async function kickUser(e, button) {
 
   try {
     const response = await fetch("/api/server/kick", {
-      method: "POST",
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json"
       },

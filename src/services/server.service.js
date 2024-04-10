@@ -8,6 +8,14 @@ import mongoose from "mongoose";
 
 export default class ServerService {
   /**
+   * Gets all servers.
+   * @returns Server array.
+   */
+  static getServers = async () => {
+    return await ServerRepository.find();
+  };
+
+  /**
    * @description Gets a server by its id.
    * @param {string} serverId The given server id.
    * @returns Server.

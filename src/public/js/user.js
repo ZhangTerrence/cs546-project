@@ -198,7 +198,7 @@ async function rejectFriendRequest(e, button) {
 
   try {
     const response = await fetch("/user/friendRequest/reject", {
-      method: "POST",
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json"
       },

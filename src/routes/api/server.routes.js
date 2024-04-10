@@ -8,11 +8,12 @@ router.route("/:name").get(ServerController.getServersByName);
 
 router
   .route("/")
+  .get(ServerController.getServers)
   .post(isAuthenticated(), ServerController.createServer)
   .delete(isAuthenticated(), ServerController.deleteServer);
 
 router.route("/join").post(isAuthenticated(), ServerController.joinServer);
 router.route("/leave").delete(isAuthenticated(), ServerController.leaveServer);
-router.route("/kick").post(isAuthenticated(), ServerController.kickUser);
+router.route("/kick").delete(isAuthenticated(), ServerController.kickUser);
 
 export default router;

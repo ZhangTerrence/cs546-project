@@ -97,6 +97,27 @@ export default class ServerController {
   };
 
   /**
+   * @description Gets all servers.
+   * @route GET /api/server
+   * @access Public
+   */
+  static getServers = async (_req, res) => {
+    try {
+      const servers = await ServerService.getServers();
+
+      return res.status(200).json({ data: { servers: servers } });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} - ${error.originName}`);
+        return res.status(error.statusCode).json({ error: error.message });
+      } else {
+        console.log(error);
+        return res.status(500).json({ error: "Code went boom." });
+      }
+    }
+  };
+
+  /**
    * @description Gets servers by name.
    * @route GET /api/server/:name
    * @access Public
@@ -180,9 +201,11 @@ export default class ServerController {
       const server = await ServerService.getServerById(serverId);
 
       const joinedUsers = await UserService.getJoinedUsers(server.id);
-      joinedUsers.forEach(async (user) => {
-        await UserService.removeServer(user, server);
-      });
+      await Promise.all(
+        joinedUsers.map(async (user) => {
+          await UserService.removeServer(user, server);
+        })
+      );
 
       await ServerService.deleteServer(server.id);
 
@@ -264,7 +287,7 @@ export default class ServerController {
 
   /**
    * @description Kicks user from a server.
-   * @route POST /api/server/kick
+   * @route DELETE /api/server/kick
    * @access Private
    */
   static kickUser = async (req, res) => {

@@ -7,6 +7,14 @@ import {
 
 export default class ChannelService {
   /**
+   * Gets all channels.
+   * @returns Channel array.
+   */
+  static getChannels = async () => {
+    return await ChannelRepository.find();
+  };
+
+  /**
    * @description Gets a channel by its id.
    * @param {string} userId The given channel id.
    * @returns Channel.
