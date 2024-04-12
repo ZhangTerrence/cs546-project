@@ -104,4 +104,16 @@ export default class ChannelService {
       );
     }
   };
+
+  static addMessage = async (channel, message) => {
+    channel.messages.push(message.id);
+    const addedMessage = await channel.save();
+    if (!addedMessage) {
+      throw new InternalServerError(
+        500,
+        this.addMessage.name,
+        `Unable to add message to ${channel.name}`
+      );
+    }
+  };
 }

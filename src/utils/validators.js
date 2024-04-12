@@ -198,3 +198,40 @@ export class ChannelValidator extends BaseValidator {
     };
   };
 }
+
+export class MessageValidator extends BaseValidator {
+  static validateCreationInfo = (_channelId, _privateMessageId, _message) => {
+    if (!_channelId && !_privateMessageId) {
+      throw new BadRequestError(
+        400,
+        this.validateCreationInfo.name,
+        "Message must belong to either a channel or a private message."
+      );
+    }
+
+    if (_channelId && _privateMessageId) {
+      throw new BadRequestError(
+        400,
+        this.validateCreationInfo.name,
+        "Message must belong to either a channel or a private message."
+      );
+    }
+
+    const message = this.validateString(_message, "message");
+    if (_channelId) {
+      const channelId = this.validateMongooseId(_channelId, "channelId");
+
+      return {
+        channelId: channelId,
+        message: message
+      };
+    }
+
+    const privateMessageId = this.validateMongooseId(_channelId, "channelId");
+
+    return {
+      privateMessageId: privateMessageId,
+      message: message
+    };
+  };
+}

@@ -41,19 +41,29 @@ export default class ChannelController {
         req.session.user.id &&
         serverUsers.includes(req.session.user.id)
       ) {
-        return res.render("channel/channel", {
-          name: channel.name,
-          description: channel.description,
-          messages: messages,
-          canSend: true
-        });
+        const userId = req.session.user.id;
+        const userPerms = server.users.find(
+          (userObj) => userObj.id === userId
+        ).permissionLevel;
+
+        if (userPerms >= channel.permissionLevel) {
+          return res.render("channel/channel", {
+            name: channel.name,
+            description: channel.description,
+            messages: messages,
+            canSend: true
+          });
+        } else {
+          return res.status(403).render("error/400", {
+            statusCode: 403,
+            message: "Insufficient permissions."
+          });
+        }
       }
 
-      return res.render("channel/channel", {
-        name: channel.name,
-        description: channel.description,
-        messages: channel.messages,
-        canSend: false
+      return res.status(403).render("error/400", {
+        statusCode: 403,
+        message: "Insufficient permissions."
       });
     } catch (error) {
       if (error instanceof BaseError) {
@@ -126,7 +136,7 @@ export default class ChannelController {
 
       await ServerService.addChannel(server, newChannel);
 
-      return res.status(200).json({
+      return res.status(201).json({
         data: {
           url: `/channel/${newChannel.id}`
         }

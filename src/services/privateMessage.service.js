@@ -6,6 +6,19 @@ export default class PrivateMessageService {
     return await PrivateMessageRepository.find();
   };
 
+  static getPrivateMessageById = async (privateMessageId) => {
+    const privateMessage =
+      await PrivateMessageRepository.findById(privateMessageId);
+    if (!privateMessage) {
+      throw new NotFoundError(
+        404,
+        this.getPrivateMessageById.name,
+        "Private message not found."
+      );
+    }
+    return privateMessage;
+  };
+
   static createPrivateMessage = async (userA, userB) => {
     const createdPrivateMessage = await PrivateMessageRepository.create({
       users: [userA.id, userB.id]
@@ -59,6 +72,18 @@ export default class PrivateMessageService {
         500,
         this.deleteUserPrivateMessages.name,
         `Unable to delete ${user.username}'s private messages.`
+      );
+    }
+  };
+
+  static addMessage = async (privateMessage, message) => {
+    privateMessage.messages.push(message.id);
+    const addedMessage = await privateMessage.save();
+    if (!addedMessage) {
+      throw new InternalServerError(
+        500,
+        this.addMessage.name,
+        "Unable to add message to private message."
       );
     }
   };
