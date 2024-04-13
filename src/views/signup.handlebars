@@ -1,15 +1,22 @@
-<h1>Signup page.</h1>
-<form>
-  <label for="email">Email:</label>
-  <input type="email" name="email" />
+<main class="signup__main">
+  <nav class="signup__nav">
+    <a href="/">Nexus</a>
+    <ul>
+      <li><a href="/signup">Signup</a></li>
+      <li><a href="/login">Login</a></li>
+    </ul>
+  </nav>
+  <h1>Signup</h1>
+  <form>
+    <label for="email">Email</label>
+    <input type="email" name="email" />
 
-  <label for="username">Username:</label>
-  <input type="text" name="username" />
+    <label for="username">Username</label>
+    <input type="text" name="username" />
 
-  <label for="password">Password:</label>
-  <input type="password" name="password" />
+    <label for="password">Password</label>
+    <input type="password" name="password" />
 
-  <button id="signupButton">Signup</button>
-</form>
-
-<script src="/public/js/signup.js"></script>
+    <button id="signup__button">Signup</button>
+  </form>
+</main>

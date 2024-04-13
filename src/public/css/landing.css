@@ -1,0 +1,41 @@
+.landing__main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--background-primary);
+}
+
+.landing__main h1 {
+  font-size: 5rem;
+}
+
+.landing__nav {
+  position: fixed;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  width: 100vw;
+  padding: 1rem;
+  font-size: 1.25rem;
+  border-bottom: 5px solid var(--background-secondary);
+  z-index: 10;
+}
+
+.landing__nav a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.landing__nav ul {
+  list-style: none;
+}
+
+.landing__nav ul li {
+  display: inline-block;
+  margin: 0 0.5rem;
+}
+
+.landing__nav ul li:hover {
+  scale: 1.05;
+}

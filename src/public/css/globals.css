@@ -1,0 +1,43 @@
+:root {
+  --background-primary: #ffffff;
+  --background-secondary: #f5f5f5;
+  --text-negative: #333333;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-primary: #121212;
+    --background-secondary: #1e1e1e;
+    --text-negative: #ffffff;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  font-family: "Lato", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  color: var(--text-negative);
+}
+
+button {
+  background-color: var(--text-negative);
+  color: var(--background-primary);
+  font-family: inherit;
+}
+
+button:hover,
+a:hover {
+  scale: 1.05;
+}
+
+input,
+button {
+  border-style: solid;
+}

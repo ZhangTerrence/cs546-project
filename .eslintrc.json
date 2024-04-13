@@ -9,5 +9,6 @@
     "es2023": true,
     "node": true,
     "browser": true
-  }
+  },
+  "ignorePatterns": ["**/public/js/*.js"]
 }

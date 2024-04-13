@@ -1,12 +1,34 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/public/images/logo.png">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="/public/images/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+      rel="stylesheet" />
+    <link rel="stylesheet" href="/public/css/globals.css" />
+    <link rel="stylesheet" href="/public/css/toast.css" />
+    <link rel="stylesheet" href="/public/css/loader.css" />
+    {{#each stylesheets}} {{{this}}} {{/each}}
     <title>Nexus</title>
   </head>
   <body>
     {{{body}}}
+    <div id="toast__background" style="visibility: hidden">
+      <div id="toast__box">
+        <p id="toast__message"></p>
+        <button id="toast__close-button">Close</button>
+      </div>
+    </div>
+    <div id="loader__background" style="visibility: hidden">
+      <span class="loader"></span>
+    </div>
+    <script src="/public/js/toast.js"></script>
+    <script src="/public/js/loader.js"></script>
+    <script src="/public/js/helpers.js"></script>
+    {{#each scripts}} {{{this}}} {{/each}}
   </body>
 </html>

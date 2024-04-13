@@ -1,26 +1,30 @@
-const loginButton = document.getElementById("loginButton");
+const loginButton = document.getElementById("login__button");
 
-loginButton.addEventListener("click", async (e) => {
+const login = async (e) => {
   e.preventDefault();
 
-  const body = Object.fromEntries(new FormData(loginButton.form));
+  const requestBody = getFormRequestBody(loginButton);
 
-  try {
-    const response = await fetch("/api/user/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
-    });
-    const json = await response.json();
-
-    if (response.ok) {
-      window.location.replace(json.data.url);
-    } else {
-      console.log(json.error);
-    }
-  } catch (error) {
-    console.log(error);
+  for (const [key, value] of Object.entries(requestBody)) {
+    requestBody[key] = validateString(value, key);
   }
-});
+
+  showLoader();
+  const response = await fetch("/api/user/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(requestBody)
+  });
+  const json = await response.json();
+
+  hideLoader();
+  if (response.ok) {
+    window.location.replace(json.data.url);
+  } else {
+    throw new Error(json.error);
+  }
+};
+
+loginButton.addEventListener("click", async (e) => asyncHandler(login, e));

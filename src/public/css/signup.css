@@ -1,0 +1,70 @@
+.signup__main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  row-gap: 1rem;
+  min-height: 100vh;
+  background-color: var(--background-primary);
+  z-index: 10;
+}
+
+.signup__main h1 {
+  font-size: 3.5rem;
+}
+
+.signup__main form {
+  display: flex;
+  flex-direction: column;
+  row-gap: 1rem;
+  width: 35%;
+}
+
+.signup__main form label {
+  font-size: 1.25rem;
+}
+
+.signup__main form input,
+.signup__main form button {
+  padding: 1rem;
+  border-radius: 5px;
+}
+
+.signup__main form input {
+  font-size: 1.25rem;
+}
+
+.signup__main form button {
+  margin-top: 1rem;
+  font-size: 1.25rem;
+  outline: none;
+}
+
+.signup__nav {
+  position: fixed;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  width: 100vw;
+  padding: 1rem;
+  font-size: 1.25rem;
+  border-bottom: 5px solid var(--background-secondary);
+}
+
+.signup__nav a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.signup__nav ul {
+  list-style: none;
+}
+
+.signup__nav ul li {
+  display: inline-block;
+  margin: 0 0.5rem;
+}
+
+.signup__nav ul li:hover {
+  scale: 1.05;
+}

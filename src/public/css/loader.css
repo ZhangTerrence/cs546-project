@@ -1,0 +1,29 @@
+#loader__background {
+  position: absolute;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  z-index: 20;
+}
+
+.loader {
+  display: inline-block;
+  width: 5rem;
+  height: 5rem;
+  border: 7.5px solid #808080;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

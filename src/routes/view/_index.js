@@ -7,12 +7,17 @@ const router = express.Router({ mergeParams: true });
 
 // Landing Page
 router.route("/").get(async (_req, res) => {
-  return res.render("landing");
+  return res.render("landing", {
+    stylesheets: [`<link rel="stylesheet" href="/public/css/landing.css" />`]
+  });
 });
 
 // Signup Page
 router.route("/signup").get(async (_req, res) => {
-  return res.render("signup");
+  return res.render("signup", {
+    stylesheets: [`<link rel="stylesheet" href="/public/css/signup.css" />`],
+    scripts: [`<script src="/public/js/signup.js"></script>`]
+  });
 });
 
 // Login Page
@@ -20,7 +25,10 @@ router.route("/login").get(async (req, res) => {
   if (req.session.user) {
     return res.redirect(`/user/${req.session.user.id}`);
   }
-  return res.render("login");
+  return res.render("login", {
+    stylesheets: [`<link rel="stylesheet" href="/public/css/login.css" />`],
+    scripts: [`<script src="/public/js/login.js"></script>`]
+  });
 });
 
 // User Page
