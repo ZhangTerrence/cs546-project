@@ -6,17 +6,19 @@ const toastCloseButton = document.getElementById("toast__close-button");
 const printMessage = (message) => {
   toastMessage.innerText = message;
   toastBackground.style.visibility = "visible";
-  toastBox.classList.add("toast-active");
+  toastBox.classList.add("toast--active");
 };
 
 const closeMessage = () => {
   toastMessage.innerText = "";
   toastBackground.style.visibility = "hidden";
-  toastBox.classList.remove("toast-active");
+  toastBox.classList.remove("toast--active");
 };
 
-toastBackground.addEventListener("click", () => {
-  closeMessage();
+toastBackground.addEventListener("click", (e) => {
+  if (e.currentTarget === e.target) {
+    closeMessage();
+  }
 });
 
 toastCloseButton.addEventListener("click", (e) => {

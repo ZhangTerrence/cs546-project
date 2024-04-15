@@ -23,6 +23,7 @@ const asyncHandler = async (func, ...args) => {
   try {
     await func(...args);
   } catch (error) {
+    hideLoader();
     printMessage(error.message);
   }
 };

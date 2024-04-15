@@ -10,16 +10,16 @@ const constructorMethod = (app) => {
   });
 
   app.route("/teapot").get((_req, res) => {
-    return res.status(418).render("error/400", {
+    return res.status(418).render("error", {
       statusCode: 418,
-      message: "Teapot."
+      message: "I'm a teapot."
     });
   });
 
   app.use("*", (_req, res) => {
-    return res.status(404).render("error/400", {
+    return res.status(404).render("error", {
       statusCode: 404,
-      message: "Route not found."
+      message: "Resource not found."
     });
   });
 };

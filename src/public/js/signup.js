@@ -1,4 +1,4 @@
-const signupButton = document.getElementById("signup__button");
+const signupButton = document.getElementById("signup__submit-button");
 
 const signup = async (e) => {
   e.preventDefault();
@@ -13,7 +13,7 @@ const signup = async (e) => {
     const minPasswordLength = 3;
     const maxPasswordLength = 20;
 
-    if (key === "username" || key === "password") {
+    if (key === "username" || key === "password" || key === "repassword") {
       if (!/^[a-z0-9]+$/i.test(string)) {
         throw new Error(`Expected only alphanumeric characters for ${key}.`);
       }
@@ -30,7 +30,7 @@ const signup = async (e) => {
       }
     }
 
-    if (key === "password") {
+    if (key === "password" || key === "repassword") {
       if (
         string.length < minPasswordLength ||
         string.length > maxPasswordLength
@@ -44,6 +44,10 @@ const signup = async (e) => {
     requestBody[key] = string;
   }
 
+  if (requestBody["password"] !== requestBody["repassword"]) {
+    throw new Error("Passwords do not match.");
+  }
+
   showLoader();
   const response = await fetch("/api/user", {
     method: "POST",
@@ -52,13 +56,13 @@ const signup = async (e) => {
     },
     body: JSON.stringify(requestBody)
   });
-  const json = await response.json();
+  const responseBody = await response.json();
 
   hideLoader();
   if (response.ok) {
-    window.location.replace(json.data.url);
+    window.location.replace(responseBody.data.url);
   } else {
-    throw new Error(json.error);
+    throw new Error(responseBody.error);
   }
 };
 

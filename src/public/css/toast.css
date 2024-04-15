@@ -1,37 +1,41 @@
 #toast__background {
+  display: flex;
   position: absolute;
   top: 0;
-  display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  width: 100vw;
-  backdrop-filter: blur(2.5px);
   z-index: 20;
+  backdrop-filter: blur(2.5px);
+  width: 100vw;
+  height: 100vh;
 }
 
 #toast__box {
+  display: flex;
   position: fixed;
   bottom: 80%;
-  display: flex;
+  row-gap: 1rem;
   flex-direction: column;
   justify-content: space-between;
-  row-gap: 1rem;
-  padding: 1rem;
-  width: 35%;
-  min-height: 10%;
-  background-color: var(--background-primary);
+  transition: transform 0.25s ease-out;
   border: 1px solid var(--text-negative);
   border-radius: 5px;
-  transition: transform 0.3s ease-out;
+  background-color: var(--background-primary);
+  padding: 1rem;
+  width: 45rem;
+  min-height: 7.5rem;
 }
 
-#toast__box button {
-  padding: 0.25rem 0.5rem;
+#toast__message {
+  font-size: 1.25rem;
+}
+
+#toast__close-button {
   align-self: flex-end;
   border-radius: 5px;
+  padding: 0.5rem 0.75rem;
 }
 
-.toast-active {
+.toast--active {
   transform: translateY(40%);
 }

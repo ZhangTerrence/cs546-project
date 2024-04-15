@@ -60,7 +60,7 @@ export default class UserController {
         return res.status(200).render("user/profile", {
           username: user.username,
           bio: user.bio,
-          darkMode: user.darkMode,
+          theme: user.theme,
           servers: servers,
           friends: friends,
           friendRequests: friendRequests,
@@ -84,19 +84,19 @@ export default class UserController {
       if (error instanceof BaseError) {
         console.log(`${error.constructor.name} ${error.toString()}`);
         if (!(error instanceof InternalServerError)) {
-          return res.status(error.statusCode).render("error/400", {
+          return res.status(error.statusCode).render("error", {
             statusCode: error.statusCode,
             message: error.message
           });
         } else {
-          return res.status(error.statusCode).render("error/500", {
+          return res.status(error.statusCode).render("error", {
             statusCode: error.statusCode,
             message: error.message
           });
         }
       } else {
         console.log(error);
-        return res.status(500).render("error/500", {
+        return res.status(500).render("error", {
           statusCode: 500,
           message: "Code went boom."
         });
