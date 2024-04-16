@@ -5,17 +5,21 @@ const constructorMethod = (app) => {
   app.use("/", viewRoutes);
   app.use("/api", apiRoutes);
 
-  app.route("/teapot").get(async (_req, res) => {
-    return res.status(418).render("error/400", {
+  app.route("/favicon.ico").get((_req, res) => {
+    res.status(204);
+  });
+
+  app.route("/teapot").get((_req, res) => {
+    return res.status(418).render("error", {
       statusCode: 418,
-      message: "Teapot."
+      message: "I'm a teapot."
     });
   });
 
   app.use("*", (_req, res) => {
-    return res.status(404).render("error/400", {
+    return res.status(404).render("error", {
       statusCode: 404,
-      message: "Route not found."
+      message: "Resource not found."
     });
   });
 };

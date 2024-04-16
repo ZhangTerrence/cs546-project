@@ -1,0 +1,53 @@
+:root {
+  --background-primary: #ffffff;
+  --background-secondary: #f5f5f5;
+  --text-negative: #333333;
+}
+
+html[data-theme="light"] {
+  --background-primary: #ffffff;
+  --background-secondary: #f5f5f5;
+  --text-negative: #333333;
+}
+
+html[data-theme="dark"] {
+  --background-primary: #121212;
+  --background-secondary: #1e1e1e;
+  --text-negative: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  color: var(--text-negative);
+  font-style: normal;
+  font-weight: 400;
+  font-family: "Lato", sans-serif;
+}
+
+textarea {
+  font-family: inherit;
+}
+
+select {
+  background-color: var(--background-primary);
+  color: var(--text-negative);
+}
+
+button {
+  cursor: pointer;
+  background-color: var(--text-negative);
+  color: var(--background-primary);
+  font-family: inherit;
+}
+
+input,
+textarea,
+select,
+button {
+  border-style: solid;
+}

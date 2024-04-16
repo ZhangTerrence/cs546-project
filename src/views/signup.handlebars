@@ -1,14 +1,25 @@
-<h1>Signup page.</h1>
-<form>
-  <label for="email">Email:</label>
-  <input type="email" name="email" />
+<main class="signup__main">
+  <nav class="signup__nav">
+    <a href="/">Nexus</a>
+    <ul>
+      <li><a href="/signup">Signup</a></li>
+      <li><a href="/login">Login</a></li>
+    </ul>
+  </nav>
+  <h1>Signup</h1>
+  <form class="signup__form">
+    <label for="email">Email</label>
+    <input type="email" name="email" autocomplete="off" />
 
-  <label for="username">Username:</label>
-  <input type="text" name="username" />
+    <label for="username">Username</label>
+    <input type="text" name="username" autocomplete="off" />
 
-  <label for="password">Password:</label>
-  <input type="password" name="password" />
+    <label for="password">Password</label>
+    <input type="password" name="password" autocomplete="off" />
 
-  <button id="signupButton">Signup</button>
-</form>
-<script src="/public/js/signup.js"></script>
+    <label for="repassword">Re-enter Password</label>
+    <input type="password" name="repassword" autocomplete="off" />
+
+    <button id="signup__submit-button">Signup</button>
+  </form>
+</main>

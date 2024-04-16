@@ -1,11 +1,19 @@
-<h1>Login page.</h1>
-<form>
-  <label for="username">Username:</label>
-  <input type="text" name="username" />
+<main class="login__main">
+  <nav class="login__nav">
+    <a href="/">Nexus</a>
+    <ul>
+      <li><a href="/signup">Signup</a></li>
+      <li><a href="/login">Login</a></li>
+    </ul>
+  </nav>
+  <h1>Login</h1>
+  <form class="login__form">
+    <label for="username">Username</label>
+    <input type="text" name="username" autocomplete="off" />
 
-  <label for="password">Password:</label>
-  <input type="password" name="password" />
+    <label for="password">Password</label>
+    <input type="password" name="password" autocomplete="off" />
 
-  <button id="loginButton">Login</button>
-</form>
-<script src="/public/js/login.js"></script>
+    <button id="login__submit-button">Login</button>
+  </form>
+</main>

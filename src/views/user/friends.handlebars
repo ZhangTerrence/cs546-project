@@ -1,0 +1,43 @@
+<main class="friends__main">
+  <a href="/user/{{id}}">Go back to profile</a>
+
+  <div class="friends__content">
+    <div class="friends__friends">
+      <h1>{{username}}'s Friends</h1>
+      <ul id="friends__friends-list">
+        {{#each friends}}
+          <li>
+            <form id="{{id}}">
+              <a href="/user/{{id}}">{{username}}</a>
+              <button class="friends__remove-buttons">Remove</button>
+            </form>
+          </li>
+        {{/each}}
+      </ul>
+    </div>
+
+    <div class="friends__friend-requests">
+      <h2>Send Friend Request</h2>
+      <form>
+        <label for="username">Username</label>
+        <input type="text" name="username" autocomplete="off" />
+
+        <button id="friends__request-button">Send</button>
+      </form>
+      <h2>Incoming Friend Requests</h2>
+      <ul id="friends__friends-requests-list">
+        {{#each friendRequests}}
+          <li>
+            <form id="{{id}}">
+              <a href="/user/{{id}}">{{username}}</a>
+              <div>
+                <button class="friends__accept-buttons">Accept</button>
+                <button class="friends__reject-buttons">Reject</button>
+              </div>
+            </form>
+          </li>
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+</main>

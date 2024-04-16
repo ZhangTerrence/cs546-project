@@ -1,0 +1,94 @@
+<main class="server__main">
+  <header>
+    <h1>{{name}}</h1>
+    <p>{{description}}</p>
+  </header>
+  {{#if owner}}
+  <div class="server__content">
+    <div class="server__lists">
+      <h2>Users</h2>
+      <ul class="server__users-list">
+        {{#each users}}
+        <li>
+          <form id="{{id}}">
+            <a href="/user/{{id}}">{{username}}</a>
+            <button class="server__kick-button">Kick</button>
+          </form>
+        </li>
+        {{/each}}
+      </ul>
+
+      <h2>Channels</h2>
+      <ul class="server__channels-list">
+        {{#each channels}}
+        <li>
+          <form id="{{id}}">
+            <a href="/channel/{{id}}">{{name}}</a>
+            <button class="server__delete-button">Delete</button>
+          </form>
+        </li>
+        {{/each}}
+      </ul>
+    </div>
+
+    <div class="server__actions">
+      <h2>Edit Server</h2>
+      <a href="/server/edit/{{id}}">
+        <button>Edit Server</button>
+      </a>
+
+      <h2>Create Channel</h2>
+      <form oninput="output.value=parseInt(permissionLevel.value)">
+        <label for="name">Name</label>
+        <input type="text" name="name" autocomplete="off" />
+
+        <label for="description">Description</label>
+        <textarea name="description" autocomplete="off"></textarea>
+
+        <label for="permissionLevel">Permission Level</label>
+        <input type="range" value="0" min="0" max="9" name="permissionLevel" />
+        <output name="output" for="permissionLevel">0</output>
+
+        <button id="server__create-button">Create</button>
+      </form>
+    </div>
+  </div>
+  {{else}}
+  <div class="server__content">
+    <div class="server__lists">
+      <h2>Users</h2>
+      <ul class="server__users-list">
+        {{#each users}}
+        <li>
+          <form id="{{id}}">
+            <a href="/user/{{id}}">{{username}}</a>
+          </form>
+        </li>
+        {{/each}}
+      </ul>
+
+      <h2>Channels</h2>
+      <ul class="server__channels-list">
+        {{#each channels}}
+        <li>
+          <form id="{{id}}">
+            <a href="/channel/{{id}}">{{name}}</a>
+          </form>
+        </li>
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+  <div class="server__leave-container">
+    {{#if member}}
+    <button id="server__leave-button">Leave Server</button>
+    {{/if}}
+  </div>
+  {{/if}}
+
+  <div class="server__delete-container">
+    {{#if owner}}
+    <button id="server__delete-button">Delete Server</button>
+    {{/if}}
+  </div>
+</main>

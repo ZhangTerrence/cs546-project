@@ -1,0 +1,132 @@
+.server__main {
+  display: flex;
+  row-gap: 2.5rem;
+  flex-direction: column;
+  background-color: var(--background-primary);
+  padding: 2.5rem;
+  min-height: 100vh;
+
+  & header {
+    & h1 {
+      margin-bottom: 1.5rem;
+      font-size: 2.75rem;
+    }
+
+    & p {
+      font-size: 1.25rem;
+      white-space: break-spaces;
+    }
+  }
+
+  & a {
+    color: var(--text-negative);
+    text-decoration: none;
+  }
+
+  & a:hover {
+    text-decoration: underline;
+  }
+}
+
+.server__content {
+  display: flex;
+  justify-content: space-between;
+}
+
+.server__lists {
+  padding-right: 1rem;
+  width: 50%;
+
+  & h2 {
+    font-size: 1.75rem;
+    text-decoration: underline;
+  }
+}
+
+.server__users-list,
+.server__channels-list {
+  list-style: none;
+
+  & li {
+    margin: 1rem 0;
+
+    & form {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+
+      & a {
+        font-size: 1.75rem;
+      }
+
+      & button {
+        border-radius: 5px;
+        padding: 0.75rem 1.75rem;
+        width: fit-content;
+        font-size: 1.25rem;
+      }
+    }
+  }
+}
+
+.server__actions {
+  display: flex;
+  row-gap: 0.75rem;
+  flex-direction: column;
+  width: 45%;
+
+  & h2 {
+    font-size: 1.75rem;
+    text-decoration: underline;
+  }
+
+  & button {
+    margin: 1rem 0;
+    border-radius: 5px;
+    padding: 1rem;
+    width: 100%;
+    font-size: 1.25rem;
+  }
+
+  & form {
+    display: flex;
+    row-gap: 1rem;
+    flex-direction: column;
+    width: 100%;
+
+    & label,
+    input,
+    textarea,
+    select,
+    button {
+      font-size: 1.25rem;
+    }
+
+    & input,
+    textarea,
+    select {
+      border-radius: 5px;
+      padding: 0.5rem;
+    }
+
+    & textarea {
+      padding: 0.5rem;
+      height: 20rem;
+      resize: none;
+    }
+  }
+}
+
+.server__delete-container,
+.server__leave-container {
+  align-self: flex-end;
+
+  & button {
+    border-radius: 5px;
+    padding: 0.75rem 1.75rem;
+    width: fit-content;
+    font-size: 1.25rem;
+  }
+}

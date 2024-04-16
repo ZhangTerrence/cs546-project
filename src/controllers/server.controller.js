@@ -6,11 +6,10 @@ import { ServerValidator } from "../utils/validators.js";
 
 export default class ServerController {
   /**
-   * @description Renders a server's main page.
    * @route GET /server/:serverId
    * @access Public
    */
-  static renderServerPage = async (req, res) => {
+  static renderServerMainPage = async (req, res) => {
     try {
       const serverId = ServerValidator.validateMongooseId(
         req.params.serverId,
@@ -30,52 +29,78 @@ export default class ServerController {
         })
       );
 
+      const channels = await Promise.all(
+        server.channels.map(async (channelId) => {
+          const channel = await ChannelService.getChannelById(channelId);
+
+          return {
+            id: channel.id,
+            name: channel.name
+          };
+        })
+      );
+
       if (req.session.user && req.session.user.id) {
         const userId = req.session.user.id;
 
         if (userId === server.creatorId) {
-          return res.render("server/server", {
+          return res.render("server/main", {
+            stylesheets: [
+              `<link rel="stylesheet" href="/public/css/server/main.css" />`
+            ],
+            scripts: [`<script src="/public/js/server/main.js"></script>`],
+            id: server.id,
             name: server.name,
             description: server.description,
             users: users,
+            channels: channels,
             owner: true,
             member: true
           });
         } else if (server.users.map((userObj) => userObj.id).includes(userId)) {
-          return res.render("server/server", {
+          return res.render("server/main", {
+            stylesheets: [
+              `<link rel="stylesheet" href="/public/css/server/main.css" />`
+            ],
+            scripts: [`<script src="/public/js/server/main.js"></script>`],
             name: server.name,
             description: server.description,
             users: users,
+            channels: channels,
             owner: false,
             member: true
           });
         }
       }
 
-      return res.render("server/server", {
+      return res.render("server/main", {
+        stylesheets: [
+          `<link rel="stylesheet" href="/public/css/server/main.css" />`
+        ],
         name: server.name,
         description: server.description,
         users: users,
+        channels: channels,
         owner: false,
         member: false
       });
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         if ((!error) instanceof InternalServerError) {
-          return res.status(error.statusCode).render("error/500", {
+          return res.status(error.statusCode).render("error", {
             statusCode: error.statusCode,
             message: error.message
           });
         } else {
-          return res.status(error.statusCode).render("error/400", {
+          return res.status(error.statusCode).render("error", {
             statusCode: error.statusCode,
             message: error.message
           });
         }
       } else {
         console.log(error);
-        return res.status(500).render("error/500", {
+        return res.status(500).render("error", {
           statusCode: 500,
           message: "Code went boom."
         });
@@ -84,7 +109,52 @@ export default class ServerController {
   };
 
   /**
-   * @description Gets servers by name.
+   * @route GET /server/edit/:serverId
+   * @access Public
+   */
+  static renderServerEditPage = async (req, res) => {
+    try {
+      const serverId = ServerValidator.validateMongooseId(
+        req.params.serverId,
+        "serverId"
+      );
+
+      const server = await ServerService.getServerById(serverId);
+
+      return res.render("server/edit", {
+        stylesheets: [
+          `<link rel="stylesheet" href="/public/css/server/edit.css" />`
+        ],
+        scripts: [`<script src="/public/js/server/edit.js"></script>`],
+        id: server.id,
+        name: server.name,
+        description: server.description
+      });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        if ((!error) instanceof InternalServerError) {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        } else {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        }
+      } else {
+        console.log(error);
+        return res.status(500).render("error", {
+          statusCode: 500,
+          message: "Code went boom."
+        });
+      }
+    }
+  };
+
+  /**
    * @route GET /api/server/:name
    * @access Public
    */
@@ -94,10 +164,10 @@ export default class ServerController {
 
       const servers = await ServerService.getSimilarServersByName(name);
 
-      return res.status(200).json({ data: { servers } });
+      return res.status(200).json({ data: { servers: servers } });
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -107,39 +177,55 @@ export default class ServerController {
   };
 
   /**
-   * @description Creates a server.
+   * @route GET /api/server
+   * @access Public
+   */
+  static getServers = async (_req, res) => {
+    try {
+      const servers = await ServerService.getServers();
+
+      return res.status(200).json({ data: { servers: servers } });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        return res.status(error.statusCode).json({ error: error.message });
+      } else {
+        console.log(error);
+        return res.status(500).json({ error: "Code went boom." });
+      }
+    }
+  };
+
+  /**
    * @route POST /api/server
    * @access Private
    */
   static createServer = async (req, res) => {
     try {
       const { name } = ServerValidator.validateCreationInfo(req.body.name);
+      const description = req.body.description;
       const userId = req.session.user.id;
 
       const user = await UserService.getUserById(userId);
-
-      const newServerId = await ServerService.generateNewServerIdFromName(name);
-
-      const newGeneralChannel =
-        await ChannelService.createGeneralChannelForServer(newServerId);
-
-      await UserService.addServer(user, newServerId);
-
-      await ServerService.createServer(
-        newServerId,
+      const newServer = await ServerService.createServer(
         name,
-        userId,
-        newGeneralChannel.id
+        description,
+        userId
       );
+      const newGeneralChannel =
+        await ChannelService.createGeneralChannelForServer(newServer);
+
+      await ServerService.addChannel(newServer, newGeneralChannel);
+      await UserService.addServer(user, newServer);
 
       return res.status(201).json({
         data: {
-          url: `/server/${newServerId}`
+          url: `/server/${newServer.id}`
         }
       });
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -149,7 +235,37 @@ export default class ServerController {
   };
 
   /**
-   * @description Deletes a server.
+   * @route PATCH /api/server
+   * @access Private
+   */
+  static updateServer = async (req, res) => {
+    try {
+      const serverId = ServerValidator.validateMongooseId(
+        req.body.serverId,
+        "serverId"
+      );
+      const { name } = ServerValidator.validateUpdateInfo(
+        req.body.name,
+        "name"
+      );
+      const description = req.body.description;
+      const userId = req.session.user.id;
+
+      await ServerService.updateServer(serverId, name, description, userId);
+
+      return res.status(204).json();
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        return res.status(error.statusCode).json({ error: error.message });
+      } else {
+        console.log(error);
+        return res.status(500).json({ error: "Code went boom." });
+      }
+    }
+  };
+
+  /**
    * @route DELETE /api/server
    * @access Private
    */
@@ -159,22 +275,26 @@ export default class ServerController {
         req.body.serverId,
         "serverId"
       );
+      const userId = req.session.user.id;
 
       const server = await ServerService.getServerById(serverId);
+      const user = await UserService.getUserById(userId);
 
-      await ChannelService.deleteServerChannels(server.id);
+      await ServerService.deleteServer(server, user);
 
       const joinedUsers = await UserService.getJoinedUsers(server.id);
-      joinedUsers.forEach(async (user) => {
-        await UserService.removeServer(user, server);
-      });
+      await Promise.all(
+        joinedUsers.map(async (user) => {
+          await UserService.removeServer(user, server);
+        })
+      );
 
-      await ServerService.deleteServer(server.id);
+      await ChannelService.deleteServerChannels(server);
 
       return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -184,7 +304,6 @@ export default class ServerController {
   };
 
   /**
-   * @description Joins a server.
    * @route POST /api/server/join
    * @access Private
    */
@@ -200,11 +319,12 @@ export default class ServerController {
       const user = await UserService.getUserById(userId);
 
       await ServerService.addUser(server, user);
+      await UserService.addServer(user, server);
 
       return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -214,7 +334,6 @@ export default class ServerController {
   };
 
   /**
-   * @description Leaves a server.
    * @route DELETE /api/server/leave
    * @access Private
    */
@@ -229,25 +348,13 @@ export default class ServerController {
       const server = await ServerService.getServerById(serverId);
       const user = await UserService.getUserById(userId);
 
-      if (user.id === server.creatorId) {
-        await ChannelService.deleteServerChannels(server.id);
-
-        const joinedUsers = await UserService.getJoinedUsers(server.id);
-        joinedUsers.forEach(async (user) => {
-          await UserService.removeServer(user, server);
-        });
-
-        await ServerService.deleteServer(server.id);
-      } else {
-        await UserService.removeServer(user, server);
-
-        await ServerService.removeUser(server, user.id);
-      }
+      await ServerService.removeUser(server, user);
+      await UserService.removeServer(user, server);
 
       return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);
@@ -257,8 +364,7 @@ export default class ServerController {
   };
 
   /**
-   * @description Kicks user from a server.
-   * @route POST /api/server/kick
+   * @route DELETE /api/server/kick
    * @access Private
    */
   static kickUser = async (req, res) => {
@@ -267,22 +373,23 @@ export default class ServerController {
         req.body.serverId,
         "serverId"
       );
-      const userId = ServerValidator.validateMongooseId(
+      const kickedId = ServerValidator.validateMongooseId(
         req.body.userId,
         "userId"
       );
+      const kickerId = req.session.user.id;
 
       const server = await ServerService.getServerById(serverId);
-      const user = await UserService.getUserById(userId);
+      const kicked = await UserService.getUserById(kickedId);
+      const kicker = await UserService.getUserById(kickerId);
 
-      await UserService.removeServer(user, server);
-
-      await ServerService.blacklistUser(server, user.id);
+      await ServerService.blacklistUser(server, kicked, kicker);
+      await UserService.removeServer(kicked, server);
 
       return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} - ${error.originName}`);
+        console.log(`${error.constructor.name} ${error.toString()}`);
         return res.status(error.statusCode).json({ error: error.message });
       } else {
         console.log(error);

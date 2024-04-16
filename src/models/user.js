@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 
+/**
+ * @constructor User
+ */
 const userSchema = new mongoose.Schema(
   {
     email: {
@@ -32,9 +35,10 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: []
     },
-    darkMode: {
-      type: Boolean,
-      default: true
+    theme: {
+      type: String,
+      enum: ["light", "dark"],
+      default: "light"
     }
   },
   { timestamps: true }
