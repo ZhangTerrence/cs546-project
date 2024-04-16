@@ -3,8 +3,7 @@ import {
   BadRequestError,
   NotFoundError,
   AuthenticationError,
-  InternalServerError,
-  AuthorizationError
+  InternalServerError
 } from "../utils/errors.js";
 import bcryptjs from "bcryptjs";
 
@@ -350,14 +349,6 @@ export default class UserService {
   };
 
   static addServer = async (user, server) => {
-    if (server.blacklist.includes(user.id)) {
-      throw new AuthorizationError(
-        403,
-        this.addServer.name,
-        `${user.username} is blacklisted from ${server.name}.`
-      );
-    }
-
     if (user.servers.includes(server.id)) {
       throw new BadRequestError(
         400,
@@ -378,14 +369,6 @@ export default class UserService {
   };
 
   static removeServer = async (user, server) => {
-    if (server.creatorId === user.id) {
-      throw new BadRequestError(
-        400,
-        this.removeServer.name,
-        `${user.username} is ${server.name}'s creator. They cannot be removed without deleting the server.`
-      );
-    }
-
     const serverIndex = user.servers.indexOf(server.id);
     if (serverIndex === -1) {
       throw new BadRequestError(

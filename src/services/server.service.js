@@ -131,14 +131,6 @@ export default class ServerService {
       );
     }
 
-    if (user.servers.includes(server.id)) {
-      throw new BadRequestError(
-        400,
-        this.addUser.name,
-        `${user.username} is already in ${server.name}.`
-      );
-    }
-
     server.users.push({
       id: user.id,
       permissionLevel: 0
@@ -183,6 +175,14 @@ export default class ServerService {
   };
 
   static blacklistUser = async (server, kicked, kicker) => {
+    if (server.creatorId === kicked.id) {
+      throw new BadRequestError(
+        400,
+        this.blacklistUser.name,
+        `${kicked.username} is ${server.name}'s creator. They cannot be kicked without deleting the server.`
+      );
+    }
+
     const kickedIndex = server.users
       .map((server) => server.id)
       .indexOf(kicked.id);
@@ -220,7 +220,15 @@ export default class ServerService {
       );
     }
 
-    await this.removeUser(server, kicked);
+    server.users.splice(kickedIndex, 1);
+    const kickedUser = await server.save();
+    if (!kickedUser) {
+      throw new InternalServerError(
+        500,
+        this.removeUser.name,
+        `Unable to remove ${kicked.username} from ${server.name}'s users.`
+      );
+    }
 
     server.blacklist.push(kicked.id);
     const blacklistedUser = await server.save();

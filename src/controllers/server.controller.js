@@ -271,8 +271,8 @@ export default class ServerController {
       const server = await ServerService.getServerById(serverId);
       const user = await UserService.getUserById(userId);
 
-      await UserService.removeServer(user, server);
       await ServerService.removeUser(server, user);
+      await UserService.removeServer(user, server);
 
       return res.status(204).json();
     } catch (error) {

@@ -1,8 +1,5 @@
 setTheme();
 
-const leaveServerButtons = document.getElementsByClassName(
-  "server__leave-button"
-);
 const kickUserButtons = document.getElementsByClassName("server__kick-button");
 const deleteServerButton = document.getElementById("server__delete-button");
 const leaveServerButton = document.getElementById("server__leave-button");
@@ -31,6 +28,7 @@ const leaveServer = async (e) => {
 
     hideLoader();
     if (response.ok) {
+      window.location.replace("/login");
       printMessage("Successfully left server.");
     } else {
       if (response.status === 401) {
@@ -105,8 +103,8 @@ const deleteServer = async (e) => {
 
     hideLoader();
     if (response.ok) {
-      printMessage("Successfully deleted server.");
       window.location.replace("/login");
+      printMessage("Successfully deleted server.");
     } else {
       if (response.status === 401) {
         window.location.replace("/login");
@@ -178,8 +176,6 @@ const createChannel = async (e) => {
     });
     const responseBody = await response.json();
 
-    console.log(response, responseBody);
-
     hideLoader();
     if (response.ok) {
       window.location.replace(responseBody.data.url);
@@ -197,12 +193,6 @@ const createChannel = async (e) => {
   }
 };
 
-if (leaveServerButtons) {
-  Array.from(leaveServerButtons).forEach((button) =>
-    button.addEventListener("click", async (e) => await leaveServer(e))
-  );
-}
-
 if (kickUserButtons) {
   Array.from(kickUserButtons).forEach((button) =>
     button.addEventListener("click", async (e) => await kickUser(e, button))
@@ -213,6 +203,13 @@ if (deleteServerButton) {
   deleteServerButton.addEventListener(
     "click",
     async (e) => await deleteServer(e)
+  );
+}
+
+if (leaveServerButton) {
+  leaveServerButton.addEventListener(
+    "click",
+    async (e) => await leaveServer(e)
   );
 }
 
