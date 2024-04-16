@@ -46,7 +46,7 @@ router
   .get(isAuthenticated(), UserController.renderUserFriendsPage);
 
 // Server Page
-router.route("/server/:serverId").get(ServerController.renderServerPage);
+router.route("/server/:serverId").get(ServerController.renderServerMainPage);
 
 // Channel Page
 router.route("/channel/:channelId").get(ChannelController.renderChannelPage);

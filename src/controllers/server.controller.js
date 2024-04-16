@@ -9,7 +9,7 @@ export default class ServerController {
    * @route GET /server/:serverId
    * @access Public
    */
-  static renderServerPage = async (req, res) => {
+  static renderServerMainPage = async (req, res) => {
     try {
       const serverId = ServerValidator.validateMongooseId(
         req.params.serverId,
@@ -44,7 +44,12 @@ export default class ServerController {
         const userId = req.session.user.id;
 
         if (userId === server.creatorId) {
-          return res.render("server/server", {
+          return res.render("server/main", {
+            stylesheets: [
+              `<link rel="stylesheet" href="/public/css/server/main.css" />`
+            ],
+            scripts: [`<script src="/public/js/server/main.js"></script>`],
+            id: server.id,
             name: server.name,
             description: server.description,
             users: users,
@@ -53,7 +58,11 @@ export default class ServerController {
             member: true
           });
         } else if (server.users.map((userObj) => userObj.id).includes(userId)) {
-          return res.render("server/server", {
+          return res.render("server/main", {
+            stylesheets: [
+              `<link rel="stylesheet" href="/public/css/server/main.css" />`
+            ],
+            scripts: [`<script src="/public/js/server/main.js"></script>`],
             name: server.name,
             description: server.description,
             users: users,
@@ -64,10 +73,14 @@ export default class ServerController {
         }
       }
 
-      return res.render("server/server", {
+      return res.render("server/main", {
+        stylesheets: [
+          `<link rel="stylesheet" href="/public/css/server/main.css" />`
+        ],
         name: server.name,
         description: server.description,
         users: users,
+        channels: channels,
         owner: false,
         member: false
       });

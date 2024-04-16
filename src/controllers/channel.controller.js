@@ -115,12 +115,11 @@ export default class ChannelController {
    */
   static createChannel = async (req, res) => {
     try {
-      const { name, description, permissionLevel } =
-        ChannelValidator.validateCreationInfo(
-          req.body.name,
-          req.body.description,
-          req.body.permissionLevel
-        );
+      const { name, permissionLevel } = ChannelValidator.validateCreationInfo(
+        req.body.name,
+        req.body.permissionLevel
+      );
+      const description = req.body.description;
       const serverId = ServerValidator.validateMongooseId(
         req.body.serverId,
         "serverId"

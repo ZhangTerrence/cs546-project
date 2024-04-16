@@ -57,7 +57,7 @@
   }
 }
 
-.servers__forms {
+.servers__actions {
   display: flex;
   row-gap: 0.75rem;
   flex-direction: column;

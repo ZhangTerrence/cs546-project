@@ -168,9 +168,8 @@ export class ServerValidator extends BaseValidator {
 }
 
 export class ChannelValidator extends BaseValidator {
-  static validateCreationInfo = (_name, _description, _permissionLevel) => {
+  static validateCreationInfo = (_name, _permissionLevel) => {
     const name = this.validateString(_name, "name");
-    const description = this.validateString(_description, "description");
 
     const permissionLevel = parseInt(_permissionLevel);
     if (Number.isNaN(permissionLevel) || typeof permissionLevel !== "number") {
@@ -191,7 +190,6 @@ export class ChannelValidator extends BaseValidator {
 
     return {
       name: name,
-      description: description,
       permissionLevel: permissionLevel
     };
   };
