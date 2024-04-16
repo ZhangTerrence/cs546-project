@@ -87,6 +87,49 @@ export default class ServerService {
     return newServer;
   };
 
+  static updateServer = async (serverId, name, description, userId) => {
+    const server = await this.getServerById(serverId);
+
+    if (server.creatorId !== userId) {
+      throw new AuthorizationError(
+        403,
+        this.updateServer.name,
+        "Unauthorized to update server."
+      );
+    }
+
+    if (server.name === name && server.description === description) {
+      throw new BadRequestError(
+        400,
+        this.updateServer.name,
+        "Nothing has changed."
+      );
+    }
+
+    const serverExists = await ServerRepository.findOne({
+      name: { $regex: name, $options: "i" }
+    });
+    if (serverExists) {
+      throw new BadRequestError(
+        400,
+        this.updateServer.name,
+        `${name} is taken.`
+      );
+    }
+
+    const updatedServer = await ServerRepository.findByIdAndUpdate(serverId, {
+      name: name,
+      description: description
+    });
+    if (!updatedServer) {
+      throw new InternalServerError(
+        500,
+        this.updateServer.name,
+        "Unable to update server."
+      );
+    }
+  };
+
   static deleteServer = async (server, user) => {
     if (server.creatorId !== user.id) {
       throw new AuthorizationError(

@@ -11,6 +11,7 @@ router
   .route("/")
   .get(ServerController.getServers)
   .post(routeType("api"), isAuthenticated(), ServerController.createServer)
+  .patch(routeType("api"), isAuthenticated(), ServerController.updateServer)
   .delete(routeType("api"), isAuthenticated(), ServerController.deleteServer);
 
 router

@@ -31,9 +31,18 @@ export default class UserController {
             bio: user.bio,
             theme: user.theme,
             owner: true,
-            loggedIn: true
+            authed: true,
+            friended: false,
+            requested: false
           });
         } else {
+          const currentUserId = req.session.user.id;
+
+          const currentUser = await UserService.getUserById(currentUserId);
+
+          const friended = currentUser.friends.includes(user.id);
+          const requested = user.friendRequests.includes(currentUser.id);
+
           return res.status(200).render("user/profile", {
             stylesheets: [
               `<link rel="stylesheet" href="/public/css/user/profile.css" />`
@@ -42,7 +51,9 @@ export default class UserController {
             username: user.username,
             bio: user.bio,
             owner: false,
-            loggedIn: true
+            authed: true,
+            friended: friended,
+            requested: requested
           });
         }
       } else {
@@ -54,7 +65,9 @@ export default class UserController {
           username: user.username,
           bio: user.bio,
           owner: false,
-          loggedIn: false
+          authed: false,
+          friended: false,
+          requested: false
         });
       }
     } catch (error) {

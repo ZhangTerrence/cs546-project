@@ -109,6 +109,52 @@ export default class ServerController {
   };
 
   /**
+   * @route GET /server/edit/:serverId
+   * @access Public
+   */
+  static renderServerEditPage = async (req, res) => {
+    try {
+      const serverId = ServerValidator.validateMongooseId(
+        req.params.serverId,
+        "serverId"
+      );
+
+      const server = await ServerService.getServerById(serverId);
+
+      return res.render("server/edit", {
+        stylesheets: [
+          `<link rel="stylesheet" href="/public/css/server/edit.css" />`
+        ],
+        scripts: [`<script src="/public/js/server/edit.js"></script>`],
+        id: server.id,
+        name: server.name,
+        description: server.description
+      });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        if ((!error) instanceof InternalServerError) {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        } else {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        }
+      } else {
+        console.log(error);
+        return res.status(500).render("error", {
+          statusCode: 500,
+          message: "Code went boom."
+        });
+      }
+    }
+  };
+
+  /**
    * @route GET /api/server/:name
    * @access Public
    */
@@ -177,6 +223,37 @@ export default class ServerController {
           url: `/server/${newServer.id}`
         }
       });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        return res.status(error.statusCode).json({ error: error.message });
+      } else {
+        console.log(error);
+        return res.status(500).json({ error: "Code went boom." });
+      }
+    }
+  };
+
+  /**
+   * @route PATCH /api/server
+   * @access Private
+   */
+  static updateServer = async (req, res) => {
+    try {
+      const serverId = ServerValidator.validateMongooseId(
+        req.body.serverId,
+        "serverId"
+      );
+      const { name } = ServerValidator.validateUpdateInfo(
+        req.body.name,
+        "name"
+      );
+      const description = req.body.description;
+      const userId = req.session.user.id;
+
+      await ServerService.updateServer(serverId, name, description, userId);
+
+      return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
         console.log(`${error.constructor.name} ${error.toString()}`);

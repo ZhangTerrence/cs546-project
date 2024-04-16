@@ -56,10 +56,13 @@ router
     UserController.renderUserFriendsPage
   );
 
-// Server Page
+// Server Pages
 router
   .route("/server/:serverId")
   .get(routeType("view"), ServerController.renderServerMainPage);
+router
+  .route("/server/edit/:serverId")
+  .get(routeType("view"), ServerController.renderServerEditPage);
 
 // Channel Page
 router

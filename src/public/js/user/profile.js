@@ -59,6 +59,14 @@ const sendFriendRequest = async (e) => {
 
     hideLoader();
     if (response.ok) {
+      const info = document.createElement("p");
+      info.innerHTML = "Already sent friend request.";
+      info.classList.add("profile__info");
+      sendFriendRequestButton.parentElement.replaceChild(
+        info,
+        sendFriendRequestButton
+      );
+
       printMessage("Successfully sent friend request.");
     } else {
       if (response.status === 401) {

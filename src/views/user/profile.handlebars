@@ -62,8 +62,17 @@
       </form>
     </div>
   {{else}}
-    {{#if loggedIn}}
-      <button id="profile__request-button">Send Friend Request</button>
+    {{#if authed}}
+      {{#if friended}}
+        <p class="profile__info">Already your friend.</p>
+      {{else}}
+        {{#if requested}}
+          <p class="profile__info">Already sent friend request.</p>
+        {{else}}
+          <button id="profile__request-button">Send Friend Request</button>
+        {{/if}}
+      {{/if}}
+    {{else}}
     {{/if}}
   {{/if}}
 

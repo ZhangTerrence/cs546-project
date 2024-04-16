@@ -165,6 +165,14 @@ export class ServerValidator extends BaseValidator {
       name: name
     };
   };
+
+  static validateUpdateInfo = (_name) => {
+    const name = this.validateString(_name, "name");
+
+    return {
+      name: name
+    };
+  };
 }
 
 export class ChannelValidator extends BaseValidator {
