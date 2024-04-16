@@ -2,7 +2,7 @@
 
 ## Description
 
-Online chat application made using ExpressJS and HandlebarsJS.
+Online chat application made using ExpressJS and HandlebarsJS. Final semester project for CS546, Web Programming I.
 
 ## Run Locally
 
