@@ -247,8 +247,8 @@ export default class UserService {
       );
     }
 
-    const friendRequestIndex = target.friendRequests.indexOf(requester.id);
-    if (friendRequestIndex === -1) {
+    const friendARequestIndex = target.friendRequests.indexOf(requester.id);
+    if (friendARequestIndex === -1) {
       throw new NotFoundError(
         404,
         this.acceptFriendRequest.name,
@@ -256,7 +256,7 @@ export default class UserService {
       );
     }
 
-    target.friendRequests.splice(friendRequestIndex, 1);
+    target.friendRequests.splice(friendARequestIndex, 1);
     target.friends.push(requester.id);
     const friendedRequester = await target.save();
     if (!friendedRequester) {
@@ -267,6 +267,16 @@ export default class UserService {
       );
     }
 
+    const friendBRequestIndex = requester.friendRequests.indexOf(target.id);
+    if (friendBRequestIndex === -1) {
+      throw new NotFoundError(
+        404,
+        this.acceptFriendRequest.name,
+        `${target.username} not found in ${requester.username}'s friend requests.`
+      );
+    }
+
+    requester.friendRequests.splice(friendBRequestIndex, 1);
     requester.friends.push(target.id);
     const friendedTarget = await requester.save();
     if (!friendedTarget) {

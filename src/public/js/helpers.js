@@ -32,12 +32,3 @@ const validateString = (_variable, _variableName) => {
 
   return variable;
 };
-
-const asyncHandler = async (func, ...args) => {
-  try {
-    await func(...args);
-  } catch (error) {
-    hideLoader();
-    printMessage(error.message);
-  }
-};

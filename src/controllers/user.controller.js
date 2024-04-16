@@ -209,51 +209,6 @@ export default class UserController {
         })
       );
 
-      return res.status(200).render("user/friends", {
-        stylesheets: [
-          `<link rel="stylesheet" href="/public/css/user/friends.css" />`
-        ],
-        scripts: [`<script src="/public/js/user/friends.js"></script>`],
-        id: user.id,
-        friends: friends
-      });
-    } catch (error) {
-      if (error instanceof BaseError) {
-        console.log(`${error.constructor.name} ${error.toString()}`);
-        if (!(error instanceof InternalServerError)) {
-          return res.status(error.statusCode).render("error", {
-            statusCode: error.statusCode,
-            message: error.message
-          });
-        } else {
-          return res.status(error.statusCode).render("error", {
-            statusCode: error.statusCode,
-            message: error.message
-          });
-        }
-      } else {
-        console.log(error);
-        return res.status(500).render("error", {
-          statusCode: 500,
-          message: "Code went boom."
-        });
-      }
-    }
-  };
-
-  /**
-   * @route GET /user/friendRequests/:userId
-   * @access Private
-   */
-  static renderUserFriendRequestsPage = async (req, res) => {
-    try {
-      const userId = UserValidator.validateMongooseId(
-        req.params.userId,
-        "userId"
-      );
-
-      const user = await UserService.getUserById(userId);
-
       const friendRequests = await Promise.all(
         user.friendRequests.map(async (userId) => {
           const sender = await UserService.getUserById(userId);
@@ -265,12 +220,14 @@ export default class UserController {
         })
       );
 
-      return res.status(200).render("user/friendRequests", {
+      return res.status(200).render("user/friends", {
         stylesheets: [
-          `<link rel="stylesheet" href="/public/css/user/friendRequests.css" />`
+          `<link rel="stylesheet" href="/public/css/user/friends.css" />`
         ],
-        scripts: [`<script src="/public/js/user/friendRequests.js"></script>`],
+        scripts: [`<script src="/public/js/user/friends.js"></script>`],
         id: user.id,
+        username: user.username,
+        friends: friends,
         friendRequests: friendRequests
       });
     } catch (error) {
@@ -493,11 +450,17 @@ export default class UserController {
         await UserService.sendFriendRequest(target, requester);
         await UserService.acceptFriendRequest(target, requester);
         await PrivateMessageService.createPrivateMessage(target, requester);
+
+        return res.status(201).json({
+          data: {
+            id: target.id,
+            username: target.username
+          }
+        });
       } else {
         await UserService.sendFriendRequest(target, requester);
+        return res.status(204).json();
       }
-
-      return res.status(204).json();
     } catch (error) {
       if (error instanceof BaseError) {
         console.log(`${error.constructor.name} ${error.toString()}`);
@@ -553,6 +516,7 @@ export default class UserController {
       const target = await UserService.getUserById(userId);
       const requester = await UserService.getUserById(requesterId);
 
+      await UserService.sendFriendRequest(requester, target);
       await UserService.acceptFriendRequest(target, requester);
       await PrivateMessageService.createPrivateMessage(target, requester);
 

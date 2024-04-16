@@ -18,59 +18,69 @@ const sendFriendRequestButton = document.getElementById(
 );
 
 const deleteUser = async (e) => {
-  e.preventDefault();
+  try {
+    e.preventDefault();
 
-  showLoader();
-  const response = await fetch("/api/user", {
-    method: "DELETE"
-  });
+    showLoader();
+    const response = await fetch("/api/user", {
+      method: "DELETE"
+    });
 
-  hideLoader();
-  if (response.ok) {
-    window.location.replace("/");
-  } else {
-    const json = await response.json();
-    throw new Error(json.error);
+    hideLoader();
+    if (response.ok) {
+      window.location.replace("/");
+    } else {
+      const responseBody = await response.json();
+      throw new Error(responseBody.error);
+    }
+  } catch (error) {
+    hideLoader();
+    printMessage(error.message);
   }
 };
 
 const sendFriendRequest = async (e) => {
-  e.preventDefault();
+  try {
+    e.preventDefault();
 
-  const targetUser = document.getElementById("profile__username").innerText;
-  const requestBody = {
-    username: targetUser
-  };
+    const targetUser = document.getElementById("profile__username").innerText;
+    const requestBody = {
+      username: targetUser
+    };
 
-  showLoader();
-  const response = await fetch("/api/user/friend/send", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(requestBody)
-  });
+    showLoader();
+    const response = await fetch("/api/user/friend/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestBody)
+    });
 
-  hideLoader();
-  if (response.ok) {
-    printMessage("Successfully sent friend request.");
-  } else {
-    if (response.statusText === "Unauthorized") {
-      window.location.replace("/login");
-      return;
+    hideLoader();
+    if (response.ok) {
+      printMessage("Successfully sent friend request.");
+    } else {
+      if (response.statusText === "Unauthorized") {
+        window.location.replace("/login");
+        return;
+      }
+      const responseBody = await response.json();
+      printMessage(responseBody.error);
     }
-    const responseBody = await response.json();
-    printMessage(responseBody.error);
+  } catch (error) {
+    hideLoader();
+    printMessage(error.message);
   }
 };
 
 if (deleteButton) {
-  deleteButton.addEventListener("click", (e) => asyncHandler(deleteUser, e));
+  deleteButton.addEventListener("click", async (e) => await deleteUser(e));
 }
 
 if (sendFriendRequestButton) {
   sendFriendRequestButton.addEventListener(
     "click",
-    async (e) => await asyncHandler(sendFriendRequest, e)
+    async (e) => await sendFriendRequest(e)
   );
 }

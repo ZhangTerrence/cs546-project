@@ -37,7 +37,7 @@ export default class PrivateMessageService {
     if (userBIndex == -1) {
       throw new NotFoundError(
         404,
-        this.removeFriend.name,
+        this.deletePrivateMessage.name,
         `${userB.username} not found in ${userA.username}'s friends.`
       );
     }
@@ -46,7 +46,7 @@ export default class PrivateMessageService {
     if (userAIndex == -1) {
       throw new NotFoundError(
         404,
-        this.removeFriend.name,
+        this.deletePrivateMessage.name,
         `${userA.username} not found in ${userB.username}'s friends.`
       );
     }

@@ -44,9 +44,6 @@ router
 router
   .route("/user/friends/:userId")
   .get(isAuthenticated(), UserController.renderUserFriendsPage);
-router
-  .route("/user/friendRequests/:userId")
-  .get(isAuthenticated(), UserController.renderUserFriendRequestsPage);
 
 // Server Page
 router.route("/server/:serverId").get(ServerController.renderServerPage);

@@ -4,7 +4,6 @@
   <div class="servers__content">
     <div class="servers__servers">
       <h1>{{username}}'s Servers</h1>
-
       <ul id="servers_server-list">
         {{#each servers}}
           <li>
@@ -24,7 +23,7 @@
         <input type="text" name="name" autocomplete="off" />
 
         <label for="description">Description</label>
-        <textarea name="description"></textarea>    
+        <textarea name="description"></textarea>
 
         <button id="servers__create-button">Create Server</button>
       </form>
@@ -32,7 +31,12 @@
       <h2>Join Server</h2>
       <form>
         <label for="name">Name</label>
-        <input type="text" id="servers__searchbar" name="name" autocomplete="off" />
+        <input
+          type="text"
+          id="servers__searchbar"
+          name="name"
+          autocomplete="off"
+        />
 
         <button id="servers__search-button">Search for Servers</button>
       </form>
