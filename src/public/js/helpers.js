@@ -1,3 +1,17 @@
+function setTheme() {
+  const theme = localStorage.getItem("userTheme") ?? "light";
+
+  if (theme !== "light" && theme !== "dark") {
+    document.documentElement.setAttribute("data-theme", "light");
+  } else {
+    document.documentElement.setAttribute("data-theme", theme);
+  }
+}
+
+function resetTheme() {
+  localStorage.removeItem("userTheme");
+}
+
 const getFormRequestBody = (node) => {
   return Object.fromEntries(new FormData(node.form));
 };

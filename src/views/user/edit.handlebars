@@ -1,0 +1,26 @@
+<main class="edit__main">
+  <a href="/user/{{id}}">Go back to profile</a>
+
+  <h1 id="edit__username">Editing {{username}}'s Profile</h1>
+
+  <form class="edit__form">
+    <label for="username">Username</label>
+    <input
+      type="text"
+      name="username"
+      value="{{username}}"
+      autocomplete="off"
+    />
+
+    <label for="bio">Bio</label>
+    <textarea name="bio" autocomplete="off">{{bio}}</textarea>
+
+    <label for="theme">Theme</label>
+    <select name="theme" id="theme">
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
+
+    <button id="edit__update-button">Save</button>
+  </form>
+</main>

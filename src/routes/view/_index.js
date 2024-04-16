@@ -1,6 +1,7 @@
 import UserController from "../../controllers/user.controller.js";
 import ServerController from "../../controllers/server.controller.js";
 import ChannelController from "../../controllers/channel.controller.js";
+import isAuthenticated from "../../middleware/authentication.js";
 import express from "express";
 
 const router = express.Router({ mergeParams: true });
@@ -8,7 +9,8 @@ const router = express.Router({ mergeParams: true });
 // Landing Page
 router.route("/").get(async (_req, res) => {
   return res.render("landing", {
-    stylesheets: [`<link rel="stylesheet" href="/public/css/landing.css" />`]
+    stylesheets: [`<link rel="stylesheet" href="/public/css/landing.css" />`],
+    scripts: [`<script src="/public/js/landing.js"></script>`]
   });
 });
 
@@ -31,8 +33,20 @@ router.route("/login").get(async (req, res) => {
   });
 });
 
-// User Page
+// User Pages
 router.route("/user/:userId").get(UserController.renderUserProfilePage);
+router
+  .route("/user/edit/:userId")
+  .get(isAuthenticated(), UserController.renderUserEditPage);
+router
+  .route("/user/servers/:userId")
+  .get(isAuthenticated(), UserController.renderUserServersPage);
+router
+  .route("/user/friends/:userId")
+  .get(isAuthenticated(), UserController.renderUserFriendsPage);
+router
+  .route("/user/friendRequests/:userId")
+  .get(isAuthenticated(), UserController.renderUserFriendRequestsPage);
 
 // Server Page
 router.route("/server/:serverId").get(ServerController.renderServerPage);

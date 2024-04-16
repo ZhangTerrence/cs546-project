@@ -118,7 +118,8 @@ export class UserValidator extends BaseValidator {
     };
   };
 
-  static validateUpdateInfo = (_bio, _theme) => {
+  static validateUpdateInfo = (_username, _bio, _theme) => {
+    const username = this.validateString(_username, "username");
     const bio = this.validateString(_bio, "bio");
     const theme = this.validateString(_theme, "theme");
 
@@ -131,6 +132,7 @@ export class UserValidator extends BaseValidator {
     }
 
     return {
+      username: username,
       bio: bio,
       theme: theme
     };

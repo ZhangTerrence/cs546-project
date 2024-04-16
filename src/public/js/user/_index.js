@@ -15,25 +15,6 @@ const rejectFriendRequestButtons = document.getElementsByClassName(
 );
 const deleteUserButton = document.getElementById("deleteUserButton");
 
-// IIFE Functions
-
-(function setRadio() {
-  const darkRadio = document.getElementById("darkRadio");
-  const lightRadio = document.getElementById("lightRadio");
-
-  if (darkRadio && lightRadio) {
-    const darkMode = document.getElementById("darkMode").innerText;
-
-    if (darkMode === "true") {
-      darkRadio.checked = true;
-      lightRadio.checked = false;
-    } else {
-      darkRadio.checked = false;
-      lightRadio.checked = true;
-    }
-  }
-})();
-
 // Helper functions
 
 function createFriendsListElement(userId, username) {

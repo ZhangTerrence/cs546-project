@@ -1,3 +1,5 @@
+resetTheme();
+
 const loginButton = document.getElementById("login__submit-button");
 
 const login = async (e) => {
@@ -56,8 +58,11 @@ const login = async (e) => {
   if (response.ok) {
     window.location.replace(responseBody.data.url);
   } else {
-    throw new Error(responseBody.error);
+    printMessage(responseBody.error);
   }
 };
 
-loginButton.addEventListener("click", async (e) => asyncHandler(login, e));
+loginButton.addEventListener(
+  "click",
+  async (e) => await asyncHandler(login, e)
+);

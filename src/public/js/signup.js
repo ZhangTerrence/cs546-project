@@ -1,3 +1,5 @@
+resetTheme();
+
 const signupButton = document.getElementById("signup__submit-button");
 
 const signup = async (e) => {
@@ -62,8 +64,11 @@ const signup = async (e) => {
   if (response.ok) {
     window.location.replace(responseBody.data.url);
   } else {
-    throw new Error(responseBody.error);
+    printMessage(responseBody.error);
   }
 };
 
-signupButton.addEventListener("click", async (e) => asyncHandler(signup, e));
+signupButton.addEventListener(
+  "click",
+  async (e) => await asyncHandler(signup, e)
+);

@@ -103,14 +103,36 @@ export default class UserService {
     return newUser;
   };
 
-  static updateUser = async (userId, bio, theme) => {
+  static updateUser = async (userId, username, bio, theme) => {
     const user = await this.getUserById(userId);
 
-    if (user.bio === bio && user.theme === theme) {
-      return;
+    if (
+      user.username === username &&
+      user.bio === bio &&
+      user.theme === theme
+    ) {
+      throw new BadRequestError(
+        400,
+        this.updateUser.name,
+        "Nothing has changed."
+      );
+    }
+
+    if (username !== user.username) {
+      const usernameExists = await UserRepository.findOne({
+        username: { $regex: `^${username}$`, $options: "i" }
+      });
+      if (usernameExists) {
+        throw new BadRequestError(
+          400,
+          this.createUser.name,
+          `${username} is taken.`
+        );
+      }
     }
 
     const updatedUser = await UserRepository.findByIdAndUpdate(userId, {
+      username: username,
       bio: bio,
       theme: theme
     });

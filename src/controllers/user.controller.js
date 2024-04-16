@@ -12,74 +12,266 @@ export default class UserController {
    */
   static renderUserProfilePage = async (req, res) => {
     try {
-      if (
-        req.session.user &&
-        req.session.user.id &&
-        req.session.user.id === req.params.userId
-      ) {
-        const userId = UserValidator.validateMongooseId(
-          req.params.userId,
-          "userId"
-        );
+      const userId = UserValidator.validateMongooseId(
+        req.params.userId,
+        "userId"
+      );
 
-        const user = await UserService.getUserById(userId);
+      const user = await UserService.getUserById(userId);
 
-        const servers = await Promise.all(
-          user.servers.map(async (serverId) => {
-            const server = await ServerService.getServerById(serverId);
-
-            return {
-              id: serverId,
-              name: server.name
-            };
-          })
-        );
-
-        const friends = await Promise.all(
-          user.friends.map(async (userId) => {
-            const friend = await UserService.getUserById(userId);
-
-            return {
-              id: userId,
-              username: friend.username
-            };
-          })
-        );
-
-        const friendRequests = await Promise.all(
-          user.friendRequests.map(async (userId) => {
-            const sender = await UserService.getUserById(userId);
-
-            return {
-              id: userId,
-              username: sender.username
-            };
-          })
-        );
-
-        return res.status(200).render("user/profile", {
-          username: user.username,
-          bio: user.bio,
-          theme: user.theme,
-          servers: servers,
-          friends: friends,
-          friendRequests: friendRequests,
-          owner: true
-        });
+      if (req.session.user && req.session.user.id) {
+        if (req.session.user.id === req.params.userId) {
+          return res.status(200).render("user/profile", {
+            stylesheets: [
+              `<link rel="stylesheet" href="/public/css/user/profile.css" />`
+            ],
+            scripts: [`<script src="/public/js/user/profile.js"></script>`],
+            id: user.id,
+            username: user.username,
+            bio: user.bio,
+            theme: user.theme,
+            owner: true,
+            loggedIn: true
+          });
+        } else {
+          return res.status(200).render("user/profile", {
+            stylesheets: [
+              `<link rel="stylesheet" href="/public/css/user/profile.css" />`
+            ],
+            scripts: [`<script src="/public/js/user/profile.js"></script>`],
+            username: user.username,
+            bio: user.bio,
+            owner: false,
+            loggedIn: true
+          });
+        }
       } else {
-        const userId = UserValidator.validateMongooseId(
-          req.params.userId,
-          "userId"
-        );
-
-        const user = await UserService.getUserById(userId);
-
         return res.status(200).render("user/profile", {
+          stylesheets: [
+            `<link rel="stylesheet" href="/public/css/user/profile.css" />`
+          ],
+          scripts: [`<script src="/public/js/user/profile.js"></script>`],
           username: user.username,
           bio: user.bio,
-          owner: false
+          owner: false,
+          loggedIn: false
         });
       }
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        if (!(error instanceof InternalServerError)) {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        } else {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        }
+      } else {
+        console.log(error);
+        return res.status(500).render("error", {
+          statusCode: 500,
+          message: "Code went boom."
+        });
+      }
+    }
+  };
+
+  /**
+   * @route GET /user/edit/:userId
+   * @access Private
+   */
+  static renderUserEditPage = async (req, res) => {
+    try {
+      const userId = UserValidator.validateMongooseId(
+        req.params.userId,
+        "userId"
+      );
+
+      const user = await UserService.getUserById(userId);
+
+      return res.status(200).render("user/edit", {
+        stylesheets: [
+          `<link rel="stylesheet" href="/public/css/user/edit.css" />`
+        ],
+        scripts: [`<script src="/public/js/user/edit.js"></script>`],
+        id: user.id,
+        username: user.username,
+        bio: user.bio,
+        theme: user.theme
+      });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        if (!(error instanceof InternalServerError)) {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        } else {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        }
+      } else {
+        console.log(error);
+        return res.status(500).render("error", {
+          statusCode: 500,
+          message: "Code went boom."
+        });
+      }
+    }
+  };
+
+  /**
+   * @route GET /user/servers/:userId
+   * @access Private
+   */
+  static renderUserServersPage = async (req, res) => {
+    try {
+      const userId = UserValidator.validateMongooseId(
+        req.params.userId,
+        "userId"
+      );
+
+      const user = await UserService.getUserById(userId);
+
+      const servers = await Promise.all(
+        user.servers.map(async (serverId) => {
+          const server = await ServerService.getServerById(serverId);
+
+          return {
+            id: serverId,
+            name: server.name
+          };
+        })
+      );
+
+      return res.status(200).render("user/servers", {
+        stylesheets: [
+          `<link rel="stylesheet" href="/public/css/user/servers.css" />`
+        ],
+        scripts: [`<script src="/public/js/user/servers.js"></script>`],
+        id: user.id,
+        servers: servers
+      });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        if (!(error instanceof InternalServerError)) {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        } else {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        }
+      } else {
+        console.log(error);
+        return res.status(500).render("error", {
+          statusCode: 500,
+          message: "Code went boom."
+        });
+      }
+    }
+  };
+
+  /**
+   * @route GET /user/friends/:userId
+   * @access Private
+   */
+  static renderUserFriendsPage = async (req, res) => {
+    try {
+      const userId = UserValidator.validateMongooseId(
+        req.params.userId,
+        "userId"
+      );
+
+      const user = await UserService.getUserById(userId);
+
+      const friends = await Promise.all(
+        user.friends.map(async (userId) => {
+          const friend = await UserService.getUserById(userId);
+
+          return {
+            id: userId,
+            username: friend.username
+          };
+        })
+      );
+
+      return res.status(200).render("user/friends", {
+        stylesheets: [
+          `<link rel="stylesheet" href="/public/css/user/friends.css" />`
+        ],
+        scripts: [`<script src="/public/js/user/friends.js"></script>`],
+        id: user.id,
+        friends: friends
+      });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        if (!(error instanceof InternalServerError)) {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        } else {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        }
+      } else {
+        console.log(error);
+        return res.status(500).render("error", {
+          statusCode: 500,
+          message: "Code went boom."
+        });
+      }
+    }
+  };
+
+  /**
+   * @route GET /user/friendRequests/:userId
+   * @access Private
+   */
+  static renderUserFriendRequestsPage = async (req, res) => {
+    try {
+      const userId = UserValidator.validateMongooseId(
+        req.params.userId,
+        "userId"
+      );
+
+      const user = await UserService.getUserById(userId);
+
+      const friendRequests = await Promise.all(
+        user.friendRequests.map(async (userId) => {
+          const sender = await UserService.getUserById(userId);
+
+          return {
+            id: userId,
+            username: sender.username
+          };
+        })
+      );
+
+      return res.status(200).render("user/friendRequests", {
+        stylesheets: [
+          `<link rel="stylesheet" href="/public/css/user/friendRequests.css" />`
+        ],
+        scripts: [`<script src="/public/js/user/friendRequests.js"></script>`],
+        id: user.id,
+        friendRequests: friendRequests
+      });
     } catch (error) {
       if (error instanceof BaseError) {
         console.log(`${error.constructor.name} ${error.toString()}`);
@@ -215,13 +407,14 @@ export default class UserController {
    */
   static updateUser = async (req, res) => {
     try {
-      const { bio, theme } = UserValidator.validateUpdateInfo(
+      const { username, bio, theme } = UserValidator.validateUpdateInfo(
+        req.body.username,
         req.body.bio,
         req.body.theme
       );
       const userId = req.session.user.id;
 
-      await UserService.updateUser(userId, bio, theme);
+      await UserService.updateUser(userId, username, bio, theme);
 
       return res.status(204).json();
     } catch (error) {

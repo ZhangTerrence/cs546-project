@@ -10,5 +10,5 @@
     "node": true,
     "browser": true
   },
-  "ignorePatterns": ["**/public/js/*.js"]
+  "ignorePatterns": ["**/public/js/*.js", "**/public/js/*/*.js"]
 }
