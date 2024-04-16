@@ -58,7 +58,7 @@ const removeFriend = async (e, button) => {
       printMessage("Successfully removed friend.");
       button.form.remove();
     } else {
-      if (response.statusText === "Unauthorized") {
+      if (response.status === 401) {
         window.location.replace("/login");
         return;
       }
@@ -103,7 +103,7 @@ const sendFriendRequest = async (e) => {
           );
       }
     } else {
-      if (response.statusText === "Unauthorized") {
+      if (response.status === 401) {
         window.location.replace("/login");
         return;
       }
@@ -148,7 +148,7 @@ const acceptFriendRequest = async (e, button) => {
           )
         );
     } else {
-      if (response.statusText === "Unauthorized") {
+      if (response.status === 401) {
         window.location.replace("/login");
         return;
       }
@@ -183,7 +183,7 @@ const rejectFriendRequest = async (e, button) => {
       printMessage("Successfully rejected friend request.");
       button.form.remove();
     } else {
-      if (response.statusText === "Unauthorized") {
+      if (response.status === 401) {
         window.location.replace("/login");
         return;
       }

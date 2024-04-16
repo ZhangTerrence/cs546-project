@@ -77,7 +77,7 @@ const createServer = async (e) => {
       e.target.form.reset();
       window.location.replace(responseBody.data.url);
     } else {
-      if (response.statusText === "Unauthorized") {
+      if (response.status === 401) {
         window.location.replace("/login");
         return;
       }
@@ -105,7 +105,7 @@ const findServersByName = async (e) => {
         queriedServers.appendChild(createQueriedServerListElement(server));
       });
     } else {
-      if (response.statusText === "Unauthorized") {
+      if (response.status === 401) {
         window.location.replace("/login");
         return;
       }
@@ -141,7 +141,7 @@ const joinServer = async (e, serverId, serverName) => {
         .getElementById("servers_server-list")
         .appendChild(createServerListElement(serverId, serverName));
     } else {
-      if (response.statusText === "Unauthorized") {
+      if (response.status === 401) {
         window.location.replace("/login");
         return;
       }
@@ -176,7 +176,7 @@ const leaveServer = async (e, button) => {
       printMessage("Successfully left server.");
       button.form.remove();
     } else {
-      if (response.statusText === "Unauthorized") {
+      if (response.status === 401) {
         window.location.replace("/login");
         return;
       }

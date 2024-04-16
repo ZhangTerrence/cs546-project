@@ -35,7 +35,7 @@ const updateUser = async (e) => {
       setTheme();
       printMessage("Successfully updated user.");
     } else {
-      if (response.statusText === "Unauthorized") {
+      if (response.status === 401) {
         window.location.replace("/login");
         return;
       }

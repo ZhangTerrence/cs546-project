@@ -61,7 +61,7 @@ const sendFriendRequest = async (e) => {
     if (response.ok) {
       printMessage("Successfully sent friend request.");
     } else {
-      if (response.statusText === "Unauthorized") {
+      if (response.status === 401) {
         window.location.replace("/login");
         return;
       }

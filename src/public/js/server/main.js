@@ -33,7 +33,7 @@ const leaveServer = async (e) => {
     if (response.ok) {
       printMessage("Successfully left server.");
     } else {
-      if (response.statusText === "Unauthorized") {
+      if (response.status === 401) {
         window.location.replace("/login");
         return;
       }
@@ -72,7 +72,7 @@ const kickUser = async (e, button) => {
       printMessage("Successfully kicked user.");
       button.form.remove();
     } else {
-      if (response.statusText === "Unauthorized") {
+      if (response.status === 401) {
         window.location.replace("/login");
         return;
       }
@@ -108,7 +108,7 @@ const deleteServer = async (e) => {
       printMessage("Successfully deleted server.");
       window.location.replace("/login");
     } else {
-      if (response.statusText === "Unauthorized") {
+      if (response.status === 401) {
         window.location.replace("/login");
         return;
       }
@@ -143,7 +143,7 @@ async function deleteChannel(e, button) {
       printMessage("Successfully deleted channel.");
       button.form.remove();
     } else {
-      if (response.statusText === "Unauthorized") {
+      if (response.status === 401) {
         window.location.replace("/login");
         return;
       }
@@ -185,7 +185,7 @@ const createChannel = async (e) => {
       window.location.replace(responseBody.data.url);
       printMessage("Successfully created channel.");
     } else {
-      if (response.statusText === "Unauthorized") {
+      if (response.status === 401) {
         window.location.replace("/login");
         return;
       }
