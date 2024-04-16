@@ -42,7 +42,8 @@
   }
 
   & textarea {
-    min-height: 20rem;
+    padding: 0.5rem;
+    height: 20rem;
     resize: none;
   }
 

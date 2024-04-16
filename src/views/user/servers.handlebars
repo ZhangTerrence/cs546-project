@@ -1,0 +1,43 @@
+<main class="servers__main">
+  <a href="/user/{{id}}">Go back to profile</a>
+
+  <div class="servers__content">
+    <div class="servers__servers">
+      <h1>{{username}}'s Servers</h1>
+
+      <ul id="servers_server-list">
+        {{#each servers}}
+          <li>
+            <form id="{{id}}">
+              <a href="/server/{{id}}">{{name}}</a>
+              <button class="servers__leave-buttons">Leave</button>
+            </form>
+          </li>
+        {{/each}}
+      </ul>
+    </div>
+
+    <div class="servers__forms">
+      <h2>Create Server</h2>
+      <form>
+        <label for="name">Name</label>
+        <input type="text" name="name" autocomplete="off" />
+
+        <label for="description">Description</label>
+        <textarea name="description"></textarea>    
+
+        <button id="servers__create-button">Create Server</button>
+      </form>
+
+      <h2>Join Server</h2>
+      <form>
+        <label for="name">Name</label>
+        <input type="text" id="servers__searchbar" name="name" autocomplete="off" />
+
+        <button id="servers__search-button">Search for Servers</button>
+      </form>
+
+      <ul id="servers__search-results"></ul>
+    </div>
+  </div>
+</main>

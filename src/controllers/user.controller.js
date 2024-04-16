@@ -158,6 +158,7 @@ export default class UserController {
         ],
         scripts: [`<script src="/public/js/user/servers.js"></script>`],
         id: user.id,
+        username: user.username,
         servers: servers
       });
     } catch (error) {
@@ -407,11 +408,11 @@ export default class UserController {
    */
   static updateUser = async (req, res) => {
     try {
-      const { username, bio, theme } = UserValidator.validateUpdateInfo(
+      const { username, theme } = UserValidator.validateUpdateInfo(
         req.body.username,
-        req.body.bio,
         req.body.theme
       );
+      const bio = req.body.bio;
       const userId = req.session.user.id;
 
       await UserService.updateUser(userId, username, bio, theme);

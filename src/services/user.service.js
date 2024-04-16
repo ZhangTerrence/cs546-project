@@ -339,31 +339,13 @@ export default class UserService {
     }
   };
 
-  static addServer = async (user, server, creation) => {
+  static addServer = async (user, server) => {
     if (server.blacklist.includes(user.id)) {
       throw new AuthorizationError(
         403,
         this.addServer.name,
         `${user.username} is blacklisted from ${server.name}.`
       );
-    }
-
-    if (server.creatorId === user.id) {
-      throw new BadRequestError(
-        400,
-        this.addServer.name,
-        `${user.username} is already in ${server.name}.`
-      );
-    }
-
-    if (creation) {
-      if (server.users.map((userObj) => userObj.id).includes(user.id)) {
-        throw new BadRequestError(
-          400,
-          this.addServer.name,
-          `${user.username} is already in ${server.name}.`
-        );
-      }
     }
 
     if (user.servers.includes(server.id)) {

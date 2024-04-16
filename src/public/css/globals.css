@@ -29,6 +29,10 @@ body {
   font-family: "Lato", sans-serif;
 }
 
+textarea {
+  font-family: inherit;
+}
+
 select {
   background-color: var(--background-primary);
   color: var(--text-negative);

@@ -118,9 +118,8 @@ export class UserValidator extends BaseValidator {
     };
   };
 
-  static validateUpdateInfo = (_username, _bio, _theme) => {
+  static validateUpdateInfo = (_username, _theme) => {
     const username = this.validateString(_username, "username");
-    const bio = this.validateString(_bio, "bio");
     const theme = this.validateString(_theme, "theme");
 
     if (theme !== "light" && theme !== "dark") {
@@ -133,7 +132,6 @@ export class UserValidator extends BaseValidator {
 
     return {
       username: username,
-      bio: bio,
       theme: theme
     };
 
@@ -160,13 +158,11 @@ export class UserValidator extends BaseValidator {
 }
 
 export class ServerValidator extends BaseValidator {
-  static validateCreationInfo = (_name, _description) => {
+  static validateCreationInfo = (_name) => {
     const name = this.validateString(_name, "name");
-    const description = this.validateString(_description, "description");
 
     return {
-      name: name,
-      description: description
+      name: name
     };
   };
 }
