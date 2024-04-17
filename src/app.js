@@ -7,6 +7,7 @@ import database from "./config/database.js";
 import env from "./config/env.js";
 import { fileURLToPath } from "url";
 import { engine } from "express-handlebars";
+import { Server } from "socket.io";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,10 +42,36 @@ if (env.NODE_ENV == "dev") {
 
 configRoutes(app);
 
-if (env.NODE_ENV == "dev") {
-  app.listen(env.PORT, () => {
+const server = app.listen(env.PORT, () => {
+  if (env.NODE_ENV === "dev") {
     console.log(`Server listening on http://localhost:${env.PORT}.`);
-  });
-}
+  }
+});
 
-export default app;
+const io = new Server(server);
+io.on("connection", (socket) => {
+  if (env.NODE_ENV === "dev") {
+    console.log(`${socket.id} has connected.`);
+  }
+
+  socket.on("joinRoom", (e) => {
+    if (env.NODE_ENV === "dev") {
+      console.log(`${socket.id} has joined room ${e.roomId}`);
+    }
+    socket.join(e.roomId);
+  });
+
+  socket.on("sendMessage", (e) => {
+    io.in(e.roomId).emit("receiveMessage", {
+      userId: e.userId,
+      username: e.username,
+      message: e.message
+    });
+  });
+
+  socket.on("disconnect", () => {
+    if (env.NODE_ENV === "dev") {
+      console.log(`${socket.id} has disconnected.`);
+    }
+  });
+});

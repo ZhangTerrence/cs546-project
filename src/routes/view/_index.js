@@ -67,6 +67,6 @@ router
 // Channel Page
 router
   .route("/channel/:channelId")
-  .get(routeType("view"), ChannelController.renderChannelPage);
+  .get(routeType("view"), ChannelController.renderChannelMainPage);
 
 export default router;

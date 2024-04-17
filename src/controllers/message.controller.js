@@ -1,6 +1,7 @@
 import ChannelService from "../services/channel.service.js";
 import MessageService from "../services/message.service.js";
 import PrivateMessageService from "../services/privateMessage.service.js";
+import UserService from "../services/user.service.js";
 import { BaseError } from "../utils/errors.js";
 import { MessageValidator } from "../utils/validators.js";
 
@@ -36,7 +37,15 @@ export default class MessageController {
         await PrivateMessageService.addMessage(privateMessage, newMessage);
       }
 
-      return res.status(201).json({ data: { message: newMessage } });
+      const user = await UserService.getUserById(newMessage.userId);
+
+      return res.status(201).json({
+        data: {
+          userId: user.id,
+          username: user.username,
+          message: newMessage.message
+        }
+      });
     } catch (error) {
       if (error instanceof BaseError) {
         console.log(`${error.constructor.name} ${error.toString()}`);
