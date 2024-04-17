@@ -45,13 +45,13 @@ export default class MessageService {
       newMessage = await MessageRepository.create({
         userId: userId,
         channelId: channelId,
-        mesage: message
+        message: message
       });
     } else {
       newMessage = await MessageRepository.create({
         userId: userId,
         privateMessageId: privateMessageId,
-        mesage: message
+        message: message
       });
     }
     if (!newMessage) {

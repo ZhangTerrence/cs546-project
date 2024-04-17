@@ -10,7 +10,7 @@ export default class ChannelController {
    * @route GET /channel/:channelId
    * @access Public
    */
-  static renderChannelPage = async (req, res) => {
+  static renderChannelMainPage = async (req, res) => {
     try {
       const channelId = ChannelValidator.validateMongooseId(
         req.params.channelId,
@@ -47,7 +47,12 @@ export default class ChannelController {
         ).permissionLevel;
 
         if (userPerms >= channel.permissionLevel) {
-          return res.render("channel/channel", {
+          return res.render("channel/main", {
+            stylesheets: [
+              `<link rel="stylesheet" href="/public/css/channel/main.css" />`
+            ],
+            scripts: [`<script src="/public/js/channel/main.js"></script>`],
+            serverId: channel.serverId,
             name: channel.name,
             description: channel.description,
             messages: messages,

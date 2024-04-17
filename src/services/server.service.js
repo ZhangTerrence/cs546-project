@@ -317,7 +317,7 @@ export default class ServerService {
     if (channel.name === "general") {
       throw new BadRequestError(
         400,
-        this.deleteChannel.name,
+        this.removeChannel.name,
         "General channel cannot be deleted."
       );
     }

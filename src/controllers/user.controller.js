@@ -10,7 +10,7 @@ export default class UserController {
    * @route GET /user/:userId
    * @access Public
    */
-  static renderUserProfilePage = async (req, res) => {
+  static renderUserMainPage = async (req, res) => {
     try {
       const userId = UserValidator.validateMongooseId(
         req.params.userId,
@@ -21,11 +21,11 @@ export default class UserController {
 
       if (req.session.user && req.session.user.id) {
         if (req.session.user.id === req.params.userId) {
-          return res.status(200).render("user/profile", {
+          return res.status(200).render("user/main", {
             stylesheets: [
-              `<link rel="stylesheet" href="/public/css/user/profile.css" />`
+              `<link rel="stylesheet" href="/public/css/user/main.css" />`
             ],
-            scripts: [`<script src="/public/js/user/profile.js"></script>`],
+            scripts: [`<script src="/public/js/user/main.js"></script>`],
             id: user.id,
             username: user.username,
             bio: user.bio,
@@ -43,11 +43,11 @@ export default class UserController {
           const friended = currentUser.friends.includes(user.id);
           const requested = user.friendRequests.includes(currentUser.id);
 
-          return res.status(200).render("user/profile", {
+          return res.status(200).render("user/main", {
             stylesheets: [
-              `<link rel="stylesheet" href="/public/css/user/profile.css" />`
+              `<link rel="stylesheet" href="/public/css/user/main.css" />`
             ],
-            scripts: [`<script src="/public/js/user/profile.js"></script>`],
+            scripts: [`<script src="/public/js/user/main.js"></script>`],
             username: user.username,
             bio: user.bio,
             owner: false,
@@ -57,11 +57,11 @@ export default class UserController {
           });
         }
       } else {
-        return res.status(200).render("user/profile", {
+        return res.status(200).render("user/main", {
           stylesheets: [
-            `<link rel="stylesheet" href="/public/css/user/profile.css" />`
+            `<link rel="stylesheet" href="/public/css/user/main.css" />`
           ],
-          scripts: [`<script src="/public/js/user/profile.js"></script>`],
+          scripts: [`<script src="/public/js/user/main.js"></script>`],
           username: user.username,
           bio: user.bio,
           owner: false,
