@@ -37,7 +37,7 @@ router.route("/login").get(routeType("view"), async (req, res) => {
 // User Pages
 router
   .route("/user/:userId")
-  .get(routeType("view"), UserController.renderUserProfilePage);
+  .get(routeType("view"), UserController.renderUserMainPage);
 router
   .route("/user/edit/:userId")
   .get(routeType("view"), isAuthenticated(), UserController.renderUserEditPage);

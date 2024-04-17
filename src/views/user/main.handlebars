@@ -1,16 +1,16 @@
 <p id="theme" hidden="true">{{theme}}</p>
-<main class="profile__main">
+<main class="user__main">
   <header>
-    <h1 id="profile__username">{{username}}</h1>
+    <h1 id="user__username">{{username}}</h1>
     <p>{{bio}}</p>
   </header>
 
   {{#if owner}}
-    <div class="profile__content">
+    <div class="user__content">
       <h2>Actions</h2>
-      <a href="/user/edit/{{id}}" class="profile__link">
+      <a href="/user/edit/{{id}}" class="user__link">
         <svg
-          class="profile__link-icon"
+          class="user__link-icon"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="none"
@@ -24,9 +24,9 @@
         </svg>
         <span>Edit Profile</span>
       </a>
-      <a href="/user/servers/{{id}}" class="profile__link">
+      <a href="/user/servers/{{id}}" class="user__link">
         <svg
-          class="profile__link-icon"
+          class="user__link-icon"
           viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -40,9 +40,9 @@
         </svg>
         <span>See Servers</span>
       </a>
-      <a href="/user/friends/{{id}}" class="profile__link">
+      <a href="/user/friends/{{id}}" class="user__link">
         <svg
-          class="profile__link-icon"
+          class="user__link-icon"
           viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -58,18 +58,18 @@
       </a>
 
       <form action="/api/user/logout" method="post">
-        <button type="submit" id="profile__logout-button">Logout</button>
+        <button type="submit" id="user__logout-button">Logout</button>
       </form>
     </div>
   {{else}}
     {{#if authed}}
       {{#if friended}}
-        <p class="profile__info">Already your friend.</p>
+        <p class="user__info">Already your friend.</p>
       {{else}}
         {{#if requested}}
-          <p class="profile__info">Already sent friend request.</p>
+          <p class="user__info">Already sent friend request.</p>
         {{else}}
-          <button id="profile__request-button">Send Friend Request</button>
+          <button id="user__request-button">Send Friend Request</button>
         {{/if}}
       {{/if}}
     {{else}}
@@ -77,6 +77,6 @@
   {{/if}}
 
   {{#if owner}}
-    <button id="profile__delete-button">Delete Account</button>
+    <button id="user__delete-button">Delete Account</button>
   {{/if}}
 </main>
