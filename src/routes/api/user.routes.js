@@ -10,8 +10,8 @@ router.route("/logout").post(routeType("api"), UserController.logoutUser);
 
 router
   .route("/")
-  .get(UserController.getUsers)
-  .post(UserController.createUser)
+  .get(routeType("api"), UserController.getUsers)
+  .post(routeType("api"), UserController.createUser)
   .patch(routeType("api"), isAuthenticated(), UserController.updateUser)
   .delete(routeType("api"), isAuthenticated(), UserController.deleteUser);
 

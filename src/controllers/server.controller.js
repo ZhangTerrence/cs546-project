@@ -1,4 +1,5 @@
 import ChannelService from "../services/channel.service.js";
+import MessageService from "../services/message.service.js";
 import ServerService from "../services/server.service.js";
 import UserService from "../services/user.service.js";
 import { BaseError, InternalServerError } from "../utils/errors.js";
@@ -184,7 +185,20 @@ export default class ServerController {
     try {
       const servers = await ServerService.getServers();
 
-      return res.status(200).json({ data: { servers: servers } });
+      return res.status(200).json({
+        data: {
+          servers: servers.map((server) => {
+            return {
+              id: server.id,
+              name: server.name,
+              description: server.description,
+              users: server.users,
+              channels: server.channels,
+              blacklist: server.blacklist
+            };
+          })
+        }
+      });
     } catch (error) {
       if (error instanceof BaseError) {
         console.log(`${error.constructor.name} ${error.toString()}`);
@@ -289,7 +303,11 @@ export default class ServerController {
         })
       );
 
-      await ChannelService.deleteServerChannels(server);
+      const channels = await ChannelService.getChannelsByServer(server);
+      for (const channel of channels) {
+        await ChannelService.deleteChannel(channel.id, true);
+        await MessageService.deleteMessagesByChannel(channel);
+      }
 
       return res.status(204).json();
     } catch (error) {

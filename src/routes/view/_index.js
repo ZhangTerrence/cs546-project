@@ -4,6 +4,7 @@ import ChannelController from "../../controllers/channel.controller.js";
 import routeType from "../../middleware/routeType.js";
 import isAuthenticated from "../../middleware/authentication.js";
 import express from "express";
+import PrivateMessageController from "../../controllers/privateMessage.controller.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -67,6 +68,19 @@ router
 // Channel Page
 router
   .route("/channel/:channelId")
-  .get(routeType("view"), ChannelController.renderChannelMainPage);
+  .get(
+    routeType("view"),
+    isAuthenticated(),
+    ChannelController.renderChannelMainPage
+  );
+
+// Private Message Page
+router
+  .route("/privateMessage/:privateMessageId")
+  .get(
+    routeType("view"),
+    isAuthenticated(),
+    PrivateMessageController.renderPrivateMessageMainPage
+  );
 
 export default router;

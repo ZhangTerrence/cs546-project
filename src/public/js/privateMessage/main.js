@@ -3,19 +3,13 @@ setTheme();
 const socket = io();
 
 const url = window.location.pathname;
-const channelId = url.substring(url.lastIndexOf("/") + 1);
-
-// const messages = [];
-
-// for (const node of document.getElementsByClassName("channel__message")) {
-//   messages.push(node.textContent);
-// }
+const privateMessageId = url.substring(url.lastIndexOf("/") + 1);
 
 socket.emit("joinRoom", {
-  roomId: channelId
+  roomId: privateMessageId
 });
 
-const messagesList = document.getElementById("channel__messages");
+const messagesList = document.getElementById("private-message__messages");
 messagesList.scrollTop = messagesList.scrollHeight;
 
 socket.on("receiveMessage", (e) =>
@@ -36,11 +30,12 @@ const appendMessageListElement = (userId, messageId, username, message) => {
   li.appendChild(a);
   li.appendChild(p);
 
-  document.getElementById("channel__messages").appendChild(li);
-  // messages.push(message);
+  document.getElementById("private-message__messages").appendChild(li);
 };
 
-const sendMessageButton = document.getElementById("channel__send-button");
+const sendMessageButton = document.getElementById(
+  "private-message__send-button"
+);
 
 const sendMessage = async (e) => {
   try {
@@ -49,7 +44,7 @@ const sendMessage = async (e) => {
     const requestBody = getFormRequestBody(e.target);
 
     const url = window.location.pathname;
-    const channelId = url.substring(url.lastIndexOf("/") + 1);
+    const privateMessageId = url.substring(url.lastIndexOf("/") + 1);
 
     showLoader();
     const response = await fetch("/api/message", {
@@ -59,7 +54,7 @@ const sendMessage = async (e) => {
       },
       body: JSON.stringify({
         ...requestBody,
-        channelId: channelId
+        privateMessageId: privateMessageId
       })
     });
     const responseBody = await response.json();
@@ -67,9 +62,8 @@ const sendMessage = async (e) => {
     hideLoader();
     if (response.ok) {
       e.target.form.reset();
-      // messages.push(requestBody["message"]);
       socket.emit("sendMessage", {
-        roomId: channelId,
+        roomId: privateMessageId,
         messageId: responseBody.data.messageId,
         userId: responseBody.data.userId,
         username: responseBody.data.username,

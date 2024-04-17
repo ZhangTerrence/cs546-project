@@ -310,7 +310,7 @@ export default class UserService {
 
   static removeFriend = async (userA, userB) => {
     const userBIndex = userA.friends.indexOf(userB.id);
-    if (userBIndex == -1) {
+    if (userBIndex === -1) {
       throw new NotFoundError(
         404,
         this.removeFriend.name,
@@ -329,7 +329,7 @@ export default class UserService {
     }
 
     const userAIndex = userB.friends.indexOf(userA.id);
-    if (userAIndex == -1) {
+    if (userAIndex === -1) {
       throw new NotFoundError(
         404,
         this.removeFriend.name,

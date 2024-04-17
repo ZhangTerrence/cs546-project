@@ -8,7 +8,7 @@ const router = express.Router({ mergeParams: true });
 
 router
   .route("/")
-  .get(ChannelController.getChannels)
+  .get(routeType("api"), isAuthenticated(), ChannelController.getChannels)
   .post(routeType("api"), isAuthenticated(), ChannelController.createChannel)
   .delete(routeType("api"), isAuthenticated(), ChannelController.deleteChannel);
 

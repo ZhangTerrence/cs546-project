@@ -1,0 +1,22 @@
+<main class="private-message__main">
+  <header>
+    <a href="/user/{{userAId}}">{{userAUsername}}</a>
+    <h1>Private Message</h1>
+    <a href="/user/{{userBId}}">{{userBUsername}}</a>
+  </header>
+
+  <ul id="private-message__messages">
+    {{#each messages}}
+    <li id="{{id}}">
+      <a href="/user/{{userId}}">{{username}}</a>
+      <p class="private-message__message">{{message}}</p>
+    </li>
+    {{/each}}
+  </ul>
+
+  <form class="private-message__submit-form">
+    <input type="text" name="message" autocomplete="off" />
+    
+    <button id="private-message__send-button">Send</button>
+  </form>
+</main>

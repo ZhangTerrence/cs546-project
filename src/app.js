@@ -51,12 +51,12 @@ const server = app.listen(env.PORT, () => {
 const io = new Server(server);
 io.on("connection", (socket) => {
   if (env.NODE_ENV === "dev") {
-    console.log(`${socket.id} has connected.`);
+    console.log(`[SOCKET] ${socket.id} has connected.`);
   }
 
   socket.on("joinRoom", (e) => {
     if (env.NODE_ENV === "dev") {
-      console.log(`${socket.id} has joined room ${e.roomId}`);
+      console.log(`[SOCKET] ${socket.id} has joined room ${e.roomId}`);
     }
     socket.join(e.roomId);
   });
@@ -64,6 +64,7 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", (e) => {
     io.in(e.roomId).emit("receiveMessage", {
       userId: e.userId,
+      messageId: e.messageId,
       username: e.username,
       message: e.message
     });
