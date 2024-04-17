@@ -231,7 +231,10 @@ export class MessageValidator extends BaseValidator {
       };
     }
 
-    const privateMessageId = this.validateMongooseId(_channelId, "channelId");
+    const privateMessageId = this.validateMongooseId(
+      _privateMessageId,
+      "privateMessageId"
+    );
 
     return {
       privateMessageId: privateMessageId,
@@ -239,3 +242,5 @@ export class MessageValidator extends BaseValidator {
     };
   };
 }
+
+export class PrivateMessageValidator extends BaseValidator {}

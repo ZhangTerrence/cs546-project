@@ -9,7 +9,7 @@ router.route("/:name").get(routeType("api"), ServerController.getServersByName);
 
 router
   .route("/")
-  .get(ServerController.getServers)
+  .get(routeType("api"), ServerController.getServers)
   .post(routeType("api"), isAuthenticated(), ServerController.createServer)
   .patch(routeType("api"), isAuthenticated(), ServerController.updateServer)
   .delete(routeType("api"), isAuthenticated(), ServerController.deleteServer);

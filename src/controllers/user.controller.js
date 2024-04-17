@@ -215,9 +215,14 @@ export default class UserController {
       const friends = await Promise.all(
         user.friends.map(async (userId) => {
           const friend = await UserService.getUserById(userId);
+          const privateMessage = await PrivateMessageService.getPrivateMessage(
+            user,
+            friend
+          );
 
           return {
             id: userId,
+            privateMessageId: privateMessage.id,
             username: friend.username
           };
         })
@@ -324,7 +329,20 @@ export default class UserController {
     try {
       const users = await UserService.getUsers();
 
-      return res.status(200).json({ data: { users: users } });
+      return res.status(200).json({
+        data: {
+          users: users.map((user) => {
+            return {
+              id: user.id,
+              username: user.username,
+              bio: user.bio,
+              servers: user.servers,
+              friends: user.friends,
+              theme: user.theme
+            };
+          })
+        }
+      });
     } catch (error) {
       if (error instanceof BaseError) {
         console.log(`${error.constructor.name} ${error.toString()}`);
@@ -423,9 +441,8 @@ export default class UserController {
       joinedServers.forEach(async (joinedServer) => {
         if (removedUser.id === joinedServer.creatorId) {
           await ServerService.deleteServer(joinedServer, removedUser);
-          const channels = await ChannelService.getChannelsByServer(
-            joinedServer.id
-          );
+          const channels =
+            await ChannelService.getChannelsByServer(joinedServer);
           for (const channel of channels) {
             await ChannelService.deleteChannel(channel.id, true);
             await MessageService.deleteMessagesByChannel(channel);

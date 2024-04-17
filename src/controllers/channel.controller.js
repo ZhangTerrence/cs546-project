@@ -8,7 +8,7 @@ import { ChannelValidator, ServerValidator } from "../utils/validators.js";
 export default class ChannelController {
   /**
    * @route GET /channel/:channelId
-   * @access Public
+   * @access Private
    */
   static renderChannelMainPage = async (req, res) => {
     try {
@@ -16,8 +16,10 @@ export default class ChannelController {
         req.params.channelId,
         "channelId"
       );
+      const userId = req.session.user.id;
 
       const channel = await ChannelService.getChannelById(channelId);
+      const user = await UserService.getUserById(userId);
 
       const server = await ServerService.getServerById(channel.serverId);
       const serverUsers = server.users.map((userObj) => userObj.id);
@@ -36,11 +38,7 @@ export default class ChannelController {
         })
       );
 
-      if (
-        req.session.user &&
-        req.session.user.id &&
-        serverUsers.includes(req.session.user.id)
-      ) {
+      if (serverUsers.includes(user.id)) {
         const userId = req.session.user.id;
         const userPerms = server.users.find(
           (userObj) => userObj.id === userId
@@ -55,20 +53,14 @@ export default class ChannelController {
             serverId: channel.serverId,
             name: channel.name,
             description: channel.description,
-            messages: messages,
-            canSend: true
-          });
-        } else {
-          return res.status(403).render("error", {
-            statusCode: 403,
-            message: "Insufficient permissions."
+            messages: messages
           });
         }
       }
 
       return res.status(403).render("error", {
         statusCode: 403,
-        message: "Insufficient permissions."
+        message: "Unauthorized."
       });
     } catch (error) {
       if (error instanceof BaseError) {
@@ -96,7 +88,7 @@ export default class ChannelController {
 
   /**
    * @route GET /api/channel
-   * @access Public
+   * @access Private
    */
   static getChannels = async (_req, res) => {
     try {

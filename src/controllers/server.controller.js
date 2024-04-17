@@ -185,7 +185,20 @@ export default class ServerController {
     try {
       const servers = await ServerService.getServers();
 
-      return res.status(200).json({ data: { servers: servers } });
+      return res.status(200).json({
+        data: {
+          servers: servers.map((server) => {
+            return {
+              id: server.id,
+              name: server.name,
+              description: server.description,
+              users: server.users,
+              channels: server.channels,
+              blacklist: server.blacklist
+            };
+          })
+        }
+      });
     } catch (error) {
       if (error instanceof BaseError) {
         console.log(`${error.constructor.name} ${error.toString()}`);

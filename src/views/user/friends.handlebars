@@ -9,7 +9,12 @@
           <li>
             <form id="{{id}}">
               <a href="/user/{{id}}">{{username}}</a>
-              <button class="friends__remove-buttons">Remove</button>
+              <div>
+                <button>
+                  <a href="/privateMessage/{{privateMessageId}}">Chat</a>
+                </button>
+                <button class="friends__remove-buttons">Remove</button>
+              </div>
             </form>
           </li>
         {{/each}}

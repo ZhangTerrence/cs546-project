@@ -12,10 +12,8 @@
   setTheme();
 })();
 
-const deleteButton = document.getElementById("profile__delete-icon");
-const sendFriendRequestButton = document.getElementById(
-  "profile__request-button"
-);
+const deleteButton = document.getElementById("user__delete-button");
+const sendFriendRequestButton = document.getElementById("user__request-button");
 
 const deleteUser = async (e) => {
   try {
