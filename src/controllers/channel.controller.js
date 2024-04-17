@@ -173,7 +173,8 @@ export default class ChannelController {
       const server = await ServerService.getServerById(channel.serverId);
 
       await ServerService.removeChannel(server, channel, user);
-      await ChannelService.deleteChannel(channel.id);
+      await ChannelService.deleteChannel(channel.id, false);
+      await MessageService.deleteMessagesByChannel(channel);
 
       return res.status(204).json();
     } catch (error) {

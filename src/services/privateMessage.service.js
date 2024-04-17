@@ -6,6 +6,20 @@ export default class PrivateMessageService {
     return await PrivateMessageRepository.find();
   };
 
+  static getPrivateMessage = async (userA, userB) => {
+    const privateMessage = await PrivateMessageRepository.findOne({
+      users: { $in: [userA.id, userB.id] }
+    });
+    if (!privateMessage) {
+      throw new NotFoundError(
+        404,
+        this.getPrivateMessage.name,
+        "Unable to find private message."
+      );
+    }
+    return privateMessage;
+  };
+
   static getPrivateMessageById = async (privateMessageId) => {
     const privateMessage =
       await PrivateMessageRepository.findById(privateMessageId);
@@ -32,9 +46,21 @@ export default class PrivateMessageService {
     }
   };
 
+  static deletePrivateMessageById = async (privateMessage) => {
+    const deletedPrivateMessage =
+      await PrivateMessageRepository.findByIdAndDelete(privateMessage.id);
+    if (!deletedPrivateMessage) {
+      throw new InternalServerError(
+        500,
+        this.deletePrivateMessageById.name,
+        "Unable to delete private message."
+      );
+    }
+  };
+
   static deletePrivateMessage = async (userA, userB) => {
     const userBIndex = userA.friends.indexOf(userB.id);
-    if (userBIndex == -1) {
+    if (userBIndex === -1) {
       throw new NotFoundError(
         404,
         this.deletePrivateMessage.name,
@@ -43,7 +69,7 @@ export default class PrivateMessageService {
     }
 
     const userAIndex = userB.friends.indexOf(userA.id);
-    if (userAIndex == -1) {
+    if (userAIndex === -1) {
       throw new NotFoundError(
         404,
         this.deletePrivateMessage.name,
@@ -84,6 +110,27 @@ export default class PrivateMessageService {
         500,
         this.addMessage.name,
         "Unable to add message to private message."
+      );
+    }
+  };
+
+  static removeMessage = async (privateMessage, message) => {
+    const messageIndex = privateMessage.messages.indexOf(message.id);
+    if (messageIndex === -1) {
+      throw new NotFoundError(
+        404,
+        this.removeMessage.name,
+        "Message not found in private message."
+      );
+    }
+
+    privateMessage.messages.splice(messageIndex, 1);
+    const removedMessage = await privateMessage.save();
+    if (!removedMessage) {
+      throw new InternalServerError(
+        500,
+        this.removeMessage.name,
+        "Unable to delete message."
       );
     }
   };

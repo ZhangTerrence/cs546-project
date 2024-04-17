@@ -19,11 +19,12 @@ const messagesList = document.getElementById("channel__messages");
 messagesList.scrollTop = messagesList.scrollHeight;
 
 socket.on("receiveMessage", (e) =>
-  appendMessageListElement(e.userId, e.username, e.message)
+  appendMessageListElement(e.userId, e.messageId, e.username, e.message)
 );
 
-const appendMessageListElement = (userId, username, message) => {
+const appendMessageListElement = (userId, messageId, username, message) => {
   const li = document.createElement("li");
+  li.id = messageId;
 
   const a = document.createElement("a");
   a.href = `/user/${userId}`;
@@ -36,7 +37,7 @@ const appendMessageListElement = (userId, username, message) => {
   li.appendChild(p);
 
   document.getElementById("channel__messages").appendChild(li);
-  messages.push(message);
+  // messages.push(message);
 };
 
 const sendMessageButton = document.getElementById("channel__send-button");
@@ -66,9 +67,10 @@ const sendMessage = async (e) => {
     hideLoader();
     if (response.ok) {
       e.target.form.reset();
-      messages.push(requestBody["message"]);
+      // messages.push(requestBody["message"]);
       socket.emit("sendMessage", {
         roomId: channelId,
+        messageId: responseBody.data.messageId,
         userId: responseBody.data.userId,
         username: responseBody.data.username,
         message: responseBody.data.message

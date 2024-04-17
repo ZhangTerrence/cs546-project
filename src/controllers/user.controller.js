@@ -1,4 +1,5 @@
 import ChannelService from "../services/channel.service.js";
+import MessageService from "../services/message.service.js";
 import PrivateMessageService from "../services/privateMessage.service.js";
 import ServerService from "../services/server.service.js";
 import UserService from "../services/user.service.js";
@@ -422,7 +423,13 @@ export default class UserController {
       joinedServers.forEach(async (joinedServer) => {
         if (removedUser.id === joinedServer.creatorId) {
           await ServerService.deleteServer(joinedServer, removedUser);
-          await ChannelService.deleteServerChannels(joinedServer);
+          const channels = await ChannelService.getChannelsByServer(
+            joinedServer.id
+          );
+          for (const channel of channels) {
+            await ChannelService.deleteChannel(channel.id, true);
+            await MessageService.deleteMessagesByChannel(channel);
+          }
         } else {
           await ServerService.removeUser(joinedServer, removedUser);
         }
@@ -565,8 +572,15 @@ export default class UserController {
       const userA = await UserService.getUserById(friendId);
       const userB = await UserService.getUserById(userId);
 
+      const privateMessage = await PrivateMessageService.getPrivateMessage(
+        userA,
+        userB
+      );
+
       await PrivateMessageService.deletePrivateMessage(userA, userB);
       await UserService.removeFriend(userA, userB);
+
+      await MessageService.deleteMessagesByPrivateMessage(privateMessage);
 
       return res.status(204).json();
     } catch (error) {

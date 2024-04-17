@@ -20,19 +20,29 @@ export default class MessageController {
         );
       const userId = req.session.user.id;
 
-      const newMessage = await MessageService.createMessage(
-        userId,
-        channelId,
-        privateMessageId,
-        message
-      );
+      let newMessage;
+
       if (channelId) {
         const channel = await ChannelService.getChannelById(channelId);
+
+        newMessage = await MessageService.createMessage(
+          userId,
+          channelId,
+          privateMessageId,
+          message
+        );
 
         await ChannelService.addMessage(channel, newMessage);
       } else {
         const privateMessage =
           await PrivateMessageService.getPrivateMessageById(privateMessageId);
+
+        newMessage = await MessageService.createMessage(
+          userId,
+          channelId,
+          privateMessageId,
+          message
+        );
 
         await PrivateMessageService.addMessage(privateMessage, newMessage);
       }
@@ -42,6 +52,7 @@ export default class MessageController {
       return res.status(201).json({
         data: {
           userId: user.id,
+          messageId: newMessage.id,
           username: user.username,
           message: newMessage.message
         }

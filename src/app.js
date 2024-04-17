@@ -64,6 +64,7 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", (e) => {
     io.in(e.roomId).emit("receiveMessage", {
       userId: e.userId,
+      messageId: e.messageId,
       username: e.username,
       message: e.message
     });

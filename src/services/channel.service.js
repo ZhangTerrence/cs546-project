@@ -10,6 +10,12 @@ export default class ChannelService {
     return await ChannelRepository.find();
   };
 
+  static getChannelsByServer = async (server) => {
+    return await ChannelRepository.find({
+      serverId: server.id
+    });
+  };
+
   static getChannelById = async (channelId) => {
     const channel = await ChannelRepository.findById(channelId);
     if (!channel) {
@@ -69,10 +75,10 @@ export default class ChannelService {
     return newChannel;
   };
 
-  static deleteChannel = async (channelId) => {
+  static deleteChannel = async (channelId, force) => {
     const channel = await this.getChannelById(channelId);
 
-    if (channel.name === "general") {
+    if (channel.name === "general" && !force) {
       throw new BadRequestError(
         400,
         this.deleteChannel.name,
@@ -91,20 +97,6 @@ export default class ChannelService {
     }
   };
 
-  static deleteServerChannels = async (server) => {
-    const deleteChannels = await ChannelRepository.deleteMany({
-      serverId: server.id
-    });
-
-    if (!deleteChannels) {
-      throw new InternalServerError(
-        500,
-        this.deleteServerChannels.name,
-        `Unable to delete ${server.name}'s channels.`
-      );
-    }
-  };
-
   static addMessage = async (channel, message) => {
     channel.messages.push(message.id);
     const addedMessage = await channel.save();
@@ -113,6 +105,27 @@ export default class ChannelService {
         500,
         this.addMessage.name,
         `Unable to add message to ${channel.name}`
+      );
+    }
+  };
+
+  static removeMessage = async (channel, message) => {
+    const messageIndex = channel.messages.indexOf(message.id);
+    if (messageIndex === -1) {
+      throw new NotFoundError(
+        404,
+        this.removeMessage.name,
+        "Message not found in channel."
+      );
+    }
+
+    channel.messages.splice(messageIndex, 1);
+    const removedMessage = await channel.save();
+    if (!removedMessage) {
+      throw new InternalServerError(
+        500,
+        this.removeMessage.name,
+        "Unable to delete message."
       );
     }
   };

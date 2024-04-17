@@ -64,4 +64,41 @@ export default class MessageService {
 
     return newMessage;
   };
+
+  static deleteMessage = async (messageId) => {
+    const deletedMessage = await MessageRepository.findByIdAndDelete(messageId);
+    if (!deletedMessage) {
+      throw new InternalServerError(
+        500,
+        this.deleteMessage.name,
+        "Unable to delete message."
+      );
+    }
+  };
+
+  static deleteMessagesByChannel = async (channel) => {
+    const deletedMessages = await MessageRepository.deleteMany({
+      channelId: channel.id
+    });
+    if (!deletedMessages) {
+      throw new InternalServerError(
+        500,
+        this.deleteMessage.name,
+        `Unable to delete messages from ${channel.name}.`
+      );
+    }
+  };
+
+  static deleteMessagesByPrivateMessage = async (privateMessage) => {
+    const deletedMessages = await MessageRepository.deleteMany({
+      privateMessageId: privateMessage.id
+    });
+    if (!deletedMessages) {
+      throw new InternalServerError(
+        500,
+        this.deleteMessage.name,
+        "Unable to delete messages from private message."
+      );
+    }
+  };
 }

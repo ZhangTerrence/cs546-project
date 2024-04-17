@@ -1,4 +1,5 @@
 import ChannelService from "../services/channel.service.js";
+import MessageService from "../services/message.service.js";
 import ServerService from "../services/server.service.js";
 import UserService from "../services/user.service.js";
 import { BaseError, InternalServerError } from "../utils/errors.js";
@@ -289,7 +290,11 @@ export default class ServerController {
         })
       );
 
-      await ChannelService.deleteServerChannels(server);
+      const channels = await ChannelService.getChannelsByServer(server);
+      for (const channel of channels) {
+        await ChannelService.deleteChannel(channel.id, true);
+        await MessageService.deleteMessagesByChannel(channel);
+      }
 
       return res.status(204).json();
     } catch (error) {
