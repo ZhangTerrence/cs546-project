@@ -23,5 +23,8 @@ router
 router
   .route("/kick")
   .delete(routeType("api"), isAuthenticated(), ServerController.kickUser);
+router
+  .route("/unkick")
+  .delete(routeType("api"), isAuthenticated(), ServerController.unkickUser);
 
 export default router;

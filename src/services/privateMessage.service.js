@@ -34,16 +34,18 @@ export default class PrivateMessageService {
   };
 
   static createPrivateMessage = async (userA, userB) => {
-    const createdPrivateMessage = await PrivateMessageRepository.create({
+    const newPrivateMessage = await PrivateMessageRepository.create({
       users: [userA.id, userB.id]
     });
-    if (!createdPrivateMessage) {
+    if (!newPrivateMessage) {
       throw new InternalServerError(
         500,
         this.createPrivateMessage.name,
         `Unable to create private message between ${userA.username} and ${userB.username}.`
       );
     }
+
+    return newPrivateMessage;
   };
 
   static deletePrivateMessageById = async (privateMessage) => {

@@ -119,8 +119,12 @@
   }
 }
 
-.server__delete-container,
-.server__leave-container {
+.server__edit-container {
+  display: flex;
+  column-gap: 0.5rem;
+}
+
+.server__container {
   align-self: flex-end;
 
   & button {

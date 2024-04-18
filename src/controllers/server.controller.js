@@ -19,6 +19,82 @@ export default class ServerController {
 
       const server = await ServerService.getServerById(serverId);
 
+      if (
+        req.session.user &&
+        req.session.user.id &&
+        server.users.find((userObj) => userObj.id === req.session.user.id)
+      ) {
+        const userId = req.session.user.id;
+        const userPerms = server.users.find(
+          (userObj) => userObj.id === userId
+        ).permissionLevel;
+
+        const users = await Promise.all(
+          server.users.map(async (userObj) => {
+            const user = await UserService.getUserById(userObj.id);
+
+            return {
+              id: user.id,
+              username: user.username,
+              canEdit: userPerms > userObj.permissionLevel
+            };
+          })
+        );
+
+        const channels = await Promise.all(
+          server.channels.map(async (channelId) => {
+            const channel = await ChannelService.getChannelById(channelId);
+
+            return {
+              id: channel.id,
+              name: channel.name,
+              canEdit: userPerms > channel.permissionLevel
+            };
+          })
+        );
+
+        const blacklist = await Promise.all(
+          server.blacklist.map(async (userId) => {
+            const user = await UserService.getUserById(userId);
+
+            return {
+              id: user.id,
+              username: user.username
+            };
+          })
+        );
+
+        if (userId === server.creatorId) {
+          return res.render("server/main", {
+            stylesheets: [
+              `<link rel="stylesheet" href="/public/css/server/main.css" />`
+            ],
+            scripts: [`<script src="/public/js/server/main.js"></script>`],
+            id: server.id,
+            name: server.name,
+            description: server.description,
+            users: users,
+            channels: channels,
+            blacklist: blacklist,
+            owner: true,
+            member: true
+          });
+        } else if (server.users.map((userObj) => userObj.id).includes(userId)) {
+          return res.render("server/main", {
+            stylesheets: [
+              `<link rel="stylesheet" href="/public/css/server/main.css" />`
+            ],
+            scripts: [`<script src="/public/js/server/main.js"></script>`],
+            name: server.name,
+            description: server.description,
+            users: users,
+            channels: channels,
+            owner: false,
+            member: true
+          });
+        }
+      }
+
       const users = await Promise.all(
         server.users.map(async (userObj) => {
           const user = await UserService.getUserById(userObj.id);
@@ -41,39 +117,6 @@ export default class ServerController {
         })
       );
 
-      if (req.session.user && req.session.user.id) {
-        const userId = req.session.user.id;
-
-        if (userId === server.creatorId) {
-          return res.render("server/main", {
-            stylesheets: [
-              `<link rel="stylesheet" href="/public/css/server/main.css" />`
-            ],
-            scripts: [`<script src="/public/js/server/main.js"></script>`],
-            id: server.id,
-            name: server.name,
-            description: server.description,
-            users: users,
-            channels: channels,
-            owner: true,
-            member: true
-          });
-        } else if (server.users.map((userObj) => userObj.id).includes(userId)) {
-          return res.render("server/main", {
-            stylesheets: [
-              `<link rel="stylesheet" href="/public/css/server/main.css" />`
-            ],
-            scripts: [`<script src="/public/js/server/main.js"></script>`],
-            name: server.name,
-            description: server.description,
-            users: users,
-            channels: channels,
-            owner: false,
-            member: true
-          });
-        }
-      }
-
       return res.render("server/main", {
         stylesheets: [
           `<link rel="stylesheet" href="/public/css/server/main.css" />`
@@ -81,9 +124,7 @@ export default class ServerController {
         name: server.name,
         description: server.description,
         users: users,
-        channels: channels,
-        owner: false,
-        member: false
+        channels: channels
       });
     } catch (error) {
       if (error instanceof BaseError) {
@@ -403,6 +444,36 @@ export default class ServerController {
 
       await ServerService.blacklistUser(server, kicked, kicker);
       await UserService.removeServer(kicked, server);
+
+      return res
+        .status(200)
+        .json({ data: { id: kicked.id, username: kicked.username } });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        return res.status(error.statusCode).json({ error: error.message });
+      } else {
+        console.log(error);
+        return res.status(500).json({ error: "Code went boom." });
+      }
+    }
+  };
+
+  static unkickUser = async (req, res) => {
+    try {
+      const serverId = ServerValidator.validateMongooseId(
+        req.body.serverId,
+        "serverId"
+      );
+      const kickedId = ServerValidator.validateMongooseId(
+        req.body.userId,
+        "userId"
+      );
+
+      const server = await ServerService.getServerById(serverId);
+      const user = await UserService.getUserById(kickedId);
+
+      await ServerService.unblacklistUser(server, user);
 
       return res.status(204).json();
     } catch (error) {

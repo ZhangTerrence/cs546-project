@@ -13,7 +13,11 @@ const rejectFriendRequestButtons = document.getElementsByClassName(
   "friends__reject-buttons"
 );
 
-const createFriendsListElement = (friendId, friendUsername) => {
+const createFriendsListElement = (
+  friendId,
+  friendUsername,
+  privateMessageId
+) => {
   const li = document.createElement("li");
 
   const form = document.createElement("form");
@@ -23,13 +27,22 @@ const createFriendsListElement = (friendId, friendUsername) => {
   a.href = `/user/${friendId}`;
   a.innerText = friendUsername;
 
+  const div = document.createElement("div");
+
+  const a2 = document.createElement("a");
+  a2.href = `/privateMessage/${privateMessageId}`;
+  a2.innerText = "Chat";
+
   const button = document.createElement("button");
   button.innerText = "Remove";
   button.classList.add("friends__remove-button");
   button.addEventListener("click", async (e) => await removeFriend(e, button));
 
+  div.appendChild(a2);
+  div.appendChild(button);
+
   form.appendChild(a);
-  form.appendChild(button);
+  form.appendChild(div);
 
   li.appendChild(form);
 
@@ -144,7 +157,8 @@ const acceptFriendRequest = async (e, button) => {
         .appendChild(
           createFriendsListElement(
             requestBody.data.id,
-            requestBody.data.username
+            requestBody.data.username,
+            requestBody.data.privateMessageId
           )
         );
     } else {

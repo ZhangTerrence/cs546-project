@@ -7,6 +7,32 @@ const deleteChannelButtons = document.getElementsByClassName(
   "server__delete-button"
 );
 const createChannelButton = document.getElementById("server__create-button");
+const unkickUserButtons = document.getElementsByClassName(
+  "server__unkick-button"
+);
+
+const createBlacklistListElement = (userId, username) => {
+  const li = document.createElement("li");
+
+  const form = document.createElement("form");
+  form.id = userId;
+
+  const a = document.createElement("a");
+  a.href = `/user/${userId}`;
+  a.innerText = username;
+
+  const button = document.createElement("button");
+  button.innerText = "Remove";
+  button.classList.add("server__unkick-button");
+  button.addEventListener("click", async (e) => await unkickUser(e, button));
+
+  form.appendChild(a);
+  form.appendChild(button);
+
+  li.appendChild(form);
+
+  return li;
+};
 
 const leaveServer = async (e) => {
   try {
@@ -64,10 +90,57 @@ const kickUser = async (e, button) => {
         serverId: serverId
       })
     });
+    const responseBody = await response.json();
 
     hideLoader();
     if (response.ok) {
       printMessage("Successfully kicked user.");
+      button.form.remove();
+      document
+        .getElementById("server__blacklist-list")
+        .appendChild(
+          createBlacklistListElement(
+            responseBody.data.id,
+            responseBody.data.username
+          )
+        );
+    } else {
+      if (response.status === 401) {
+        window.location.replace("/login");
+        return;
+      }
+      printMessage(responseBody.error);
+    }
+  } catch (error) {
+    hideLoader();
+    printMessage(error.message);
+  }
+};
+
+const unkickUser = async (e, button) => {
+  try {
+    e.preventDefault();
+
+    const userId = button.form.id;
+
+    const url = window.location.pathname;
+    const serverId = url.substring(url.lastIndexOf("/") + 1);
+
+    showLoader();
+    const response = await fetch("/api/server/unkick", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userId: userId,
+        serverId: serverId
+      })
+    });
+
+    hideLoader();
+    if (response.ok) {
+      printMessage("Successfully unkicked user.");
       button.form.remove();
     } else {
       if (response.status === 401) {
@@ -196,6 +269,12 @@ const createChannel = async (e) => {
 if (kickUserButtons) {
   Array.from(kickUserButtons).forEach((button) =>
     button.addEventListener("click", async (e) => await kickUser(e, button))
+  );
+}
+
+if (unkickUserButtons) {
+  Array.from(unkickUserButtons).forEach((button) =>
+    button.addEventListener("click", async (e) => await unkickUser(e, button))
   );
 }
 

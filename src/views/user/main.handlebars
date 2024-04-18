@@ -56,6 +56,9 @@
     </form>
   </div>
   {{else}} {{#if authed}} {{#if friended}}
+  <a href="/privateMessage/{{privateMessageId}}" class="user__chat-link">
+    Chat
+  </a>
   <p class="user__info">Already your friend.</p>
   {{else}} {{#if requested}}
   <p class="user__info">Already sent friend request.</p>

@@ -42,6 +42,15 @@ export default class UserController {
           const currentUser = await UserService.getUserById(currentUserId);
 
           const friended = currentUser.friends.includes(user.id);
+
+          let privateMessage;
+          if (friended) {
+            privateMessage = await PrivateMessageService.getPrivateMessage(
+              user,
+              currentUser
+            );
+          }
+
           const requested = user.friendRequests.includes(currentUser.id);
 
           return res.status(200).render("user/main", {
@@ -54,6 +63,7 @@ export default class UserController {
             owner: false,
             authed: true,
             friended: friended,
+            privateMessageId: privateMessage.id,
             requested: requested
           });
         }
@@ -555,12 +565,14 @@ export default class UserController {
 
       await UserService.sendFriendRequest(requester, target);
       await UserService.acceptFriendRequest(target, requester);
-      await PrivateMessageService.createPrivateMessage(target, requester);
+      const newPrivateMessage =
+        await PrivateMessageService.createPrivateMessage(target, requester);
 
       return res.status(200).json({
         data: {
           id: requester.id,
-          username: requester.username
+          username: requester.username,
+          privateMessageId: newPrivateMessage.id
         }
       });
     } catch (error) {

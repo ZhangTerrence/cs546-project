@@ -279,7 +279,28 @@ export default class ServerService {
       throw new InternalServerError(
         500,
         this.blacklistUser.name,
-        `Unable to add ${kicked.username} to ${server.name}'s blacklisst.`
+        `Unable to add ${kicked.username} to ${server.name}'s blacklist.`
+      );
+    }
+  };
+
+  static unblacklistUser = async (server, user) => {
+    const kickedIndex = server.blacklist.indexOf(user.id);
+    if (kickedIndex === -1) {
+      throw new NotFoundError(
+        404,
+        this.unblacklistUser.name,
+        `${user.username} not found in ${server.name}'s users.`
+      );
+    }
+
+    server.blacklist.splice(kickedIndex, 1);
+    const unblacklistedUser = await server.save();
+    if (!unblacklistedUser) {
+      throw new InternalServerError(
+        500,
+        this.unblacklistUser.name,
+        `Unable to remove ${user.username} to ${server.name}'s blacklist.`
       );
     }
   };

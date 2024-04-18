@@ -53,12 +53,19 @@
   }
 }
 
-.user__info {
+.user__info,
+.user__chat-link {
   border: 1px solid var(--text-negative);
   border-radius: 5px;
   padding: 0.75rem 1.75rem;
   width: fit-content;
   font-size: 1.25rem;
+}
+
+.user__chat-link {
+  background-color: var(--text-negative);
+  color: var(--background-primary);
+  text-decoration: none;
 }
 
 .user__link {

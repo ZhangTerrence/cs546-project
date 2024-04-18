@@ -41,7 +41,7 @@ const sendFriendRequest = async (e) => {
   try {
     e.preventDefault();
 
-    const targetUser = document.getElementById("profile__username").innerText;
+    const targetUser = document.getElementById("user__username").innerText;
     const requestBody = {
       username: targetUser
     };
@@ -59,7 +59,7 @@ const sendFriendRequest = async (e) => {
     if (response.ok) {
       const info = document.createElement("p");
       info.innerHTML = "Already sent friend request.";
-      info.classList.add("profile__info");
+      info.classList.add("user__info");
       sendFriendRequestButton.parentElement.replaceChild(
         info,
         sendFriendRequestButton

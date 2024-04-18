@@ -3,7 +3,6 @@
     <h1>{{name}}</h1>
     <p>{{description}}</p>
   </header>
-  {{#if owner}}
   <div class="server__content">
     <div class="server__lists">
       <h2>Users</h2>
@@ -12,7 +11,12 @@
         <li>
           <form id="{{id}}">
             <a href="/user/{{id}}">{{username}}</a>
-            <button class="server__kick-button">Kick</button>
+            {{#if canEdit}}
+            <div class="server__edit-container">
+              <button>Edit</button>
+              <button class="server__kick-button">Kick</button>
+            </div>
+            {{/if}}
           </form>
         </li>
         {{/each}}
@@ -24,13 +28,33 @@
         <li>
           <form id="{{id}}">
             <a href="/channel/{{id}}">{{name}}</a>
-            <button class="server__delete-button">Delete</button>
+            {{#if canEdit}}
+            <div class="server__edit-container">
+              <button>Edit</button>
+              <button class="server__delete-button">Delete</button>
+            </div>
+            {{/if}}
           </form>
         </li>
         {{/each}}
       </ul>
+
+      {{#if owner}}
+      <h2>Blacklist</h2>
+      <ul id="server__blacklist-list" class="server__users-list">
+        {{#each blacklist}}
+        <li>
+          <form id="{{id}}">
+            <a href="/user/{{id}}">{{username}}</a>
+            <button class="server__unkick-button">Remove</button>
+          </form>
+        </li>
+        {{/each}}
+      </ul>
+      {{/if}}
     </div>
 
+    {{#if owner}}
     <div class="server__actions">
       <h2>Edit Server</h2>
       <a href="/server/edit/{{id}}">
@@ -52,43 +76,14 @@
         <button id="server__create-button">Create</button>
       </form>
     </div>
-  </div>
-  {{else}}
-  <div class="server__content">
-    <div class="server__lists">
-      <h2>Users</h2>
-      <ul class="server__users-list">
-        {{#each users}}
-        <li>
-          <form id="{{id}}">
-            <a href="/user/{{id}}">{{username}}</a>
-          </form>
-        </li>
-        {{/each}}
-      </ul>
-
-      <h2>Channels</h2>
-      <ul class="server__channels-list">
-        {{#each channels}}
-        <li>
-          <form id="{{id}}">
-            <a href="/channel/{{id}}">{{name}}</a>
-          </form>
-        </li>
-        {{/each}}
-      </ul>
-    </div>
-  </div>
-  <div class="server__leave-container">
-    {{#if member}}
-    <button id="server__leave-button">Leave Server</button>
     {{/if}}
   </div>
-  {{/if}}
 
-  <div class="server__delete-container">
+  <div class="server__container">
     {{#if owner}}
     <button id="server__delete-button">Delete Server</button>
-    {{/if}}
+    {{else}} {{#if member}}
+    <button id="server__leave-button">Leave Server</button>
+    {{/if}} {{/if}}
   </div>
 </main>
