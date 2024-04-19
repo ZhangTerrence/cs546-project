@@ -40,6 +40,6 @@ const updateServer = async (e) => {
 if (updateServerButton) {
   updateServerButton.addEventListener(
     "click",
-    async (e) => await updateServer(e)
+    async (e) => await updateUser(e)
   );
 }

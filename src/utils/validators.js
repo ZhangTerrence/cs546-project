@@ -173,6 +173,54 @@ export class ServerValidator extends BaseValidator {
       name: name
     };
   };
+
+  static validateUpdateUserInfo = (_permissionLevel) => {
+    const permissionLevel = parseInt(_permissionLevel);
+    if (Number.isNaN(permissionLevel) || typeof permissionLevel !== "number") {
+      throw new BadRequestError(
+        400,
+        this.validateUpdateUserInfo.name,
+        "Expected a number for permission level."
+      );
+    }
+
+    if (permissionLevel < 0 || permissionLevel > 9) {
+      throw new BadRequestError(
+        400,
+        this.validateUpdateUserInfo.name,
+        "Permission level must be between 0 and 9 inclusive."
+      );
+    }
+    return {
+      permissionLevel: permissionLevel
+    };
+  };
+
+  static validateUpdateChannelInfo = (_name, _permissionLevel) => {
+    const name = this.validateString(_name, "name");
+
+    const permissionLevel = parseInt(_permissionLevel);
+    if (Number.isNaN(permissionLevel) || typeof permissionLevel !== "number") {
+      throw new BadRequestError(
+        400,
+        this.validateCreationInfo.name,
+        "Expected a number for permission level."
+      );
+    }
+
+    if (permissionLevel < 0 || permissionLevel > 9) {
+      throw new BadRequestError(
+        400,
+        this.validateCreationInfo.name,
+        "Permission level must be between 0 and 9 inclusive."
+      );
+    }
+
+    return {
+      name: name,
+      permissionLevel: permissionLevel
+    };
+  };
 }
 
 export class ChannelValidator extends BaseValidator {

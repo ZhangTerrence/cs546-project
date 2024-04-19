@@ -1,0 +1,24 @@
+<main class="edit__main">
+  <a href="/server/{{serverId}}">Go back to server</a>
+
+  <h1>Editing {{name}}</h1>
+  <form id="{{id}}" class="edit__form" oninput="output.value=parseInt(permissionLevel.value)">
+    <label for="name">Name</label>
+    <input type="text" name="name" value="{{name}}" autocomplete="off" />
+
+    <label for="description">Description</label>
+    <textarea name="description" autocomplete="off">{{description}}</textarea>
+
+    <label for="permissionLevel">Permission Level</label>
+    <input
+      type="range"
+      value="{{permissionLevel}}"
+      min="0"
+      max="9"
+      name="permissionLevel"
+    />
+    <output name="output" for="permissionLevel">{{permissionLevel}}</output>
+
+    <button id="edit__update-button">Save</button>
+  </form>
+</main>

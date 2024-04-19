@@ -130,6 +130,59 @@ export default class ServerService {
     }
   };
 
+  static updateUser = async (
+    server,
+    editedUser,
+    editorUser,
+    permissionLevel
+  ) => {
+    const editedUserIndex = server.users
+      .map((server) => server.id)
+      .indexOf(editedUser.id);
+    if (editedUserIndex === -1) {
+      throw new NotFoundError(
+        404,
+        this.updateUser.name,
+        `${editedUser.username} not found in ${server.name}.`
+      );
+    }
+
+    const editorUserIndex = server.users
+      .map((server) => server.id)
+      .indexOf(editorUser.id);
+    if (editorUserIndex === -1) {
+      throw new NotFoundError(
+        404,
+        this.updateUser.name,
+        `${editorUser.username} not found in ${server.name}.`
+      );
+    }
+
+    const editedUserPerms = server.users[editedUserIndex].permissionLevel;
+    const editorUserPerms = server.users[editorUserIndex].permissionLevel;
+
+    if (
+      editedUserPerms >= editorUserPerms ||
+      permissionLevel >= editorUserPerms
+    ) {
+      throw new AuthorizationError(
+        403,
+        this.updateUser.name,
+        "Unsufficient permissions."
+      );
+    }
+
+    server.users[editedUserIndex].permissionLevel = permissionLevel;
+    const updatedUser = await server.save();
+    if (!updatedUser) {
+      throw new InternalServerError(
+        500,
+        this.updateUser.name,
+        `Unable to update ${editedUser.username} in ${server.name}.`
+      );
+    }
+  };
+
   static deleteServer = async (server, user) => {
     if (server.creatorId !== user.id) {
       throw new AuthorizationError(

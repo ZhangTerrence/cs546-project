@@ -26,5 +26,11 @@ router
 router
   .route("/unkick")
   .delete(routeType("api"), isAuthenticated(), ServerController.unkickUser);
+router
+  .route("/edit/user")
+  .patch(routeType("api"), isAuthenticated(), ServerController.updateUser);
+router
+  .route("/edit/channel")
+  .patch(routeType("api"), isAuthenticated(), ServerController.updateChannel);
 
 export default router;

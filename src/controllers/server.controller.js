@@ -85,6 +85,7 @@ export default class ServerController {
               `<link rel="stylesheet" href="/public/css/server/main.css" />`
             ],
             scripts: [`<script src="/public/js/server/main.js"></script>`],
+            id: server.id,
             name: server.name,
             description: server.description,
             users: users,
@@ -121,6 +122,7 @@ export default class ServerController {
         stylesheets: [
           `<link rel="stylesheet" href="/public/css/server/main.css" />`
         ],
+        id: server.id,
         name: server.name,
         description: server.description,
         users: users,
@@ -151,8 +153,8 @@ export default class ServerController {
   };
 
   /**
-   * @route GET /server/edit/:serverId
-   * @access Public
+   * @route GET /server/:serverId/edit
+   * @access Private
    */
   static renderServerEditPage = async (req, res) => {
     try {
@@ -171,6 +173,167 @@ export default class ServerController {
         id: server.id,
         name: server.name,
         description: server.description
+      });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        if ((!error) instanceof InternalServerError) {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        } else {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        }
+      } else {
+        console.log(error);
+        return res.status(500).render("error", {
+          statusCode: 500,
+          message: "Code went boom."
+        });
+      }
+    }
+  };
+
+  /**
+   * @route GET /server/:serverId/edit/user/:userId
+   * @access Private
+   */
+  static renderServerEditUserPage = async (req, res) => {
+    try {
+      const serverId = ServerValidator.validateMongooseId(
+        req.params.serverId,
+        "serverId"
+      );
+      const editedId = ServerValidator.validateMongooseId(
+        req.params.userId,
+        "userId"
+      );
+      const editorId = req.session.user.id;
+
+      const server = await ServerService.getServerById(serverId);
+
+      const editedUser = server.users.find(
+        (userObj) => userObj.id === editedId
+      );
+      if (!editedUser) {
+        return res.status(404).render("error", {
+          statusCode: 404,
+          message: "User not found in server."
+        });
+      }
+
+      const editorUser = server.users.find(
+        (userObj) => userObj.id === editorId
+      );
+      if (!editorUser) {
+        return res.status(404).render("error", {
+          statusCode: 404,
+          message: "User not found in server."
+        });
+      }
+
+      if (editedUser.permissionLevel >= editorUser.permissionLevel) {
+        return res.status(403).render("error", {
+          statusCode: 403,
+          message: "Insufficient permissions."
+        });
+      }
+
+      const user = await UserService.getUserById(editedUser.id);
+
+      return res.render("server/editUser", {
+        stylesheets: [
+          `<link rel="stylesheet" href="/public/css/server/editUser.css" />`
+        ],
+        scripts: [`<script src="/public/js/server/editUser.js"></script>`],
+        serverId: server.id,
+        id: user.id,
+        username: user.username,
+        permissionLevel: editedUser.permissionLevel
+      });
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        if ((!error) instanceof InternalServerError) {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        } else {
+          return res.status(error.statusCode).render("error", {
+            statusCode: error.statusCode,
+            message: error.message
+          });
+        }
+      } else {
+        console.log(error);
+        return res.status(500).render("error", {
+          statusCode: 500,
+          message: "Code went boom."
+        });
+      }
+    }
+  };
+
+  /**
+   * @route GET /server/:serverId/edit/channel/:channelId
+   * @access Private
+   */
+  static renderServerEditChannelPage = async (req, res) => {
+    try {
+      const serverId = ServerValidator.validateMongooseId(
+        req.params.serverId,
+        "serverId"
+      );
+      const channelId = ServerValidator.validateMongooseId(
+        req.params.channelId,
+        "channelId"
+      );
+      const editorId = req.session.user.id;
+
+      const server = await ServerService.getServerById(serverId);
+
+      const serverChannel = server.channels.find((id) => id === channelId);
+      if (!serverChannel) {
+        return res.status(404).render("error", {
+          statusCode: 404,
+          message: "Channel not found in server."
+        });
+      }
+
+      const editorUser = server.users.find(
+        (userObj) => userObj.id === editorId
+      );
+      if (!editorUser) {
+        return res.status(404).render("error", {
+          statusCode: 404,
+          message: "User not found in server."
+        });
+      }
+
+      const channel = await ChannelService.getChannelById(serverChannel);
+
+      if (channel.permissionLevel >= editorUser.permissionLevel) {
+        return res.status(403).render("error", {
+          statusCode: 403,
+          message: "Insufficient permissions."
+        });
+      }
+
+      return res.render("server/editChannel", {
+        stylesheets: [
+          `<link rel="stylesheet" href="/public/css/server/editChannel.css" />`
+        ],
+        scripts: [`<script src="/public/js/server/editChannel.js"></script>`],
+        serverId: server.id,
+        id: channel.id,
+        name: channel.name,
+        description: channel.description,
+        permissionLevel: channel.permissionLevel
       });
     } catch (error) {
       if (error instanceof BaseError) {
@@ -474,6 +637,95 @@ export default class ServerController {
       const user = await UserService.getUserById(kickedId);
 
       await ServerService.unblacklistUser(server, user);
+
+      return res.status(204).json();
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        return res.status(error.statusCode).json({ error: error.message });
+      } else {
+        console.log(error);
+        return res.status(500).json({ error: "Code went boom." });
+      }
+    }
+  };
+
+  /**
+   * @route PATCH /api/server/edit/user
+   * @access Private
+   */
+  static updateUser = async (req, res) => {
+    try {
+      const serverId = ServerValidator.validateMongooseId(
+        req.body.serverId,
+        "serverId"
+      );
+      const editedId = ServerValidator.validateMongooseId(
+        req.body.userId,
+        "userId"
+      );
+      const { permissionLevel } = ServerValidator.validateUpdateUserInfo(
+        req.body.permissionLevel
+      );
+      const editorId = req.session.user.id;
+
+      const server = await ServerService.getServerById(serverId);
+      const editedUser = await UserService.getUserById(editedId);
+      const editorUser = await UserService.getUserById(editorId);
+
+      await ServerService.updateUser(
+        server,
+        editedUser,
+        editorUser,
+        permissionLevel
+      );
+
+      return res.status(204).json();
+    } catch (error) {
+      if (error instanceof BaseError) {
+        console.log(`${error.constructor.name} ${error.toString()}`);
+        return res.status(error.statusCode).json({ error: error.message });
+      } else {
+        console.log(error);
+        return res.status(500).json({ error: "Code went boom." });
+      }
+    }
+  };
+
+  /**
+   * @route PATCH /api/server/edit/channel
+   * @access Private
+   */
+  static updateChannel = async (req, res) => {
+    try {
+      const serverId = ServerValidator.validateMongooseId(
+        req.body.serverId,
+        "serverId"
+      );
+      const channelId = ServerValidator.validateMongooseId(
+        req.body.channelId,
+        "channelId"
+      );
+      const { name, permissionLevel } =
+        ServerValidator.validateUpdateChannelInfo(
+          req.body.name,
+          req.body.permissionLevel
+        );
+      const description = req.body.description;
+      const editorId = req.session.user.id;
+
+      const server = await ServerService.getServerById(serverId);
+      const channel = await ChannelService.getChannelById(channelId);
+      const editorUser = await UserService.getUserById(editorId);
+
+      await ChannelService.updateChannel(
+        server,
+        channel,
+        editorUser,
+        name,
+        description,
+        permissionLevel
+      );
 
       return res.status(204).json();
     } catch (error) {

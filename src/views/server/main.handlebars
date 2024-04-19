@@ -13,7 +13,7 @@
             <a href="/user/{{id}}">{{username}}</a>
             {{#if canEdit}}
             <div class="server__edit-container">
-              <button>Edit</button>
+              <a href="/server/{{../id}}/edit/user/{{id}}">Edit</a>
               <button class="server__kick-button">Kick</button>
             </div>
             {{/if}}
@@ -27,10 +27,10 @@
         {{#each channels}}
         <li>
           <form id="{{id}}">
-            <a href="/channel/{{id}}">{{name}}</a>
+            <a href="/server/{{../id}}/channel/{{id}}">{{name}}</a>
             {{#if canEdit}}
             <div class="server__edit-container">
-              <button>Edit</button>
+              <a href="/server/{{../id}}/edit/channel/{{id}}">Edit</a>
               <button class="server__delete-button">Delete</button>
             </div>
             {{/if}}
@@ -57,7 +57,7 @@
     {{#if owner}}
     <div class="server__actions">
       <h2>Edit Server</h2>
-      <a href="/server/edit/{{id}}">
+      <a href="/server/{{id}}/edit">
         <button>Edit Server</button>
       </a>
 

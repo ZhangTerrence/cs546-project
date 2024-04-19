@@ -1,5 +1,6 @@
 import ChannelRepository from "../models/channel.js";
 import {
+  AuthorizationError,
   BadRequestError,
   InternalServerError,
   NotFoundError
@@ -73,6 +74,73 @@ export default class ChannelService {
     }
 
     return newChannel;
+  };
+
+  static updateChannel = async (
+    server,
+    channel,
+    editorUser,
+    name,
+    description,
+    permissionLevel
+  ) => {
+    const channelIndex = server.channels.indexOf(channel.id);
+    if (channelIndex === -1) {
+      throw new NotFoundError(
+        404,
+        this.updateChannel.name,
+        `${channel.name} not found in ${server.name}.`
+      );
+    }
+
+    const editorUserIndex = server.users
+      .map((server) => server.id)
+      .indexOf(editorUser.id);
+    if (editorUserIndex === -1) {
+      throw new NotFoundError(
+        404,
+        this.updateChannel.name,
+        `${editorUser.username} not found in ${server.name}.`
+      );
+    }
+
+    const channelPerms = channel.permissionLevel;
+    const editorUserPerms = server.users[editorUserIndex].permissionLevel;
+
+    if (channelPerms >= editorUserPerms || permissionLevel >= editorUserPerms) {
+      throw new AuthorizationError(
+        403,
+        this.updateChannel.name,
+        "Unsufficient permissions."
+      );
+    }
+
+    if (
+      channel.name === "general" &&
+      (name != "general" || permissionLevel > 0)
+    ) {
+      throw new BadRequestError(
+        400,
+        this.updateChannel.name,
+        "Can only edit general channel description."
+      );
+    }
+
+    const updatedChannel = await ChannelRepository.findByIdAndUpdate(
+      channel.id,
+      {
+        name: name,
+        description: description,
+        permissionLevel: permissionLevel
+      }
+    );
+    if (!updatedChannel) {
+      throw new InternalServerError(
+        500,
+        this.updateChannel.name,
+        `Unable to update ${channel.name} in ${server.name}.`
+      );
+    }
   };
 
   static deleteChannel = async (channelId, force) => {

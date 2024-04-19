@@ -7,11 +7,15 @@ import { ChannelValidator, ServerValidator } from "../utils/validators.js";
 
 export default class ChannelController {
   /**
-   * @route GET /channel/:channelId
+   * @route GET /server/:serverId/channel/:channelId
    * @access Private
    */
   static renderChannelMainPage = async (req, res) => {
     try {
+      const serverId = ServerValidator.validateMongooseId(
+        req.params.serverId,
+        "serverId"
+      );
       const channelId = ChannelValidator.validateMongooseId(
         req.params.channelId,
         "channelId"
@@ -20,6 +24,13 @@ export default class ChannelController {
 
       const channel = await ChannelService.getChannelById(channelId);
       const user = await UserService.getUserById(userId);
+
+      if (serverId !== channel.serverId) {
+        return res.status(500).render("error", {
+          statusCode: 500,
+          message: "Channel doesn't belong to server."
+        });
+      }
 
       const server = await ServerService.getServerById(channel.serverId);
       const serverUsers = server.users.map((userObj) => userObj.id);
@@ -134,7 +145,7 @@ export default class ChannelController {
 
       return res.status(201).json({
         data: {
-          url: `/channel/${newChannel.id}`
+          url: `/server/${server.id}/channel/${newChannel.id}`
         }
       });
     } catch (error) {

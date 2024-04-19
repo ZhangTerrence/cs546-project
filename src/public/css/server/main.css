@@ -61,11 +61,29 @@
         font-size: 1.75rem;
       }
 
-      & button {
-        border-radius: 5px;
-        padding: 0.75rem 1.75rem;
-        width: fit-content;
-        font-size: 1.25rem;
+      & div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        & button,
+        a {
+          border: none;
+          border-radius: 5px;
+          padding: 0.75rem 1.75rem;
+          width: fit-content;
+          font-size: 1.25rem;
+        }
+
+        & a {
+          cursor: pointer;
+          background-color: var(--text-negative);
+          color: var(--background-primary);
+        }
+
+        & a:hover {
+          text-decoration: none;
+        }
       }
     }
   }

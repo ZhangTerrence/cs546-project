@@ -62,12 +62,30 @@ router
   .route("/server/:serverId")
   .get(routeType("view"), ServerController.renderServerMainPage);
 router
-  .route("/server/edit/:serverId")
-  .get(routeType("view"), ServerController.renderServerEditPage);
+  .route("/server/:serverId/edit")
+  .get(
+    routeType("view"),
+    isAuthenticated(),
+    ServerController.renderServerEditPage
+  );
+router
+  .route("/server/:serverId/edit/user/:userId")
+  .get(
+    routeType("view"),
+    isAuthenticated(),
+    ServerController.renderServerEditUserPage
+  );
+router
+  .route("/server/:serverId/edit/channel/:channelId")
+  .get(
+    routeType("view"),
+    isAuthenticated(),
+    ServerController.renderServerEditChannelPage
+  );
 
 // Channel Page
 router
-  .route("/channel/:channelId")
+  .route("/server/:serverId/channel/:channelId")
   .get(
     routeType("view"),
     isAuthenticated(),
