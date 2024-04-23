@@ -1,6 +1,8 @@
 import { BadRequestError } from "./errors.js";
 import mongoose from "mongoose";
 import emailValidator from "email-validator";
+import xss from "xss";
+
 class BaseValidator {
   static validateString = (_variable, _variableName) => {
     if (!_variable) {
@@ -102,9 +104,9 @@ export class UserValidator extends BaseValidator {
     }
 
     return {
-      email: email,
-      username: username,
-      password: password
+      email: xss(email),
+      username: xss(username),
+      password: xss(password)
     };
   };
 
@@ -113,12 +115,12 @@ export class UserValidator extends BaseValidator {
     const password = this.validateString(_password, "password");
 
     return {
-      username: username,
-      password: password
+      username: xss(username),
+      password: xss(password)
     };
   };
 
-  static validateUpdateInfo = (_username, _theme) => {
+  static validateUpdateInfo = (_username, _bio, _theme) => {
     const username = this.validateString(_username, "username");
     const theme = this.validateString(_theme, "theme");
 
@@ -131,28 +133,17 @@ export class UserValidator extends BaseValidator {
     }
 
     return {
-      username: username,
-      theme: theme
+      username: xss(username),
+      bio: xss(_bio),
+      theme: xss(theme)
     };
-
-    // Object.entries(args).forEach((entry) => {
-    //   const [key, value] = entry;
-
-    //   if (key === "darkMode") {
-    //     if (typeof value !== "boolean") {
-    //       throw new BadRequestError(400, key, "Expected type boolean.");
-    //     }
-    //   } else {
-    //     this.validateString({ variable: value, variableName: key });
-    //   }
-    // });
   };
 
   static validateCreateFriendRequestInfo = (_username) => {
     const username = this.validateString(_username, "username");
 
     return {
-      username: username
+      username: xss(username)
     };
   };
 }
@@ -162,7 +153,7 @@ export class ServerValidator extends BaseValidator {
     const name = this.validateString(_name, "name");
 
     return {
-      name: name
+      name: xss(name)
     };
   };
 
@@ -170,7 +161,7 @@ export class ServerValidator extends BaseValidator {
     const name = this.validateString(_name, "name");
 
     return {
-      name: name
+      name: xss(name)
     };
   };
 
@@ -192,7 +183,7 @@ export class ServerValidator extends BaseValidator {
       );
     }
     return {
-      permissionLevel: permissionLevel
+      permissionLevel: xss(permissionLevel)
     };
   };
 
@@ -217,8 +208,8 @@ export class ServerValidator extends BaseValidator {
     }
 
     return {
-      name: name,
-      permissionLevel: permissionLevel
+      name: xss(name),
+      permissionLevel: xss(permissionLevel)
     };
   };
 }
@@ -245,8 +236,8 @@ export class ChannelValidator extends BaseValidator {
     }
 
     return {
-      name: name,
-      permissionLevel: permissionLevel
+      name: xss(name),
+      permissionLevel: xss(permissionLevel)
     };
   };
 }
@@ -274,8 +265,8 @@ export class MessageValidator extends BaseValidator {
       const channelId = this.validateMongooseId(_channelId, "channelId");
 
       return {
-        channelId: channelId,
-        message: message
+        channelId: xss(channelId),
+        message: xss(message)
       };
     }
 
@@ -285,8 +276,8 @@ export class MessageValidator extends BaseValidator {
     );
 
     return {
-      privateMessageId: privateMessageId,
-      message: message
+      privateMessageId: xss(privateMessageId),
+      message: xss(message)
     };
   };
 }
