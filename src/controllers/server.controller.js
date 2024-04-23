@@ -420,8 +420,10 @@ export default class ServerController {
    */
   static createServer = async (req, res) => {
     try {
-      const { name } = ServerValidator.validateCreationInfo(req.body.name);
-      const description = req.body.description;
+      const { name, description } = ServerValidator.validateCreationInfo(
+        req.body.name,
+        req.body.description
+      );
       const userId = req.session.user.id;
 
       const user = await UserService.getUserById(userId);
@@ -462,11 +464,10 @@ export default class ServerController {
         req.body.serverId,
         "serverId"
       );
-      const { name } = ServerValidator.validateUpdateInfo(
+      const { name, description } = ServerValidator.validateUpdateInfo(
         req.body.name,
-        "name"
+        req.body.description
       );
-      const description = req.body.description;
       const userId = req.session.user.id;
 
       await ServerService.updateServer(serverId, name, description, userId);
@@ -706,12 +707,12 @@ export default class ServerController {
         req.body.channelId,
         "channelId"
       );
-      const { name, permissionLevel } =
+      const { name, description, permissionLevel } =
         ServerValidator.validateUpdateChannelInfo(
           req.body.name,
+          req.body.description,
           req.body.permissionLevel
         );
-      const description = req.body.description;
       const editorId = req.session.user.id;
 
       const server = await ServerService.getServerById(serverId);

@@ -49,7 +49,10 @@ export default class ChannelService {
 
   static createChannel = async (name, description, server, permissionLevel) => {
     const channelExists = await ChannelRepository.findOne({
-      $and: [{ name: { $regex: name, $options: "i" } }, { serverId: server.id }]
+      $and: [
+        { name: { $regex: `^${name}$`, $options: "i" } },
+        { serverId: server.id }
+      ]
     });
     if (channelExists) {
       throw new BadRequestError(

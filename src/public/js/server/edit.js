@@ -8,8 +8,8 @@ const updateServer = async (e) => {
 
     const requestBody = getFormRequestBody(e.target);
 
-    const url = window.location.pathname;
-    const serverId = url.substring(url.lastIndexOf("/") + 1);
+    const urlTokens = window.location.pathname.split("/");
+    const serverId = urlTokens[2];
 
     showLoader();
     const response = await fetch("/api/server", {
@@ -40,6 +40,6 @@ const updateServer = async (e) => {
 if (updateServerButton) {
   updateServerButton.addEventListener(
     "click",
-    async (e) => await updateUser(e)
+    async (e) => await updateServer(e)
   );
 }

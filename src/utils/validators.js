@@ -44,7 +44,7 @@ class BaseValidator {
       );
     }
 
-    return id;
+    return xss(id);
   };
 }
 
@@ -146,22 +146,25 @@ export class UserValidator extends BaseValidator {
       username: xss(username)
     };
   };
+  s;
 }
 
 export class ServerValidator extends BaseValidator {
-  static validateCreationInfo = (_name) => {
+  static validateCreationInfo = (_name, _description) => {
     const name = this.validateString(_name, "name");
 
     return {
-      name: xss(name)
+      name: xss(name),
+      description: xss(_description)
     };
   };
 
-  static validateUpdateInfo = (_name) => {
+  static validateUpdateInfo = (_name, _description) => {
     const name = this.validateString(_name, "name");
 
     return {
-      name: xss(name)
+      name: xss(name),
+      description: xss(_description)
     };
   };
 
@@ -183,11 +186,15 @@ export class ServerValidator extends BaseValidator {
       );
     }
     return {
-      permissionLevel: xss(permissionLevel)
+      permissionLevel: parseInt(xss(permissionLevel))
     };
   };
 
-  static validateUpdateChannelInfo = (_name, _permissionLevel) => {
+  static validateUpdateChannelInfo = (
+    _name,
+    _description,
+    _permissionLevel
+  ) => {
     const name = this.validateString(_name, "name");
 
     const permissionLevel = parseInt(_permissionLevel);
@@ -209,13 +216,14 @@ export class ServerValidator extends BaseValidator {
 
     return {
       name: xss(name),
-      permissionLevel: xss(permissionLevel)
+      description: xss(_description),
+      permissionLevel: parseInt(xss(permissionLevel))
     };
   };
 }
 
 export class ChannelValidator extends BaseValidator {
-  static validateCreationInfo = (_name, _permissionLevel) => {
+  static validateCreationInfo = (_name, _description, _permissionLevel) => {
     const name = this.validateString(_name, "name");
 
     const permissionLevel = parseInt(_permissionLevel);
@@ -237,7 +245,8 @@ export class ChannelValidator extends BaseValidator {
 
     return {
       name: xss(name),
-      permissionLevel: xss(permissionLevel)
+      description: xss(_description),
+      permissionLevel: parseInt(xss(permissionLevel))
     };
   };
 }
@@ -260,13 +269,12 @@ export class MessageValidator extends BaseValidator {
       );
     }
 
-    const message = this.validateString(_message, "message");
     if (_channelId) {
       const channelId = this.validateMongooseId(_channelId, "channelId");
 
       return {
         channelId: xss(channelId),
-        message: xss(message)
+        message: xss(_message)
       };
     }
 
@@ -277,7 +285,7 @@ export class MessageValidator extends BaseValidator {
 
     return {
       privateMessageId: xss(privateMessageId),
-      message: xss(message)
+      message: xss(_message)
     };
   };
 }
