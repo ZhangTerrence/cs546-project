@@ -55,7 +55,7 @@ export default class ServerService {
 
   static createServer = async (name, description, creatorId) => {
     const serverExists = await ServerRepository.findOne({
-      name: { $regex: name, $options: "i" }
+      name: { $regex: `^${name}$`, $options: "i" }
     });
     if (serverExists) {
       throw new BadRequestError(
@@ -104,17 +104,19 @@ export default class ServerService {
         this.updateServer.name,
         "Nothing has changed."
       );
-    }
-
-    const serverExists = await ServerRepository.findOne({
-      name: { $regex: name, $options: "i" }
-    });
-    if (serverExists) {
-      throw new BadRequestError(
-        400,
-        this.updateServer.name,
-        `${name} is taken.`
-      );
+    } else {
+      if (server.name !== name) {
+        const serverExists = await ServerRepository.findOne({
+          name: { $regex: `^${name}$`, $options: "i" }
+        });
+        if (serverExists) {
+          throw new BadRequestError(
+            400,
+            this.updateServer.name,
+            `${name} is taken.`
+          );
+        }
+      }
     }
 
     const updatedServer = await ServerRepository.findByIdAndUpdate(serverId, {
