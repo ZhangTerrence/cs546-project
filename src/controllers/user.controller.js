@@ -407,11 +407,11 @@ export default class UserController {
    */
   static updateUser = async (req, res) => {
     try {
-      const { username, theme } = UserValidator.validateUpdateInfo(
+      const { username, bio, theme } = UserValidator.validateUpdateInfo(
         req.body.username,
+        req.body.bio,
         req.body.theme
       );
-      const bio = req.body.bio;
       const userId = req.session.user.id;
 
       await UserService.updateUser(userId, username, bio, theme);

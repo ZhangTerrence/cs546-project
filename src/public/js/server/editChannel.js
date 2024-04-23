@@ -1,7 +1,5 @@
 setTheme();
 
-setTheme();
-
 const updateChannelButton = document.getElementById("edit__update-button");
 
 const updateChannel = async (e) => {
