@@ -8,7 +8,7 @@ export default class PrivateMessageService {
 
   static getPrivateMessage = async (userA, userB) => {
     const privateMessage = await PrivateMessageRepository.findOne({
-      users: { $in: [userA.id, userB.id] }
+      users: { $all: [userA.id, userB.id] }
     });
     if (!privateMessage) {
       throw new NotFoundError(
