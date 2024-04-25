@@ -205,30 +205,51 @@ export class ServerValidator extends BaseValidator {
 }
 
 export class ChannelValidator extends BaseValidator {
-  static validateCreationInfo = (_name, _description, _permissionLevel) => {
+  static validateChannelName = (_name) => {
     const name = this.validateString(_name, "name");
+    if (!/^[a-z0-9]{3,20}$/i.test(name)) {
+      throw new BadRequestError(
+        400,
+        this.validateChannelName.name,
+        "Channel name must be between 3 and 20 alphanumeric characters."
+      );
+    }
+    return name;
+  };
 
+  static validateDescription = (_description) => {
+    const description = this.validateString(_description, "description");
+    if (description.length > 255) {
+      throw new BadRequestError(
+        400,
+        this.validateDescription.name,
+        "Description must be at most 255 characters long."
+      );
+    }
+    return description;
+  };
+
+  static validatePermissionLevel = (_permissionLevel) => {
     const permissionLevel = parseInt(_permissionLevel);
-    if (Number.isNaN(permissionLevel) || typeof permissionLevel !== "number") {
+    if (Number.isNaN(permissionLevel) || permissionLevel < 0 || permissionLevel > 9) {
       throw new BadRequestError(
         400,
-        this.validateCreationInfo.name,
-        "Expected a number for permission level."
+        this.validatePermissionLevel.name,
+        "Permission level must be between 0 and 9."
       );
     }
+    return permissionLevel;
+  };
 
-    if (permissionLevel < 0 || permissionLevel > 9) {
-      throw new BadRequestError(
-        400,
-        this.validateCreationInfo.name,
-        "Permission level must be between 0 and 9 inclusive."
-      );
-    }
+  static validateCreationInfo = (_name, _description, _permissionLevel) => {
+    const name = this.validateChannelName(_name);
+    const description = this.validateDescription(_description);
+    const permissionLevel = this.validatePermissionLevel(_permissionLevel);
 
     return {
       name: xss(name),
-      description: xss(_description),
-      permissionLevel: parseInt(xss(permissionLevel))
+      description: xss(description),
+      permissionLevel: xss(permissionLevel)
     };
   };
 }
