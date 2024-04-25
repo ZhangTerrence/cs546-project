@@ -150,75 +150,57 @@ export class UserValidator extends BaseValidator {
 }
 
 export class ServerValidator extends BaseValidator {
-  static validateCreationInfo = (_name, _description) => {
+  static validateServerName = (_name) => {
     const name = this.validateString(_name, "name");
-
-    return {
-      name: xss(name),
-      description: xss(_description)
-    };
+    const regex = /^[a-z0-9]{3,20}$/i;
+    if (!regex.test(name)) {
+      throw new BadRequestError(
+        400,
+        this.validateServerName.name,
+        "Server name must be between 3 and 20 alphanumeric characters."
+      );
+    }
+    return name;
   };
 
-  static validateUpdateInfo = (_name, _description) => {
-    const name = this.validateString(_name, "name");
-
-    return {
-      name: xss(name),
-      description: xss(_description)
-    };
+  static validateDescription = (_description) => {
+    const description = this.validateString(_description, "description");
+    if (description.length > 255) {
+      throw new BadRequestError(
+        400,
+        this.validateDescription.name,
+        "Description must be at most 255 characters long."
+      );
+    }
+    return description;
   };
 
-  static validateUpdateUserInfo = (_permissionLevel) => {
+  static validatePermissionLevel = (_permissionLevel) => {
     const permissionLevel = parseInt(_permissionLevel);
-    if (Number.isNaN(permissionLevel) || typeof permissionLevel !== "number") {
+    if (Number.isNaN(permissionLevel) || permissionLevel < 0 || permissionLevel > 9) {
       throw new BadRequestError(
         400,
-        this.validateUpdateUserInfo.name,
-        "Expected a number for permission level."
+        this.validatePermissionLevel.name,
+        "Permission level must be between 0 and 9."
       );
     }
-
-    if (permissionLevel < 0 || permissionLevel > 9) {
-      throw new BadRequestError(
-        400,
-        this.validateUpdateUserInfo.name,
-        "Permission level must be between 0 and 9 inclusive."
-      );
-    }
-    return {
-      permissionLevel: parseInt(xss(permissionLevel))
-    };
+    return permissionLevel;
   };
 
-  static validateUpdateChannelInfo = (
-    _name,
-    _description,
-    _permissionLevel
-  ) => {
-    const name = this.validateString(_name, "name");
-
-    const permissionLevel = parseInt(_permissionLevel);
-    if (Number.isNaN(permissionLevel) || typeof permissionLevel !== "number") {
-      throw new BadRequestError(
-        400,
-        this.validateCreationInfo.name,
-        "Expected a number for permission level."
-      );
-    }
-
-    if (permissionLevel < 0 || permissionLevel > 9) {
-      throw new BadRequestError(
-        400,
-        this.validateCreationInfo.name,
-        "Permission level must be between 0 and 9 inclusive."
-      );
-    }
+  static validateCreationInfo = (_name, _description, _permissionLevel) => {
+    const name = this.validateServerName(_name);
+    const description = this.validateDescription(_description);
+    const permissionLevel = this.validatePermissionLevel(_permissionLevel);
 
     return {
       name: xss(name),
-      description: xss(_description),
-      permissionLevel: parseInt(xss(permissionLevel))
+      description: xss(description),
+      permissionLevel: xss(permissionLevel)
     };
+  };
+
+  static validateUpdateInfo = (_name, _description, _permissionLevel) => {
+    return this.validateCreationInfo(_name, _description, _permissionLevel);
   };
 }
 
