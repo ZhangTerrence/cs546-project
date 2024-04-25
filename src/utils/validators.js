@@ -164,20 +164,31 @@ export class ServerValidator extends BaseValidator {
   };
 
   static validateDescription = (_description) => {
-    const description = this.validateString(_description, "description");
-    if (description.length > 255) {
+    if (typeof _description !== "string") {
+      throw new BadRequestError(
+        400,
+        this.validateDescription.name,
+        `Expected a string for description.`
+      );
+    }
+
+    if (_description.trim().length > 255) {
       throw new BadRequestError(
         400,
         this.validateDescription.name,
         "Description must be at most 255 characters long."
       );
     }
-    return description;
+    return _description.trim();
   };
 
   static validatePermissionLevel = (_permissionLevel) => {
     const permissionLevel = parseInt(_permissionLevel);
-    if (Number.isNaN(permissionLevel) || permissionLevel < 0 || permissionLevel > 9) {
+    if (
+      Number.isNaN(permissionLevel) ||
+      permissionLevel < 0 ||
+      permissionLevel > 9
+    ) {
       throw new BadRequestError(
         400,
         this.validatePermissionLevel.name,
@@ -190,12 +201,12 @@ export class ServerValidator extends BaseValidator {
   static validateCreationInfo = (_name, _description, _permissionLevel) => {
     const name = this.validateServerName(_name);
     const description = this.validateDescription(_description);
-    const permissionLevel = this.validatePermissionLevel(_permissionLevel);
+    const permissionLevel = this.validatePermissionLevel(xss(_permissionLevel));
 
     return {
       name: xss(name),
       description: xss(description),
-      permissionLevel: xss(permissionLevel)
+      permissionLevel: permissionLevel
     };
   };
 
@@ -218,20 +229,31 @@ export class ChannelValidator extends BaseValidator {
   };
 
   static validateDescription = (_description) => {
-    const description = this.validateString(_description, "description");
-    if (description.length > 255) {
+    if (typeof _description !== "string") {
+      throw new BadRequestError(
+        400,
+        this.validateDescription.name,
+        `Expected a string for description.`
+      );
+    }
+
+    if (_description.trim().length > 255) {
       throw new BadRequestError(
         400,
         this.validateDescription.name,
         "Description must be at most 255 characters long."
       );
     }
-    return description;
+    return _description.trim();
   };
 
   static validatePermissionLevel = (_permissionLevel) => {
     const permissionLevel = parseInt(_permissionLevel);
-    if (Number.isNaN(permissionLevel) || permissionLevel < 0 || permissionLevel > 9) {
+    if (
+      Number.isNaN(permissionLevel) ||
+      permissionLevel < 0 ||
+      permissionLevel > 9
+    ) {
       throw new BadRequestError(
         400,
         this.validatePermissionLevel.name,
@@ -244,12 +266,24 @@ export class ChannelValidator extends BaseValidator {
   static validateCreationInfo = (_name, _description, _permissionLevel) => {
     const name = this.validateChannelName(_name);
     const description = this.validateDescription(_description);
-    const permissionLevel = this.validatePermissionLevel(_permissionLevel);
+    const permissionLevel = this.validatePermissionLevel(xss(_permissionLevel));
 
     return {
       name: xss(name),
       description: xss(description),
-      permissionLevel: xss(permissionLevel)
+      permissionLevel: permissionLevel
+    };
+  };
+
+  static validateUpdateInfo = (_name, _description, _permissionLevel) => {
+    const name = this.validateChannelName(_name);
+    const description = this.validateDescription(_description);
+    const permissionLevel = this.validatePermissionLevel(xss(_permissionLevel));
+
+    return {
+      name: xss(name),
+      description: xss(description),
+      permissionLevel: permissionLevel
     };
   };
 }

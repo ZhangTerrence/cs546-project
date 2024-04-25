@@ -3,7 +3,7 @@ import MessageService from "../services/message.service.js";
 import ServerService from "../services/server.service.js";
 import UserService from "../services/user.service.js";
 import { BaseError, InternalServerError } from "../utils/errors.js";
-import { ServerValidator } from "../utils/validators.js";
+import { ChannelValidator, ServerValidator } from "../utils/validators.js";
 
 export default class ServerController {
   /**
@@ -708,7 +708,7 @@ export default class ServerController {
         "channelId"
       );
       const { name, description, permissionLevel } =
-        ServerValidator.validateUpdateChannelInfo(
+        ChannelValidator.validateUpdateInfo(
           req.body.name,
           req.body.description,
           req.body.permissionLevel
