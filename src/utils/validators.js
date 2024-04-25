@@ -245,13 +245,14 @@ export class MessageValidator extends BaseValidator {
       throw new BadRequestError(
         400,
         this.validateCreationInfo.name,
-        "Message must belong to either a channel or a private message."
+        "Message cannot belong to both a channel and a private message."
       );
     }
 
+    this.validateMessageLength(_message);
+
     if (_channelId) {
       const channelId = this.validateMongooseId(_channelId, "channelId");
-
       return {
         channelId: xss(channelId),
         message: xss(_message)
@@ -267,6 +268,16 @@ export class MessageValidator extends BaseValidator {
       privateMessageId: xss(privateMessageId),
       message: xss(_message)
     };
+  };
+
+  static validateMessageLength = (_message) => {
+    if (_message.length > 255) {
+      throw new BadRequestError(
+        400,
+        this.validateMessageLength.name,
+        "Message must be at most 255 characters long."
+      );
+    }
   };
 }
 
