@@ -150,68 +150,77 @@ export class UserValidator extends BaseValidator {
 }
 
 export class ServerValidator extends BaseValidator {
-  static validateServerName = (_name) => {
+  static validateCreationInfo = (_name, _description) => {
     const name = this.validateString(_name, "name");
-    const regex = /^[a-z0-9]{3,20}$/i;
-    if (!regex.test(name)) {
+    if (!name.match(/^[a-z0-9]{3,20}$/i)) {
       throw new BadRequestError(
-        400,
-        this.validateServerName.name,
-        "Server name must be between 3 and 20 alphanumeric characters."
-      );
-    }
-    return name;
-  };
-
-  static validateDescription = (_description) => {
-    if (typeof _description !== "string") {
-      throw new BadRequestError(
-        400,
-        this.validateDescription.name,
-        `Expected a string for description.`
-      );
+      400,
+      this.validateCreationInfo.name,
+      'Name must be between 3 and 20 alphanumeric characters.');
     }
 
-    if (_description.trim().length > 255) {
+    const description = _description ? this.validateString(_description, "description") : '';
+    if (description.length > 255) {
       throw new BadRequestError(
-        400,
-        this.validateDescription.name,
-        "Description must be at most 255 characters long."
-      );
+      400,
+      this.validateCreationInfo.description,
+      'Description must be at most 255 characters long.');
     }
-    return _description.trim();
-  };
-
-  static validatePermissionLevel = (_permissionLevel) => {
-    const permissionLevel = parseInt(_permissionLevel);
-    if (
-      Number.isNaN(permissionLevel) ||
-      permissionLevel < 0 ||
-      permissionLevel > 9
-    ) {
-      throw new BadRequestError(
-        400,
-        this.validatePermissionLevel.name,
-        "Permission level must be between 0 and 9."
-      );
-    }
-    return permissionLevel;
-  };
-
-  static validateCreationInfo = (_name, _description, _permissionLevel) => {
-    const name = this.validateServerName(_name);
-    const description = this.validateDescription(_description);
-    const permissionLevel = this.validatePermissionLevel(xss(_permissionLevel));
 
     return {
-      name: xss(name),
-      description: xss(description),
-      permissionLevel: permissionLevel
+      name: xss(name),           
+      description: xss(description)  
     };
   };
+  
 
-  static validateUpdateInfo = (_name, _description, _permissionLevel) => {
-    return this.validateCreationInfo(_name, _description, _permissionLevel);
+  static validateUpdateInfo = (_name, _description) => {
+    let name;
+    if (_name) {
+        name = this.validateString(_name, "name");
+        if (!name.match(/^[a-z0-9]{3,20}$/i)) {
+          throw new BadRequestError(
+          400,
+          this.validateUpdateInfo.name,
+          'Name must be between 3 and 20 alphanumeric characters.');
+        }
+    }
+
+    let description = _description ? this.validateString(_description, "description") : '';
+        if (description.length > 255) {
+          throw new BadRequestError(
+          400,
+          this.validateUpdateInfo.description,
+          'Description must be at most 255 characters long.');
+        }
+
+    return {
+      name:xss(name),
+      description:xss(description)
+    };
+    
+  };
+
+  static validateUpdateUserInfo = (_permissionLevel) => {
+    const permissionLevel = parseInt(_permissionLevel);
+    if (Number.isNaN(permissionLevel) || typeof permissionLevel !== "number") {
+      throw new BadRequestError(
+        400,
+        this.validateUpdateUserInfo.name,
+        "Expected a number for permission level."
+      );
+    }
+
+    if (permissionLevel < 0 || permissionLevel > 9) {
+      throw new BadRequestError(
+        400,
+        this.validateUpdateUserInfo.name,
+        "Permission level must be between 0 and 9 inclusive."
+      );
+    }
+    return {
+      permissionLevel: parseInt(xss(permissionLevel))
+    };
   };
 }
 
