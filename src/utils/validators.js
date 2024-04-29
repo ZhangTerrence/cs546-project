@@ -159,7 +159,7 @@ export class ServerValidator extends BaseValidator {
       'Name must be between 3 and 20 alphanumeric characters.');
     }
 
-    const description = this.validateString(_description, "description");
+    const description = _description ? this.validateString(_description, "description") : '';
     if (description.length > 255) {
       throw new BadRequestError(
       400,
@@ -172,6 +172,7 @@ export class ServerValidator extends BaseValidator {
       description: xss(description)  
     };
   };
+  
 
   static validateUpdateInfo = (_name, _description) => {
     let name;
@@ -183,25 +184,21 @@ export class ServerValidator extends BaseValidator {
           this.validateUpdateInfo.name,
           'Name must be between 3 and 20 alphanumeric characters.');
         }
-        return name;  
     }
 
-    let description;
-    if (_description) {
-        description = this.validateString(_description, "description");
+    let description = _description ? this.validateString(_description, "description") : '';
         if (description.length > 255) {
           throw new BadRequestError(
           400,
           this.validateUpdateInfo.description,
           'Description must be at most 255 characters long.');
         }
-        return description;
-    }
 
     return {
       name:xss(name),
       description:xss(description)
     };
+    
   };
 
   static validateUpdateUserInfo = (_permissionLevel) => {
