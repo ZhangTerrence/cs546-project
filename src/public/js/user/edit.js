@@ -10,6 +10,7 @@
   setTheme();
 })();
 
+
 const updateUserButton = document.getElementById("edit__update-button");
 
 const updateUser = async (e) => {
@@ -17,6 +18,18 @@ const updateUser = async (e) => {
     e.preventDefault();
 
     const requestBody = getFormRequestBody(e.target);
+
+    if (requestBody["username"] && (requestBody["username"].length < 3 || requestBody["username"].length > 20)) {
+      throw new Error("Username must be between 3 and 20 characters.");
+    }
+
+    if (requestBody["theme"] !== "light" && requestBody["theme"] !== "dark") {
+      throw new Error("Invalid theme.");
+    }
+
+    if (requestBody["bio"] && requestBody["bio"].length > 255) {
+      throw new Error("Bio must be less than 255 characters.");
+    }
 
     showLoader();
     const response = await fetch("/api/user", {
