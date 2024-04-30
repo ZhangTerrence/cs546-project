@@ -2,6 +2,11 @@ resetTheme();
 
 const signupButton = document.getElementById("signup__submit-button");
 
+function isValidEmail(email) {
+  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(email);
+}
+
 const signup = async (e) => {
   try {
     e.preventDefault();
@@ -30,6 +35,12 @@ const signup = async (e) => {
           throw new Error(
             `Expected between ${minUsernameLength} and ${maxUsernameLength} characters without whitespace for username.`
           );
+        }
+      }
+
+      if (key === "email") {
+        if (!isValidEmail(string)) {
+          throw new Error("Invalid email.");
         }
       }
 
