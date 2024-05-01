@@ -133,13 +133,16 @@ export default class ChannelController {
         req.body.serverId,
         "serverId"
       );
+      const userId = req.session.user.id;
 
       const server = await ServerService.getServerById(serverId);
+      const user = await UserService.getUserById(userId);
       const newChannel = await ChannelService.createChannel(
         name,
         description,
         server,
-        permissionLevel
+        permissionLevel,
+        user
       );
 
       await ServerService.addChannel(server, newChannel);

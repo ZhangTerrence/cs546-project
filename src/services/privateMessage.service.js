@@ -80,7 +80,7 @@ export default class PrivateMessageService {
     }
 
     const deletedPrivateMessage = await PrivateMessageRepository.deleteOne({
-      users: { $in: [userA.id, userB.id] }
+      users: { $all: [userA.id, userB.id] }
     });
     if (!deletedPrivateMessage) {
       throw new InternalServerError(

@@ -47,7 +47,13 @@ export default class ChannelService {
     return newChannel;
   };
 
-  static createChannel = async (name, description, server, permissionLevel) => {
+  static createChannel = async (
+    name,
+    description,
+    server,
+    permissionLevel,
+    user
+  ) => {
     const channelExists = await ChannelRepository.findOne({
       $and: [
         { name: { $regex: `^${name}$`, $options: "i" } },
@@ -59,6 +65,26 @@ export default class ChannelService {
         400,
         this.createChannel.name,
         `${name} already exists in ${server.name}.`
+      );
+    }
+
+    const userIndex = server.users
+      .map((userObj) => userObj.id)
+      .indexOf(user.id);
+    if (userIndex === -1) {
+      throw new NotFoundError(
+        404,
+        this.createChannel.name,
+        `${user.username} is not in ${server.name}.`
+      );
+    }
+
+    const userPerms = server.users[userIndex].permissionLevel;
+    if (userPerms <= permissionLevel) {
+      throw new AuthorizationError(
+        403,
+        this.createChannel.name,
+        "Unsufficient permissions."
       );
     }
 
