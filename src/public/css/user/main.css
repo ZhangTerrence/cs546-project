@@ -29,7 +29,8 @@
 .user__content {
   display: flex;
   row-gap: 1.5rem;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
 
   & h1 {
     font-size: 2.75rem;
@@ -80,11 +81,11 @@
   text-decoration: none;
 }
 
-.user__link-icon {
+/* .user__link-icon {
   width: 2.5rem;
   height: 2.5rem;
   color: var(--text-negative);
-}
+} */
 
 #user__delete-button {
   align-self: flex-end;
@@ -92,4 +93,43 @@
   padding: 0.75rem 1.75rem;
   width: fit-content;
   font-size: 1.25rem;
+}
+
+.form {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px;
+}
+
+.card {
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  display: flex;
+  margin: 8px;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+
+  
+
+  & a {
+    text-decoration: none;   
+    display: flex;          
+    flex-direction: column;  
+    align-items: center;
+  }
+
+  & svg {
+    height: 100px;            
+    width: 100px;             
+    margin-bottom: 10px;
+  }
+
+}
+.card:hover {
+  background-color: dodgerblue;
 }
