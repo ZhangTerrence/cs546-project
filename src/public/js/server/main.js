@@ -239,7 +239,11 @@ const createChannel = async (e) => {
       return; 
     }
 
-    
+    if (requestBody.description && requestBody.description.length > 255) {
+      printMessage("Channel description must not exceed 255 characters.");
+      return; 
+    }
+
     if (!/^[a-z0-9]+$/i.test(requestBody.name) || requestBody.name.length < 3 || requestBody.name.length > 20) {
       printMessage("Channel name must be 3-20 alphanumeric characters.");
       return; 
