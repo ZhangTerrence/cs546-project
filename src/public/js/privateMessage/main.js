@@ -44,8 +44,8 @@ const sendMessage = async (e) => {
     const message = messageInput.value.trim();
 
     
-    if (message.length > 255) {
-      printMessage("Message must be at most 255 characters long.");
+    if (message.trim().length <=0 || message.length > 255) {
+      printMessage("Message must be at least 1 chracter and at most 255 characters long.");
       return; 
     }
 
