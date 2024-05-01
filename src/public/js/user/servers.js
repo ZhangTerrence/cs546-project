@@ -62,6 +62,16 @@ const createServer = async (e) => {
 
     const requestBody = getFormRequestBody(e.target);
 
+    if (!/^[a-z0-9]+$/i.test(requestBody.name) || requestBody.name.length < 3 || requestBody.name.length > 20) {
+      printMessage("Server name must be 3-20 alphanumeric characters.");
+      return; 
+    }
+
+    if (requestBody.description && requestBody.description.length > 255) {
+      printMessage("Server description must not exceed 255 characters.");
+      return;  
+    }
+
     showLoader();
     const response = await fetch("/api/server", {
       method: "POST",
@@ -76,6 +86,7 @@ const createServer = async (e) => {
     if (response.ok) {
       e.target.form.reset();
       window.location.replace(responseBody.data.url);
+      printMessage("Successfully created server.");
     } else {
       if (response.status === 401) {
         window.location.replace("/login");
