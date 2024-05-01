@@ -10,7 +10,6 @@
   setTheme();
 })();
 
-
 const updateUserButton = document.getElementById("edit__update-button");
 
 const updateUser = async (e) => {
@@ -19,8 +18,15 @@ const updateUser = async (e) => {
 
     const requestBody = getFormRequestBody(e.target);
 
-    if (requestBody["username"] && (requestBody["username"].length < 3 || requestBody["username"].length > 20)) {
-      throw new Error("Username must be between 3 and 20 characters.");
+    if (
+      requestBody["username"] &&
+      (!/^[a-z0-9]+$/i.test(requestBody["username"]) ||
+        requestBody["username"].length < 3 ||
+        requestBody["username"].length > 20)
+    ) {
+      throw new Error(
+        "Username must be between 3 and 20 alphanumeric characters."
+      );
     }
 
     if (requestBody["theme"] !== "light" && requestBody["theme"] !== "dark") {

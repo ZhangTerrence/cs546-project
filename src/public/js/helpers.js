@@ -13,7 +13,15 @@ function resetTheme() {
 }
 
 const getFormRequestBody = (node) => {
-  return Object.fromEntries(new FormData(node.form));
+  const requestBody = Object.fromEntries(new FormData(node.form));
+
+  for (const [key, value] of Object.entries(requestBody)) {
+    if (typeof value === "string" && key !== "description" && key !== "bio") {
+      requestBody[key] = validateString(value, key);
+    }
+  }
+
+  return requestBody;
 };
 
 const validateString = (_variable, _variableName) => {
