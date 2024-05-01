@@ -51,8 +51,8 @@ class BaseValidator {
 export class UserValidator extends BaseValidator {
   static minUsernameLength = 3;
   static maxUsernameLength = 20;
-  static minPasswordLength = 3;
-  static maxPasswordLength = 20;
+  static minPasswordLength = 8; 
+  static maxBioLength = 255;
 
   static validateSignupInfo = (_email, _username, _password) => {
     const email = this.validateString(_email, "email");
@@ -85,21 +85,11 @@ export class UserValidator extends BaseValidator {
       );
     }
 
-    if (
-      password.length < this.minPasswordLength ||
-      password.length > this.maxPasswordLength
-    ) {
+    if (password.length < this.minPasswordLength || !/[A-Z]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
       throw new BadRequestError(
         400,
         this.validateSignupInfo.name,
-        `Expected between ${this.minPasswordLength} and ${this.maxPasswordLength} characters without whitespace for password.`
-      );
-    }
-    if (!/^[a-z0-9]+$/i.test(password)) {
-      throw new BadRequestError(
-        400,
-        this.validateSignupInfo.name,
-        "Expected only alphanumeric characters for username."
+        "Password must be at least 8 characters long and contain at least one uppercase letter and one special character."
       );
     }
 
@@ -122,7 +112,31 @@ export class UserValidator extends BaseValidator {
 
   static validateUpdateInfo = (_username, _bio, _theme) => {
     const username = this.validateString(_username, "username");
+    const bio = _bio;
     const theme = this.validateString(_theme, "theme");
+
+    if (username.length < this.minUsernameLength || username.length > this.maxUsernameLength) {
+      throw new BadRequestError(
+        400,
+        this.validateUpdateInfo.name,
+        `Username must be between ${this.minUsernameLength} and ${this.maxUsernameLength} alphanumeric characters.`
+      );
+    }
+    if (!/^[a-z0-9]+$/i.test(username)) {
+      throw new BadRequestError(
+        400,
+        this.validateUpdateInfo.name,
+        "Username must contain only alphanumeric characters."
+      );
+    }
+
+    if (bio && bio.length > this.maxBioLength) {
+      throw new BadRequestError(
+        400,
+        this.validateUpdateInfo.name,
+        `Bio must not exceed ${this.maxBioLength} characters.`
+      );
+    }
 
     if (theme !== "light" && theme !== "dark") {
       throw new BadRequestError(
@@ -134,7 +148,7 @@ export class UserValidator extends BaseValidator {
 
     return {
       username: xss(username),
-      bio: xss(_bio),
+      bio: xss(bio),
       theme: xss(theme)
     };
   };
@@ -146,7 +160,6 @@ export class UserValidator extends BaseValidator {
       username: xss(username)
     };
   };
-  s;
 }
 
 export class ServerValidator extends BaseValidator {
