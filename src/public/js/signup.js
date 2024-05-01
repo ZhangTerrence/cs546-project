@@ -50,7 +50,7 @@ const signup = async (e) => {
           string.length > maxPasswordLength
         ) {
           throw new Error(
-            `Expected between ${minPasswordLength} and ${maxPasswordLength} characters without whitespace for username.`
+            `Expected between ${minPasswordLength} and ${maxPasswordLength} characters without whitespace for password.`
           );
         }
       }
