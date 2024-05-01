@@ -47,13 +47,7 @@ export default class ChannelService {
     return newChannel;
   };
 
-  static createChannel = async (
-    name,
-    description,
-    server,
-    permissionLevel,
-    user
-  ) => {
+  static createChannel = async (name, description, server, permissionLevel) => {
     const channelExists = await ChannelRepository.findOne({
       $and: [
         { name: { $regex: `^${name}$`, $options: "i" } },
@@ -65,26 +59,6 @@ export default class ChannelService {
         400,
         this.createChannel.name,
         `${name} already exists in ${server.name}.`
-      );
-    }
-
-    const userIndex = server.users
-      .map((userObj) => userObj.id)
-      .indexOf(user.id);
-    if (userIndex === -1) {
-      throw new NotFoundError(
-        404,
-        this.createChannel.name,
-        `${user.username} is not in ${server.name}.`
-      );
-    }
-
-    const userPerms = server.users[userIndex].permissionLevel;
-    if (userPerms <= permissionLevel) {
-      throw new AuthorizationError(
-        403,
-        this.createChannel.name,
-        "Unsufficient permissions."
       );
     }
 
@@ -113,17 +87,8 @@ export default class ChannelService {
     description,
     permissionLevel
   ) => {
-    const channelIndex = server.channels.indexOf(channel.id);
-    if (channelIndex === -1) {
-      throw new NotFoundError(
-        404,
-        this.updateChannel.name,
-        `${channel.name} not found in ${server.name}.`
-      );
-    }
-
     const editorUserIndex = server.users
-      .map((server) => server.id)
+      .map((user) => user.id)
       .indexOf(editorUser.id);
     if (editorUserIndex === -1) {
       throw new NotFoundError(
@@ -133,14 +98,12 @@ export default class ChannelService {
       );
     }
 
-    const channelPerms = channel.permissionLevel;
     const editorUserPerms = server.users[editorUserIndex].permissionLevel;
-
-    if (channelPerms >= editorUserPerms || permissionLevel >= editorUserPerms) {
+    if (channel.permissionLevel >= editorUserPerms || permissionLevel >= editorUserPerms) {
       throw new AuthorizationError(
         403,
         this.updateChannel.name,
-        "Unsufficient permissions."
+        "Insufficient permissions."
       );
     }
 
@@ -155,13 +118,23 @@ export default class ChannelService {
       );
     }
 
+    if (
+      name === channel.name &&
+      description === channel.description &&
+      permissionLevel === channel.permissionLevel
+    ) {
+      throw new BadRequestError(
+        400,
+        this.updateChannel.name,
+        "Nothing has changed."
+      );
+    }
+
+
     const updatedChannel = await ChannelRepository.findByIdAndUpdate(
       channel.id,
-      {
-        name: name,
-        description: description,
-        permissionLevel: permissionLevel
-      }
+      { name, description, permissionLevel },
+      { new: true } 
     );
     if (!updatedChannel) {
       throw new InternalServerError(
@@ -170,6 +143,7 @@ export default class ChannelService {
         `Unable to update ${channel.name} in ${server.name}.`
       );
     }
+    return updatedChannel;
   };
 
   static deleteChannel = async (channelId, force) => {
