@@ -5,10 +5,13 @@
     <p>{{bio}}</p>
   </header>
 
+
   {{#if owner}}
   <div class="user__content">
-    <h2>Actions</h2>
-    <a href="/user/edit/{{id}}" class="user__link">
+    {{!-- <h2>Actions</h2> --}}
+
+    <div class="card">
+      <a href="/user/edit/{{id}}" class="user__link">
       <svg
         class="user__link-icon"
         xmlns="http://www.w3.org/2000/svg"
@@ -22,7 +25,11 @@
       </svg>
       <span>Edit Profile</span>
     </a>
-    <a href="/user/servers/{{id}}" class="user__link">
+    </div>
+      
+    
+    <div class="card">
+      <a href="/user/servers/{{id}}" class="user__link">
       <svg
         class="user__link-icon"
         viewBox="0 0 24 24"
@@ -36,8 +43,11 @@
       </svg>
       <span>See Servers</span>
     </a>
-    <a href="/user/friends/{{id}}" class="user__link">
-      <svg
+    </div>
+    
+    <div class="card">
+      <a href="/user/friends/{{id}}" class="user__link">
+        <svg
         class="user__link-icon"
         viewBox="0 0 24 24"
         xmlns="http://www.w3.org/2000/svg"
@@ -50,11 +60,16 @@
       </svg>
       <span>See Friends</span>
     </a>
-
-    <form action="/api/user/logout" method="post">
-      <button type="submit" id="user__logout-button">Logout</button>
-    </form>
+    </div>
   </div>
+
+  <form action="/api/user/logout" method="post">
+      <button type="submit" id="user__logout-button">Logout</button>
+      {{#if owner}}
+      <button id="user__delete-button">Delete Account</button>
+      {{/if}}
+  </form>
+
   {{else}} {{#if authed}} {{#if friended}}
   <a href="/privateMessage/{{privateMessageId}}" class="user__chat-link">
     Chat
@@ -64,7 +79,6 @@
   <p class="user__info">Already sent friend request.</p>
   {{else}}
   <button id="user__request-button">Send Friend Request</button>
-  {{/if}} {{/if}} {{else}} {{/if}} {{/if}} {{#if owner}}
-  <button id="user__delete-button">Delete Account</button>
-  {{/if}}
+  {{/if}} {{/if}} {{else}} {{/if}} {{/if}} 
 </main>
+
