@@ -245,6 +245,11 @@ const createChannel = async (e) => {
       return; 
     }
 
+    if (!/^[0-9]$/.test(requestBody.permissionLevel)) {
+      printMessage("Permission level must be a single digit from 0 to 9.");
+      return; 
+    }
+
     const url = window.location.pathname;
     const serverId = url.substring(url.lastIndexOf("/") + 1);
 
