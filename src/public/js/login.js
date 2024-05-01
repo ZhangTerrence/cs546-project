@@ -2,6 +2,10 @@ resetTheme();
 
 const loginButton = document.getElementById("login__submit-button");
 
+function isValidPassword(password) {
+  return password.length >= 8 && /[A-Z]/.test(password) && /[^A-Za-z0-9]/.test(password);
+}
+
 const login = async (e) => {
   try {
     e.preventDefault();
@@ -11,34 +15,15 @@ const login = async (e) => {
     for (const [key, value] of Object.entries(requestBody)) {
       const string = validateString(value, key);
 
-      const minUsernameLength = 3;
-      const maxUsernameLength = 20;
-      const minPasswordLength = 3;
-      const maxPasswordLength = 20;
-
-      if (!/^[a-z0-9]+$/i.test(string)) {
-        throw new Error(`Expected only alphanumeric characters for ${key}.`);
-      }
-
       if (key === "username") {
-        if (
-          string.length < minUsernameLength ||
-          string.length > maxUsernameLength
-        ) {
-          throw new Error(
-            `Expected between ${minUsernameLength} and ${maxUsernameLength} characters without whitespace for username.`
-          );
+        if (!/^[a-z0-9]+$/i.test(string) || string.length < 3 || string.length > 20) {
+          throw new Error("Username must be 3-20 alphanumeric characters.");
         }
       }
 
       if (key === "password") {
-        if (
-          string.length < minPasswordLength ||
-          string.length > maxPasswordLength
-        ) {
-          throw new Error(
-            `Expected between ${minPasswordLength} and ${maxPasswordLength} characters without whitespace for username.`
-          );
+        if (!isValidPassword(string)) {
+          throw new Error("Password must be at least 8 characters long, include at least one uppercase letter, and one special character.");
         }
       }
 
