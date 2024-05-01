@@ -8,6 +8,22 @@ const updateChannel = async (e) => {
 
     const requestBody = getFormRequestBody(e.target);
 
+    if (!requestBody.name || !/^[a-z0-9]+$/i.test(requestBody.name) || requestBody.name.length < 3 || requestBody.name.length > 20) {
+      printMessage("Channel name must be 3-20 alphanumeric characters.");
+      return; 
+    }
+
+
+    if (requestBody.description && requestBody.description.length > 255) {
+      printMessage("Description must not exceed 255 characters.");
+      return;
+    }
+
+    if (!/^[0-9]$/.test(requestBody.permissionLevel)) {
+      printMessage("Permission level must be a single digit from 0 to 9.");
+      return; 
+    }
+
     const urlTokens = window.location.pathname.split("/");
     const serverId = urlTokens[2];
     const channelId = urlTokens[urlTokens.length - 1];
