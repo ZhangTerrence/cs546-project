@@ -24,6 +24,22 @@ export default class MessageService {
     privateMessageId,
     message
   ) => {
+    if (!message || message.trim().length === 0) {
+      throw new BadRequestError(
+        400,
+        this.createMessage.name,
+        "Message content cannot be empty."
+      );
+    }
+  
+    if (message.length > 255) {
+      throw new BadRequestError(
+        400,
+        this.createMessage.name,
+        "Message must be at most 255 characters long."
+      );
+    }
+    
     if (!channelId && !privateMessageId) {
       throw new BadRequestError(
         400,
