@@ -33,18 +33,26 @@ const appendMessageListElement = (userId, messageId, username, message) => {
   document.getElementById("private-message__messages").appendChild(li);
 };
 
-const sendMessageButton = document.getElementById(
-  "private-message__send-button"
-);
+const sendMessageButton = document.getElementById("private-message__send-button");
 
 const sendMessage = async (e) => {
   try {
     e.preventDefault();
 
-    const requestBody = getFormRequestBody(e.target);
+    const form = e.target.form;
+    const messageInput = form.elements['message']; 
+    const message = messageInput.value.trim();
 
-    const url = window.location.pathname;
-    const privateMessageId = url.substring(url.lastIndexOf("/") + 1);
+    
+    if (message.trim().length <=0 || message.length > 255) {
+      printMessage("Message must be at least 1 chracter and at most 255 characters long.");
+      return; 
+    }
+
+    const requestBody = {
+      message: message,
+      privateMessageId: privateMessageId
+    };
 
     showLoader();
     const response = await fetch("/api/message", {
@@ -52,16 +60,13 @@ const sendMessage = async (e) => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        ...requestBody,
-        privateMessageId: privateMessageId
-      })
+      body: JSON.stringify(requestBody)
     });
     const responseBody = await response.json();
 
     hideLoader();
     if (response.ok) {
-      e.target.form.reset();
+      form.reset(); 
       socket.emit("sendMessage", {
         roomId: privateMessageId,
         messageId: responseBody.data.messageId,
