@@ -62,14 +62,16 @@ const createServer = async (e) => {
 
     const requestBody = getFormRequestBody(e.target);
 
-    if (!/^[a-z0-9]+$/i.test(requestBody.name) || requestBody.name.length < 3 || requestBody.name.length > 20) {
-      printMessage("Server name must be 3-20 alphanumeric characters.");
-      return; 
+    if (
+      !/^[a-z0-9]+$/i.test(requestBody.name) ||
+      requestBody.name.length < 3 ||
+      requestBody.name.length > 20
+    ) {
+      throw new Error("Server name must be 3-20 alphanumeric characters.");
     }
 
     if (requestBody.description && requestBody.description.length > 255) {
-      printMessage("Server description must not exceed 255 characters.");
-      return;  
+      throw new Error("Server description must not exceed 255 characters.");
     }
 
     showLoader();
