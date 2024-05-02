@@ -233,6 +233,27 @@ const createChannel = async (e) => {
 
     const requestBody = getFormRequestBody(e.target);
 
+
+    if (!requestBody.name || requestBody.name.trim() === '') {
+      printMessage("Expected a nonempty string for name.");
+      return; 
+    }
+
+    if (requestBody.description && requestBody.description.length > 255) {
+      printMessage("Channel description must not exceed 255 characters.");
+      return; 
+    }
+
+    if (!/^[a-z0-9]+$/i.test(requestBody.name) || requestBody.name.length < 3 || requestBody.name.length > 20) {
+      printMessage("Channel name must be 3-20 alphanumeric characters.");
+      return; 
+    }
+
+    if (!/^[0-9]$/.test(requestBody.permissionLevel)) {
+      printMessage("Permission level must be a single digit from 0 to 9.");
+      return; 
+    }
+
     const url = window.location.pathname;
     const serverId = url.substring(url.lastIndexOf("/") + 1);
 
