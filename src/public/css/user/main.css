@@ -86,6 +86,10 @@
   text-decoration: none;
 }
 
+a:hover{
+  background-color: dodgerblue;
+}
+
 /* .user__link-icon {
   width: 2.5rem;
   height: 2.5rem;
