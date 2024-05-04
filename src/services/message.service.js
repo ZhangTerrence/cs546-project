@@ -31,7 +31,7 @@ export default class MessageService {
         "Message content cannot be empty."
       );
     }
-  
+
     if (message.length > 255) {
       throw new BadRequestError(
         400,
@@ -39,7 +39,7 @@ export default class MessageService {
         "Message must be at most 255 characters long."
       );
     }
-    
+
     if (!channelId && !privateMessageId) {
       throw new BadRequestError(
         400,

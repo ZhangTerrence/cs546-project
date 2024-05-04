@@ -2,7 +2,11 @@
   <a href="/server/{{serverId}}">Go back to server</a>
 
   <h1>Editing {{username}}'s Permissions</h1>
-  <form id="{{id}}" class="edit__form" oninput="output.value=parseInt(permissionLevel.value)">
+  <form
+    id="{{id}}"
+    class="edit__form"
+    oninput="output.value=parseInt(permissionLevel.value)"
+  >
     <label for="permissionLevel">Permission Level</label>
     <input
       type="range"

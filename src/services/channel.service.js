@@ -125,7 +125,10 @@ export default class ChannelService {
     }
 
     const editorUserPerms = server.users[editorUserIndex].permissionLevel;
-    if (channel.permissionLevel >= editorUserPerms || permissionLevel >= editorUserPerms) {
+    if (
+      channel.permissionLevel >= editorUserPerms ||
+      permissionLevel >= editorUserPerms
+    ) {
       throw new AuthorizationError(
         403,
         this.updateChannel.name,
@@ -159,7 +162,7 @@ export default class ChannelService {
     const updatedChannel = await ChannelRepository.findByIdAndUpdate(
       channel.id,
       { name, description, permissionLevel },
-      { new: true } 
+      { new: true }
     );
     if (!updatedChannel) {
       throw new InternalServerError(
@@ -170,7 +173,6 @@ export default class ChannelService {
     }
     return updatedChannel;
   };
-
 
   static deleteChannel = async (channelId, force) => {
     const channel = await this.getChannelById(channelId);
