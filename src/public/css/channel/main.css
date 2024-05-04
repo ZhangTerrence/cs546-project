@@ -57,13 +57,13 @@
     }
 
     & p {
+      border-radius: 5px; /* 圓角 */
+      background-color: #f0f0f0; /* 對話框的背景顏色 */
+      padding: 10px; /* 內邊距 */
+      width: fit-content;
+      color: black; /* 根據文字內容調整寬度 */
       white-space: break-spaces;
       word-break: break-all;
-      background-color: #f0f0f0; /* 對話框的背景顏色 */
-      border-radius: 5px; /* 圓角 */
-      padding: 10px; /* 內邊距 */
-      width: fit-content; 
-      color: black; /* 根據文字內容調整寬度 */
     }
 
     &.own-message {

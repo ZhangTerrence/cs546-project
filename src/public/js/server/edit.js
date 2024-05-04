@@ -7,15 +7,19 @@ const updateServer = async (e) => {
     e.preventDefault();
 
     const requestBody = getFormRequestBody(e.target);
-    
-    if (!/^[a-z0-9]+$/i.test(requestBody.name) || requestBody.name.length < 3 || requestBody.name.length > 20) {
+
+    if (
+      !/^[a-z0-9]+$/i.test(requestBody.name) ||
+      requestBody.name.length < 3 ||
+      requestBody.name.length > 20
+    ) {
       printMessage("Server name must be 3-20 alphanumeric characters.");
-      return; 
+      return;
     }
 
     if (requestBody.description.length > 255) {
       printMessage("Server description must not exceed 255 characters.");
-      return; 
+      return;
     }
 
     const urlTokens = window.location.pathname.split("/");

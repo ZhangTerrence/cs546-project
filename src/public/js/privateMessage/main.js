@@ -33,20 +33,23 @@ const appendMessageListElement = (userId, messageId, username, message) => {
   document.getElementById("private-message__messages").appendChild(li);
 };
 
-const sendMessageButton = document.getElementById("private-message__send-button");
+const sendMessageButton = document.getElementById(
+  "private-message__send-button"
+);
 
 const sendMessage = async (e) => {
   try {
     e.preventDefault();
 
     const form = e.target.form;
-    const messageInput = form.elements['message']; 
+    const messageInput = form.elements["message"];
     const message = messageInput.value.trim();
 
-    
-    if (message.trim().length <=0 || message.length > 255) {
-      printMessage("Message must be at least 1 chracter and at most 255 characters long.");
-      return; 
+    if (message.trim().length <= 0 || message.length > 255) {
+      printMessage(
+        "Message must be at least 1 character and at most 255 characters long."
+      );
+      return;
     }
 
     const requestBody = {
@@ -66,7 +69,7 @@ const sendMessage = async (e) => {
 
     hideLoader();
     if (response.ok) {
-      form.reset(); 
+      form.reset();
       socket.emit("sendMessage", {
         roomId: privateMessageId,
         messageId: responseBody.data.messageId,

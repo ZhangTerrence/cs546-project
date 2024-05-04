@@ -137,6 +137,7 @@ export default class ChannelController {
 
       const server = await ServerService.getServerById(serverId);
       const user = await UserService.getUserById(userId);
+
       const newChannel = await ChannelService.createChannel(
         name,
         description,
@@ -144,7 +145,6 @@ export default class ChannelController {
         permissionLevel,
         user
       );
-
       await ServerService.addChannel(server, newChannel);
 
       return res.status(201).json({

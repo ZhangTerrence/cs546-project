@@ -63,7 +63,7 @@ export default class UserController {
             owner: false,
             authed: true,
             friended: friended,
-            privateMessageId: privateMessage.id,
+            privateMessageId: privateMessage ? privateMessage.id : "",
             requested: requested
           });
         }

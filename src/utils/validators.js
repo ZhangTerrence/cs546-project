@@ -51,7 +51,7 @@ class BaseValidator {
 export class UserValidator extends BaseValidator {
   static minUsernameLength = 3;
   static maxUsernameLength = 20;
-  static minPasswordLength = 8; 
+  static minPasswordLength = 8;
   static maxBioLength = 255;
 
   static validateSignupInfo = (_email, _username, _password) => {
@@ -85,7 +85,11 @@ export class UserValidator extends BaseValidator {
       );
     }
 
-    if (password.length < this.minPasswordLength || !/[A-Z]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
+    if (
+      password.length < this.minPasswordLength ||
+      !/[A-Z]/.test(password) ||
+      !/[^A-Za-z0-9]/.test(password)
+    ) {
       throw new BadRequestError(
         400,
         this.validateSignupInfo.name,
@@ -115,7 +119,10 @@ export class UserValidator extends BaseValidator {
     const bio = _bio;
     const theme = this.validateString(_theme, "theme");
 
-    if (username.length < this.minUsernameLength || username.length > this.maxUsernameLength) {
+    if (
+      username.length < this.minUsernameLength ||
+      username.length > this.maxUsernameLength
+    ) {
       throw new BadRequestError(
         400,
         this.validateUpdateInfo.name,
@@ -167,51 +174,57 @@ export class ServerValidator extends BaseValidator {
     const name = this.validateString(_name, "name");
     if (!name.match(/^[a-z0-9]{3,20}$/i)) {
       throw new BadRequestError(
-      400,
-      this.validateCreationInfo.name,
-      'Name must be between 3 and 20 alphanumeric characters.');
+        400,
+        this.validateCreationInfo.name,
+        "Name must be between 3 and 20 alphanumeric characters."
+      );
     }
 
-    const description = _description ? this.validateString(_description, "description") : '';
+    const description = _description
+      ? this.validateString(_description, "description")
+      : "";
     if (description.length > 255) {
       throw new BadRequestError(
-      400,
-      this.validateCreationInfo.description,
-      'Description must be at most 255 characters long.');
+        400,
+        this.validateCreationInfo.description,
+        "Description must be at most 255 characters long."
+      );
     }
 
     return {
-      name: xss(name),           
-      description: xss(description)  
+      name: xss(name),
+      description: xss(description)
     };
   };
-  
 
   static validateUpdateInfo = (_name, _description) => {
     let name;
     if (_name) {
-        name = this.validateString(_name, "name");
-        if (!name.match(/^[a-z0-9]{3,20}$/i)) {
-          throw new BadRequestError(
+      name = this.validateString(_name, "name");
+      if (!name.match(/^[a-z0-9]{3,20}$/i)) {
+        throw new BadRequestError(
           400,
           this.validateUpdateInfo.name,
-          'Name must be between 3 and 20 alphanumeric characters.');
-        }
+          "Name must be between 3 and 20 alphanumeric characters."
+        );
+      }
     }
 
-    let description = _description ? this.validateString(_description, "description") : '';
-        if (description.length > 255) {
-          throw new BadRequestError(
-          400,
-          this.validateUpdateInfo.description,
-          'Description must be at most 255 characters long.');
-        }
+    let description = _description
+      ? this.validateString(_description, "description")
+      : "";
+    if (description.length > 255) {
+      throw new BadRequestError(
+        400,
+        this.validateUpdateInfo.description,
+        "Description must be at most 255 characters long."
+      );
+    }
 
     return {
-      name:xss(name),
-      description:xss(description)
+      name: xss(name),
+      description: xss(description)
     };
-    
   };
 
   static validateUpdateUserInfo = (_permissionLevel) => {
@@ -309,7 +322,6 @@ export class ChannelValidator extends BaseValidator {
     };
   };
 }
-
 
 export class MessageValidator extends BaseValidator {
   static validateCreationInfo = (_channelId, _privateMessageId, _message) => {

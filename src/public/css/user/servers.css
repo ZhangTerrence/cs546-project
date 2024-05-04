@@ -19,9 +19,9 @@
 .servers__content {
   display: flex;
   flex-direction: column;
-  margin-top: 30px;
   justify-content: space-between;
   align-items: center;
+  margin-top: 30px;
 
   & h1 {
     font-size: 2.75rem;
