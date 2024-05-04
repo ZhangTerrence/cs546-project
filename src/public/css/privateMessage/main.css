@@ -31,7 +31,7 @@
 
 #private-message__messages {
   flex: 1 1 auto;
-  padding: 0.25rem 1rem 0.25rem 0;
+  padding: 0.75rem 1rem 0.75rem 0;
   overflow: auto;
   list-style: none;
 
@@ -43,7 +43,6 @@
 
     & a {
       width: fit-content;
-      color: var(--text-negative);
       font-size: 1.15rem;
       text-decoration: none;
     }
@@ -55,8 +54,13 @@
     & p {
       white-space: break-spaces;
       word-break: break-all;
+      background-color: #f0f0f0; /* 對話框的背景顏色 */
+      border-radius: 5px; /* 圓角 */
+      padding: 10px; /* 內邊距 */
+      width: fit-content;
+      color: black;  /* 根據文字內容調整寬度 */
     }
-  }
+}
 }
 
 .private-message__submit-form {
