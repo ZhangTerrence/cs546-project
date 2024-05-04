@@ -54,3 +54,11 @@ npm run format:fix
 ```
 
 Formats the code.
+
+## Seeding the Database
+
+Simply run the following to seed the database.
+
+```console
+npm run seed
+```
