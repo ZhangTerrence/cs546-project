@@ -77,6 +77,7 @@ export default class ServerController {
             channels: channels,
             blacklist: blacklist,
             owner: true,
+            userId: req.session.user.id,
             member: true
           });
         } else if (server.users.map((userObj) => userObj.id).includes(userId)) {
@@ -91,6 +92,7 @@ export default class ServerController {
             users: users,
             channels: channels,
             owner: false,
+            userId: req.session.user.id,
             member: true
           });
         }
