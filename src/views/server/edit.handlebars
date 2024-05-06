@@ -4,10 +4,10 @@
   <h1>Editing {{name}}</h1>
   <form class="edit__form">
     <label for="name">Name</label>
-    <input type="text" name="name" value="{{name}}" autocomplete="off" />
+    <input id="name" type="text" name="name" value="{{name}}" autocomplete="off" />
 
     <label for="description">Description</label>
-    <textarea name="description" autocomplete="off">{{description}}</textarea>
+    <textarea id="description" name="description" autocomplete="off">{{description}}</textarea>
 
     <button id="edit__update-button">Save</button>
   </form>

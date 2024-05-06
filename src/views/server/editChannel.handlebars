@@ -8,13 +8,14 @@
     oninput="output.value=parseInt(permissionLevel.value)"
   >
     <label for="name">Name</label>
-    <input type="text" name="name" value="{{name}}" autocomplete="off" />
+    <input id="name" type="text" name="name" value="{{name}}" autocomplete="off" />
 
     <label for="description">Description</label>
-    <textarea name="description" autocomplete="off">{{description}}</textarea>
+    <textarea id="description" name="description" autocomplete="off">{{description}}</textarea>
 
     <label for="permissionLevel">Permission Level</label>
     <input
+      id="permissionLevel" 
       type="range"
       value="{{permissionLevel}}"
       min="0"
