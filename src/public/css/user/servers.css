@@ -82,7 +82,9 @@
     input,
     textarea,
     button {
+      cursor: default;
       font-size: 1.25rem;
+      text-align: center;
     }
 
     & label {
