@@ -3,12 +3,17 @@ resetTheme();
 const signupButton = document.getElementById("signup__submit-button");
 
 function isValidEmail(email) {
-  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const re =
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(email);
 }
 
 function isValidPassword(password) {
-  return password.length >= 8 && /[A-Z]/.test(password) && /[^A-Za-z0-9]/.test(password);
+  return (
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[^A-Za-z0-9]/.test(password)
+  );
 }
 
 const signup = async (e) => {
@@ -21,7 +26,11 @@ const signup = async (e) => {
       const string = validateString(value, key);
 
       if (key === "username") {
-        if (!/^[a-z0-9]+$/i.test(string) || string.length < 3 || string.length > 20) {
+        if (
+          !/^[a-z0-9]+$/i.test(string) ||
+          string.length < 3 ||
+          string.length > 20
+        ) {
           throw new Error("Username must be 3-20 alphanumeric characters.");
         }
       }
@@ -30,8 +39,13 @@ const signup = async (e) => {
         throw new Error("Invalid email.");
       }
 
-      if ((key === "password" || key === "repassword") && !isValidPassword(string)) {
-        throw new Error("Password must be at least 8 characters long, include at least one uppercase letter, and one special character.");
+      if (
+        (key === "password" || key === "repassword") &&
+        !isValidPassword(string)
+      ) {
+        throw new Error(
+          "Password must be at least 8 characters long, include at least one uppercase letter, and one special character."
+        );
       }
 
       requestBody[key] = string;

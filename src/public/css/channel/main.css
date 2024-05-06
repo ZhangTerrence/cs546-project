@@ -48,7 +48,6 @@
 
     & a {
       width: fit-content;
-      color: var(--text-negative);
       font-size: 1.15rem;
       text-decoration: none;
     }
@@ -58,8 +57,21 @@
     }
 
     & p {
+      border-radius: 5px; /* 圓角 */
+      background-color: #f0f0f0; /* 對話框的背景顏色 */
+      padding: 10px; /* 內邊距 */
+      width: fit-content;
+      color: black; /* 根據文字內容調整寬度 */
       white-space: break-spaces;
       word-break: break-all;
+    }
+
+    &.own-message {
+      align-self: flex-end; /* 將自己的訊息靠右對齊 */
+    }
+
+    &.other-message {
+      align-self: flex-start; /* 將其他人的訊息靠左對齊 */
     }
   }
 }

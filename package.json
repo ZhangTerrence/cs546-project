@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
+    "seed": "node tasks/seed.js",
     "lint:check": "eslint .",
     "lint:fix": "eslint --fix .",
     "format:check": "prettier --check .",
